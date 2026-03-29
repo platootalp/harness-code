@@ -4,185 +4,131 @@
 
 ### 1.1 核心定位
 
-Orchestrator 是 Mozi 的**控制平面**，位于委托层级顶端。它的职责是：
+**Orchestrator 就是一个 Agent**，一个位于会话层级的 Agent。
 
-> 拦截用户消息 → 理解任务 → 委托子代理 → 验证结果
+它的特殊性在于：
+- scope 是整个会话生命周期
+- 它的"工具"包括其他 Agent
 
-**不是**：直接执行任务、管理文件、调用工具
+### 1.2 统一的工作流
 
-### 1.2 设计参考
+所有 Agent 共享相同的工作循环：
 
-参考 [Sisyphus 编排器](https://zread.ai/code-yeongyu/oh-my-opencode/10-sisyphus-the-orchestrator-agent) 的设计理念：
-- 五阶段工作流
-- 委托给专业子代理
-- NO EVIDENCE = NOT COMPLETE
-- 失败恢复机制
+```
+Agent（工作循环）
+    │
+    ├──► 理解（Understand）
+    │         解析输入，提取目标、实体、约束
+    │
+    ├──► 规划（Plan）
+    │         决定如何执行，是否需要委托
+    │
+    ├──► 执行（Execute）
+    │         调用工具 或 委托子Agent
+    │
+    └──► 评估（Evaluate）
+              验证结果，决定下一步（继续/失败/完成）
+```
 
-### 1.3 设计原则
+### 1.3 层级差异只是 scope 不同
+
+| 层级 | 名称 | scope |
+|------|------|-------|
+| 会话级 | Orchestrator Agent | 管理整个会话生命周期 |
+| 任务级 | Task Agent | 执行单个具体任务 |
+| 工具级 | 直接调用 | 执行单一操作 |
+
+**委托的本质**：Agent 在 Execute 阶段调用子 Agent，子 Agent 遵循相同的工作循环。
+
+### 1.4 设计原则
 
 | 原则 | 说明 |
 |------|------|
-| 自适应流程 | 根据任务特征动态决定是否需要某些阶段 |
-| 结构化委托 | 用模板约束子代理行为 |
-| 智能恢复 | 分类失败 → 策略重试 → 必要时咨询 Oracle |
-| 混合验证 | 自动验证 + 用户确认 |
+| 递归结构 | Agent 可以委托子 Agent，子 Agent 遵循相同工作流 |
+| 结构化委托 | 用模板约束子 Agent 行为 |
+| 证据驱动 | NO EVIDENCE = NOT COMPLETE |
+| 自我恢复 | 失败后自动重试或升级 |
 
 ---
 
-## 2. 四阶段流程
+## 2. Agent 工作循环
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        用户消息                               │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│  阶段1: 意图理解 (Intent Understanding)        【必须】       │
-│  - 解析用户输入为 TaskSpec                                   │
-│  - 提取目标、实体、约束、风险等级                              │
-│  - 判断是否需要澄清                                          │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│  阶段2: 探索 (Exploration)                      【自适应】     │
-│  - 如果任务涉及未知代码/项目结构 → 委托 ExploreAgent          │
-│  - 如果任务目标明确 → 跳过此阶段                              │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│  阶段3: 实现 (Implementation)                  【必须】       │
-│  - 委托 ExecutorAgent，带结构化模板                          │
-│  - TASK / EXPECTED OUTCOME / MUST DO / MUST NOT DO          │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│  阶段4: 验证 (Verification)                   【必须】        │
-│  - 证据收集：修改的文件、执行的命令、输出结果                  │
-│  - 用户确认：展示结果，用户确认是否完成                        │
-│  - 失败 → 触发智能恢复                                        │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                        返回结果                               │
-└─────────────────────────────────────────────────────────────┘
-```
+### 2.1 理解（Understand）
 
-### 2.1 阶段1: 意图理解
-
-解析用户输入为 TaskSpec，不做意图分类。
+解析输入，提取任务规约（TaskSpec）：
 
 ```python
 class TaskSpec(BaseModel):
     """任务规约"""
-    goal: str                           # 用户目标（原文）
-    entities: dict[str, str]            # 实体：{file: "auth.py", func: "validate"}
+    goal: str                           # 目标（原文）
+    entities: dict[str, str]            # 实体：{file, func, language}
     constraints: list[str]               # 约束条件
     risk_level: RiskLevel               # LOW / MEDIUM / HIGH
-    requires_exploration: bool          # 是否需要探索（初步判断）
-    requires_clarification: bool        # 是否需要澄清
-    clarification_questions: list[str]   # 澄清问题
-
-
-class RiskLevel(Enum):
-    LOW = "low"      # 只读操作
-    MEDIUM = "medium"  # 修改文件
-    HIGH = "high"    # 删除、批量操作
+    delegation_hint: str = ""            # 委托提示（如果需要）
 ```
 
-### 2.2 阶段2: 探索（自适应）
+### 2.2 规划（Plan）
 
-是否需要探索由 TaskSpec 解析阶段由 LLM 直接判断，不是关键词匹配。
+决定如何执行：
 
-**判断依据**（LLM 解析时直接输出）：
-
-| 判断 | requires_exploration = True | requires_exploration = False |
-|------|----------------------------|------------------------------|
-| 目标明确性 | 任务涉及未知代码/项目结构 | 用户指定了明确的目标 |
-| 实体完整性 | 实体不完整，需要先了解 | 实体完整，无需额外探索 |
-| 上下文依赖 | 需要先了解代码库才能执行 | 可以直接执行 |
-
-**示例**：
-
-| 用户输入 | requires_exploration |
-|----------|---------------------|
-| "帮我写一个快速排序" | False（目标明确，无需探索） |
-| "检查 auth.py 里的 validate 函数" | False（目标文件明确） |
-| "帮我看看这个项目用了什么技术栈" | True（涉及未知代码库结构） |
-| "在项目里搜索所有用到 auth 的地方" | False（搜索工具可以直接执行） |
-| "帮我优化一下性能" | True（目标不明确，需要先探索） |
-
-**TaskSpec 解析 Prompt**：
-
-```
-解析用户输入，提取任务规约：
-
-goal: 用户目标（原文）
-entities: 提取的实体 {file, func, language, ...}
-constraints: 约束条件
-risk_level: LOW / MEDIUM / HIGH
-
-requires_exploration: 是否需要探索代码库才能执行？
-- 如果任务涉及"项目结构"、"技术栈"、"未知代码" → True
-- 如果用户指定了明确的目标文件/函数，且不需要了解额外上下文 → False
-
-requires_clarification: 是否需要澄清？
-- 如果目标不明确、实体不完整 → True
+```python
+class Plan(BaseModel):
+    """执行计划"""
+    action: str                          # "execute" | "delegate" | "clarify" | "complete"
+    agent_type: str | None               # 如果是 delegate，指定子Agent类型
+    delegation_template: DelegationTemplate | None  # 委托模板
+    reason: str                          # 决策理由
 ```
 
-### 2.3 阶段3: 实现
+**规划决策**：
 
-委托 ExecutorAgent，带结构化模板。
+```
+输入: TaskSpec
+输出: Plan
 
-### 2.4 阶段4: 验证
+if 目标不明确:
+    → Plan(action="clarify")
+elif 需要探索代码库:
+    → Plan(action="delegate", agent_type="explorer")
+elif 可以直接执行:
+    → Plan(action="execute")
+elif 完成:
+    → Plan(action="complete")
+```
 
-证据收集 + 自动验证 + 用户确认。
+### 2.3 执行（Execute）
+
+根据 Plan 执行：
+
+```python
+async def execute(plan: Plan, context: dict) -> Result:
+    if plan.action == "execute":
+        return await execute_tools(context)
+    elif plan.action == "delegate":
+        return await delegate_to_agent(plan, context)
+    elif plan.action == "clarify":
+        return await ask_clarification(context)
+```
+
+### 2.4 评估（Evaluate）
+
+验证结果，决定下一步：
+
+```python
+class Evaluation(BaseModel):
+    success: bool
+    evidence: dict                       # 证据
+    next_action: str                    # "continue" | "retry" | "delegate" | "complete" | "fail"
+    issues: list[str]                   # 发现的问题
+```
 
 ---
 
-## 3. 代理体系
+## 3. 委托协议
 
-### 3.1 代理架构（混合模式）
+### 3.1 委托模板
 
-```
-                    ┌──────────────────┐
-                    │  Orchestrator    │
-                    │  （编排器）       │
-                    └────────┬─────────┘
-                             │
-          ┌──────────────────┼──────────────────┐
-          │                  │                  │
-          ▼                  ▼                  ▼
-   ┌────────────┐    ┌────────────┐    ┌────────────┐
-   │  Explore   │    │  Executor  │    │   Oracle   │
-   │   Agent    │    │   Agent    │    │   Agent    │
-   │  (专业)    │    │  (专业)    │    │  (专业)    │
-   └────────────┘    └────────────┘    └────────────┘
-```
-
-### 3.2 专业代理
-
-| 代理 | 职责 | 使用场景 |
-|------|------|----------|
-| **ExploreAgent** | 搜索、探索代码库 | 任务涉及未知代码/项目结构 |
-| **ExecutorAgent** | 执行具体任务 | 任务目标明确，需要修改/生成代码 |
-| **OracleAgent** | 咨询、反思、诊断 | 失败后需要分析原因 |
-
-### 3.3 通用 Agent
-
-- **行为由模板决定**：TASK / EXPECTED OUTCOME / MUST DO / MUST NOT DO
-- **无状态**：每次委托都是新实例
-- **通过 EventBus 通信**
-
----
-
-## 4. 委托协议
-
-### 4.1 委托模板
+当 Agent 选择 delegate 时，使用模板约束子 Agent：
 
 ```python
 class DelegationTemplate(BaseModel):
@@ -194,10 +140,10 @@ class DelegationTemplate(BaseModel):
     context: dict                # 额外上下文
 ```
 
-### 4.2 委托示例
+### 3.2 委托示例
 
 ```
-委托给 ExploreAgent:
+委托给 ExplorerAgent:
   task: "探索 /src 目录下的代码结构，找出处理用户认证的模块"
   expected_outcome: "返回认证相关的文件列表和它们的主要职责"
   must_do: ["只读文件", "返回文件路径"]
@@ -210,456 +156,244 @@ class DelegationTemplate(BaseModel):
   must_not_do: ["不要删除现有代码", "不要修改其他文件"]
 ```
 
----
-
-### 4.3 澄清流程
+### 3.3 委托流程
 
 ```
-用户输入
+Agent.execute()
     │
     ▼
-TaskSpec 解析
+Plan(action="delegate")
     │
-    ├──► requires_clarification = False ──► 继续下一阶段
+    ▼
+构建 DelegationTemplate
     │
-    └──► requires_clarification = True
-              │
-              ▼
-         发送澄清问题给用户
-              │
-              ▼
-         等待用户回复（最多2次）
-              │
-              ▼
-         更新 TaskSpec.entities
-              │
-              ├──► 仍需澄清 ──► 再次发送问题
-              │
-              └──► 澄清完成 ──► 继续下一阶段
-```
-
-**澄清接口**：
-
-```python
-class ClarificationManager:
-    """澄清管理器"""
-
-    async def ask(
-        self,
-        session_id: str,
-        questions: list[str],
-    ) -> None:
-        """
-        向用户发送澄清问题
-        """
-
-    async def process_answers(
-        self,
-        session_id: str,
-        answers: dict[str, str],
-    ) -> TaskSpec:
-        """
-        处理用户澄清回复，更新 TaskSpec
-        - 最多澄清 2 次
-        - 超过则停止，请求用户重新描述任务
-        """
+    ▼
+调用子 Agent.execute(template, context)
+    │
+    ▼
+子 Agent 遵循相同工作循环
+    │
+    ▼
+返回结果给父 Agent
+    │
+    ▼
+Agent.evaluate() 结果
 ```
 
 ---
 
-## 5. 智能恢复机制
+## 4. 失败恢复
 
-### 5.1 失败分类
+### 4.1 失败分类
 
 ```python
 class FailureType(Enum):
-    """失败类型"""
-    EXECUTION_ERROR = "execution_error"     # 执行错误（代码异常）
-    VERIFICATION_ERROR = "verification_error" # 验证错误（结果不符合预期）
-    TIMEOUT_ERROR = "timeout_error"         # 超时错误
-    INTENT_ERROR = "intent_error"            # 意图理解错误
+    EXECUTION_ERROR = "execution_error"     # 执行错误
+    VERIFICATION_ERROR = "verification_error" # 验证错误
+    TIMEOUT_ERROR = "timeout_error"         # 超时
+    DELEGATION_ERROR = "delegation_error"    # 委托失败
 ```
 
-### 5.2 恢复策略
+### 4.2 恢复策略
 
-| 失败类型 | 策略1 | 策略2 |
-|----------|-------|-------|
-| EXECUTION_ERROR | 重试（最多2次） | Oracle 分析 |
-| VERIFICATION_ERROR | 修改后重试（最多1次） | 请求澄清 |
-| TIMEOUT_ERROR | 重试（最多1次） | 拆分任务 |
-| INTENT_ERROR | 请求澄清（最多2次） | 停止 |
+| 失败类型 | 策略 |
+|----------|------|
+| EXECUTION_ERROR | 重试（最多2次）→ 仍失败则升级 |
+| VERIFICATION_ERROR | 修复后重试（最多1次）→ 仍失败则澄清 |
+| TIMEOUT_ERROR | 重试（最多1次）→ 仍失败则拆分任务 |
+| DELEGATION_ERROR | 重试委托或更换 Agent 类型 |
 
-### 5.3 恢复流程
+### 4.3 升级路径
 
 ```
-执行失败
+失败次数超过阈值
     │
     ▼
-分析失败类型
+升级到更专业的 Agent
     │
-    ├──► EXECUTION_ERROR ──► 重试（最多2次）
-    │                              │
-    │                              ├──► 成功 ──► 继续
-    │                              └──► 仍失败 ──► Oracle 分析
+    ▼
+如果所有 Agent 都失败
     │
-    ├──► VERIFICATION_ERROR ──► 委托 ExecutorAgent 修改（最多1次）
-    │                                │  Orchestrator 提供失败原因和期望
-    │                                ├──► 成功 ──► 继续
-    │                                └──► 仍失败 ──► 请求澄清
-    │
-    ├──► TIMEOUT_ERROR ──► 重试（最多1次）
-    │                          │
-    │                          ├──► 成功 ──► 继续
-    │                          └──► 仍失败 ──► 拆分任务
-    │
-    └──► INTENT_ERROR ──► 请求澄清（最多2次）
-                              │
-                              ├──► 成功 ──► 重新执行
-                              └──► 仍失败 ──► 停止，报告用户
-```
-
-### 5.4 回滚机制
-
-回滚用于高风险操作前的安全保护。
-
-**检查点格式**：
-
-```python
-class Checkpoint(BaseModel):
-    """检查点"""
-    id: str
-    session_id: str
-    created_at: datetime
-    files: dict[str, str]  # file_path -> content hash (SHA256)
-```
-
-**回滚策略**：
-
-| 风险等级 | 检查点时机 | 回滚粒度 |
-|----------|------------|----------|
-| LOW | 不需要 | - |
-| MEDIUM | 执行前 | 仅修改的文件 |
-| HIGH | 执行前 | 所有相关文件 |
-
-**回滚管理器**：
-
-```python
-class RollbackManager:
-    """回滚管理器"""
-
-    async def save_checkpoint(
-        self,
-        session_id: str,
-        files: list[str],
-    ) -> str:
-        """
-        保存检查点
-        - 对指定文件计算 hash 并记录
-        - 返回 checkpoint_id
-        """
-        checkpoint_id = generate_uuid()
-        file_hashes = {
-            f: compute_file_hash(f) for f in files
-        }
-        await self.storage.save(checkpoint_id, Checkpoint(
-            id=checkpoint_id,
-            session_id=session_id,
-            created_at=datetime.now(),
-            files=file_hashes,
-        ))
-        return checkpoint_id
-
-    async def rollback(self, checkpoint_id: str) -> list[str]:
-        """
-        回滚到检查点
-        - 对比当前文件 hash 与检查点
-        - 恢复不一致的文件
-        - 返回恢复的文件列表
-        """
-        checkpoint = await self.storage.load(checkpoint_id)
-        restored = []
-        for path, expected_hash in checkpoint.files.items():
-            current_hash = compute_file_hash(path)
-            if current_hash != expected_hash:
-                # 从 Git 或备份恢复文件
-                await self.restore_file(path)
-                restored.append(path)
-        return restored
-
-    async def cleanup(self, checkpoint_id: str) -> None:
-        """清理检查点"""
-        await self.storage.delete(checkpoint_id)
+    ▼
+返回用户，请求澄清或人工介入
 ```
 
 ---
 
-## 6. 验证机制
+## 5. 验证机制
 
-### 6.1 验证职责划分
+### 5.1 证据收集
 
-| 验证类型 | 执行者 | 说明 |
-|----------|--------|------|
-| 自验证 | ExecutorAgent | 执行过程中进行语法检查、lint、测试 |
-| 证据收集 | ExecutorAgent | 收集修改的文件、执行的命令等证据 |
-| 结果确认 | Orchestrator | 验证阶段展示证据，用户确认 |
-| 用户确认 | 用户 | 最终确认任务是否完成 |
-
-### 6.2 验证流程
-
-```
-执行完成（ExecutorAgent）
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ ExecutorAgent 自验证（执行中）         │
-│ - 语法检查                           │
-│ - lint 检查                          │
-│ - 测试验证（如果有）                   │
-└─────────────────────────────────────┘
-    │
-    ▼
-收集证据（ExecutorAgent）
-    │
-    ├──► 修改的文件列表
-    ├──► 执行的操作列表
-    ├──► 自验证结果
-    └──► 相关日志
-    │
-    ▼
-展示证据（Orchestrator）
-    │
-    ├──► 展示证据和自验证结果
-    ├──► 询问："任务完成了吗？"
-    └──► 用户确认 / 拒绝
-    │
-    ├──► 确认 ──► 成功返回
-    └──► 拒绝 ──► 进入智能恢复（VERIFICATION_ERROR）
-```
-
-### 6.3 证据收集
+每个 Agent 执行后必须收集证据：
 
 ```python
-class EvidenceCollector:
-    """证据收集器"""
-
-    async def collect(self, execution_result: dict) -> dict:
-        """收集执行证据"""
-        return {
-            "files_read": execution_result.get("files_read", []),
-            "files_modified": execution_result.get("files_modified", []),
-            "files_created": execution_result.get("files_created", []),
-            "commands_executed": execution_result.get("commands", []),
-            "output": execution_result.get("output", ""),
-            "model_messages": execution_result.get("messages", []),
-        }
+class Evidence(BaseModel):
+    """证据"""
+    action_taken: str                   # 执行的动作
+    files_read: list[str]               # 读取的文件
+    files_modified: list[str]           # 修改的文件
+    files_created: list[str]            # 创建的文件
+    commands_executed: list[str]         # 执行的命令
+    output: str                         # 输出
+    model_messages: list[str]           # LLM 消息
 ```
 
-### 6.4 验证模板
+### 5.2 验证规则
 
-```
-任务: {task}
-期望结果: {expected_outcome}
+**NO EVIDENCE = NOT COMPLETE**
 
-执行证据:
-- 修改的文件: {files_modified}
-- 执行的命令: {commands}
-- 输出: {output}
+```python
+def evaluate(result: Result) -> Evaluation:
+    evidence = result.evidence
 
-请验证:
-1. 任务是否完成？
-2. 结果是否符合期望？
-3. 是否有遗留问题？
+    if not evidence:
+        return Evaluation(success=False, next_action="fail", issues=["No evidence provided"])
 
-回复格式:
-- 完成: YES/NO
-- 原因: <简短说明>
-- 遗留问题: <如有>
+    if evidence.files_modified and not verify_syntax(evidence.files_modified):
+        return Evaluation(success=False, next_action="retry", issues=["Syntax error"])
+
+    if evidence.files_modified and not verify_lint(evidence.files_modified):
+        return Evaluation(success=False, next_action="retry", issues=["Lint error"])
+
+    return Evaluation(success=True, next_action="complete")
 ```
 
 ---
 
-## 7. 超时配置
+## 6. 会话级 Agent
 
-### 7.1 超时配置项
+### 6.1 Orchestrator 的特殊性
+
+Orchestrator 是一个会话级 Agent：
 
 ```python
-class OrchestratorConfig(BaseModel):
-    """编排器配置"""
+class Orchestrator:
+    """会话级 Agent"""
 
-    # 各阶段超时（秒）
-    intent_timeout_seconds: int = 30
-    exploration_timeout_seconds: int = 60
-    execution_timeout_seconds: int = 300
-    verification_timeout_seconds: int = 60
+    async def run(self, session_id: str):
+        """工作循环"""
+        while True:
+            # 理解
+            user_input = await self.get_user_input(session_id)
+            task_spec = await self.understand(user_input)
 
-    # 澄清配置
-    clarification_max_retries: int = 2
-    clarification_timeout_seconds: int = 300
+            # 规划
+            plan = await self.plan(task_spec)
 
-    # 恢复配置
-    execution_max_retries: int = 2
-    verification_max_retries: int = 1
+            # 执行
+            if plan.action == "delegate":
+                result = await self.delegate(plan)
+            else:
+                result = await self.execute(plan)
 
-    # 会话配置
-    max_session_minutes: int = 30
+            # 评估
+            evaluation = await self.evaluate(result)
+
+            if evaluation.next_action == "complete":
+                await self.notify_user(result)
+            elif evaluation.next_action == "fail":
+                await self.handle_failure(evaluation)
 ```
 
-### 7.2 默认超时值
+### 6.2 与任务级 Agent 的区别
 
-| 配置项 | 默认值 | 说明 |
-|--------|--------|------|
-| intent_timeout_seconds | 30s | 意图理解阶段 |
-| exploration_timeout_seconds | 60s | 探索阶段 |
-| execution_timeout_seconds | 300s | 执行阶段 |
-| verification_timeout_seconds | 60s | 验证阶段 |
-| clarification_max_retries | 2 | 最大澄清次数 |
-| max_session_minutes | 30min | 会话最大时长 |
+| 方面 | 会话级 Agent | 任务级 Agent |
+|------|-------------|-------------|
+| scope | 整个会话 | 单次任务 |
+| 工具 | 其他 Agent、工具 | 主要是工具 |
+| 记忆 | 长期记忆 | 任务上下文 |
+| 生命周期 | 会话期间 | 任务完成 |
 
 ---
 
-## 8. 接口设计
+## 7. 数据模型
 
-### 10.1 核心数据模型
+### 7.1 核心数据模型
 
 ```python
-class VerificationResult(BaseModel):
-    """验证结果"""
+class TaskSpec(BaseModel):
+    """任务规约"""
+    goal: str
+    entities: dict[str, str]
+    constraints: list[str]
+    risk_level: RiskLevel
+    delegation_hint: str = ""
+
+
+class Plan(BaseModel):
+    """执行计划"""
+    action: str
+    agent_type: str | None
+    delegation_template: DelegationTemplate | None
+    reason: str
+
+
+class Result(BaseModel):
+    """执行结果"""
     success: bool
-    evidence: dict[str, Any]           # 证据
-    auto_verified: bool                 # 是否通过自动验证
-    user_confirmed: bool                # 用户是否确认
-    issues: list[str]                   # 发现的问题
+    data: dict
+    evidence: Evidence
+    error: str | None
 
 
-class OrchestrationResult(BaseModel):
-    """编排结果"""
+class Evaluation(BaseModel):
+    """评估结果"""
     success: bool
-    task_spec: TaskSpec
-    exploration_result: Optional[dict]  # 探索结果（如有）
-    execution_result: Optional[dict]    # 执行结果（如有）
-    verification: VerificationResult
-    error: Optional[str]
-```
-
-### 10.2 核心接口
-
-```python
-class Orchestrator(ABC):
-    """编排器接口"""
-
-    async def process(
-        self,
-        user_input: str,
-        session_id: str,
-    ) -> OrchestrationResult:
-        """
-        处理用户输入，执行自适应四阶段流程
-        """
-
-    async def clarify(
-        self,
-        session_id: str,
-        answers: dict[str, str],
-    ) -> OrchestrationResult:
-        """
-        处理澄清回复
-        """
+    evidence: dict
+    next_action: str
+    issues: list[str]
 
 
-class Agent(ABC):
-    """代理接口"""
+class Evidence(BaseModel):
+    """证据"""
+    action_taken: str
+    files_read: list[str] = []
+    files_modified: list[str] = []
+    files_created: list[str] = []
+    commands_executed: list[str] = []
+    output: str = ""
 
-    async def execute(
-        self,
-        template: DelegationTemplate,
-        context: dict,
-    ) -> dict:
-        """
-        执行委托任务
-        """
+
+class RiskLevel(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
+class FailureType(Enum):
+    EXECUTION_ERROR = "execution_error"
+    VERIFICATION_ERROR = "verification_error"
+    TIMEOUT_ERROR = "timeout_error"
+    DELEGATION_ERROR = "delegation_error"
 ```
 
 ---
 
-## 9. 模块结构
+## 8. 模块结构
 
 ```
 mozi/orchestrator/
     __init__.py
-    orchestrator.py              # 主编排器入口
-    agent/
-        __init__.py
-        base.py                  # Agent 基类定义
-        explore.py               # ExploreAgent
-        executor.py              # ExecutorAgent
-        oracle.py                # OracleAgent
-    core/
-        __init__.py
-        task_spec.py             # 任务规约解析器
-        explorer.py              # 探索决策器
-        recovery.py              # 智能恢复管理器
-        verifier.py              # 验证器
-    session/
-        __init__.py
-        manager.py               # 会话管理器
-        context.py               # 上下文构建器
-        rollback.py             # 回滚管理器
+    agent.py                    # Agent 基类和通用工作循环
+    orchestrator.py             # Orchestrator（会话级 Agent）
+    delegation.py               # 委托协议和模板
+    recovery.py                 # 失败恢复
+    verification.py             # 验证机制
 ```
 
 ---
 
-## 10. 事件流
-
-```
-user_message ──► Orchestrator.process()
-                        │
-                        ▼
-                   TaskSpec 解析
-                        │
-                        ├──► requires_clarification ──► 澄清循环
-                        │
-                        ▼
-                   阶段1完成: 意图理解
-                        │
-                        ▼
-                   should_explore() ──► True ──► ExploreAgent
-                        │                              │
-                        │                              ▼
-                        │                         探索结果
-                        │                              │
-                        ▼                              │
-                   阶段2完成: 探索                      │
-                        │                              │
-                        ▼                              │
-                   ExecutorAgent                       │
-                        │                              │
-                        ▼                              │
-                   阶段3完成: 实现                      │
-                        │                              │
-                        ▼                              │
-                   验证结果 + 用户确认                   │
-                        │                              │
-                        ▼                              │
-                   成功/失败 ──► 失败 ──► OracleAgent
-                                              │
-                                              ▼
-                                         智能恢复
-```
-
----
-
-## 11. 与旧设计对比
+## 9. 与旧设计对比
 
 | 旧设计 | 新设计 |
 |--------|--------|
-| 意图分类（穷举枚举） | 任务规约（不做分类） |
-| 复杂度路由（SIMPLE/MEDIUM/COMPLEX） | 自适应阶段（是否需要探索） |
-| 复杂度评分（固定阈值 40/70） | 风险等级（LOW/MEDIUM/HIGH） |
-| 意图识别器 | 任务规约解析器 |
-| 路由决策器 | 探索决策器 + 委托协议 |
+| 四阶段流程（理解→探索→执行→验证） | 统一工作循环（理解→规划→执行→评估） |
+| Orchestrator 是控制平面 | Orchestrator 是会话级 Agent |
+| 专业代理（ExploreAgent等） | 统一 Agent + 委托模板 |
+| 复杂度路由 | 规划决策 |
+| 复杂度评分 | 风险等级 |
 
 ---
 
-_版本: 1.2_
-_更新日期: 2026-03-29_
-_设计参考: Sisyphus Orchestrator (oh-my-opencode)_
+_版本: 2.0_
+_更新日期: 2026-03-30_
