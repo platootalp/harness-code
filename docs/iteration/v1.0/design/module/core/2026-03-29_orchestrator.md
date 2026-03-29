@@ -96,19 +96,42 @@ class RiskLevel(Enum):
 
 ### 2.2 阶段2: 探索（自适应）
 
-根据 TaskSpec 判断是否需要探索。
+是否需要探索由 TaskSpec 解析阶段由 LLM 直接判断，不是关键词匹配。
 
-```python
-def should_explore(task_spec: TaskSpec) -> bool:
-    """判断是否需要探索阶段"""
-    # 探索关键词
-    exploration_keywords = ["看看", "检查", "分析", "探索", "哪些", "什么"]
-    # 有探索关键词，且没有明确指定目标文件
-    has_explicit_target = task_spec.entities.get("file")
-    has_exploration_intent = any(k in task_spec.goal for k in exploration_keywords)
-    # 只有当没有明确目标时，或者有探索意图且目标不明确时才探索
-    should_skip = has_explicit_target and not (has_exploration_intent and not has_explicit_target)
-    return not should_skip
+**判断依据**（LLM 解析时直接输出）：
+
+| 判断 | requires_exploration = True | requires_exploration = False |
+|------|----------------------------|------------------------------|
+| 目标明确性 | 任务涉及未知代码/项目结构 | 用户指定了明确的目标 |
+| 实体完整性 | 实体不完整，需要先了解 | 实体完整，无需额外探索 |
+| 上下文依赖 | 需要先了解代码库才能执行 | 可以直接执行 |
+
+**示例**：
+
+| 用户输入 | requires_exploration |
+|----------|---------------------|
+| "帮我写一个快速排序" | False（目标明确，无需探索） |
+| "检查 auth.py 里的 validate 函数" | False（目标文件明确） |
+| "帮我看看这个项目用了什么技术栈" | True（涉及未知代码库结构） |
+| "在项目里搜索所有用到 auth 的地方" | False（搜索工具可以直接执行） |
+| "帮我优化一下性能" | True（目标不明确，需要先探索） |
+
+**TaskSpec 解析 Prompt**：
+
+```
+解析用户输入，提取任务规约：
+
+goal: 用户目标（原文）
+entities: 提取的实体 {file, func, language, ...}
+constraints: 约束条件
+risk_level: LOW / MEDIUM / HIGH
+
+requires_exploration: 是否需要探索代码库才能执行？
+- 如果任务涉及"项目结构"、"技术栈"、"未知代码" → True
+- 如果用户指定了明确的目标文件/函数，且不需要了解额外上下文 → False
+
+requires_clarification: 是否需要澄清？
+- 如果目标不明确、实体不完整 → True
 ```
 
 ### 2.3 阶段3: 实现
@@ -637,6 +660,6 @@ user_message ──► Orchestrator.process()
 
 ---
 
-_版本: 1.1_
+_版本: 1.2_
 _更新日期: 2026-03-29_
 _设计参考: Sisyphus Orchestrator (oh-my-opencode)_
