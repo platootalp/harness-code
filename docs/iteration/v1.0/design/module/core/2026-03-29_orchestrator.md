@@ -494,67 +494,7 @@ class OrchestratorConfig(BaseModel):
 
 ---
 
-## 8. 会话状态管理
-
-### 8.1 会话数据结构
-
-```python
-class SessionState(BaseModel):
-    """会话状态"""
-    session_id: str
-    created_at: datetime
-    updated_at: datetime
-    task_spec: Optional[TaskSpec]           # 当前任务规约
-    exploration_result: Optional[dict]        # 探索结果
-    execution_result: Optional[dict]         # 执行结果
-    checkpoints: list[str]                   # 检查点 ID 列表
-    context: list[Message]                   # 对话历史
-```
-
-### 8.2 上下文构建
-
-```python
-class ContextBuilder:
-    """上下文构建器"""
-
-    async def build(
-        self,
-        session_id: str,
-        agent_type: str,
-    ) -> dict:
-        """
-        为不同类型的代理构建上下文
-        """
-        session = await self.session_manager.get(session_id)
-        return {
-            "session_id": session_id,
-            "task_spec": session.task_spec,
-            "exploration_result": session.exploration_result,
-            "recent_history": session.context[-10:],  # 最近 10 条消息
-            "memory": await self.memory.recall(session_id),  # 长期记忆
-        }
-```
-
----
-
-## 9. 事件总线
-
-EventBus 接口定义详见 [eventbus 设计文档](../iteration/v1.0/design/module/2026-03-29_eventbus.md)。
-
-### 9.1 事件类型
-
-| 事件类型 | 发布者 | 订阅者 | 说明 |
-|----------|--------|--------|------|
-| user_message | CLI | Orchestrator | 用户输入 |
-| agent_execute | Orchestrator | Agent | 委托执行 |
-| tool_result | Tools | Orchestrator | 工具结果 |
-| agent_result | Agent | Orchestrator | Agent 结果 |
-| clarification_request | Orchestrator | CLI | 请求澄清 |
-| verification_request | Orchestrator | CLI | 请求用户确认 |
-
----
-
-## 10. 接口设计
+## 8. 接口设计
 
 ### 10.1 核心数据模型
 
@@ -618,7 +558,7 @@ class Agent(ABC):
 
 ---
 
-## 11. 模块结构
+## 9. 模块结构
 
 ```
 mozi/orchestrator/
@@ -645,7 +585,7 @@ mozi/orchestrator/
 
 ---
 
-## 12. 事件流
+## 10. 事件流
 
 ```
 user_message ──► Orchestrator.process()
@@ -685,7 +625,7 @@ user_message ──► Orchestrator.process()
 
 ---
 
-## 13. 与旧设计对比
+## 11. 与旧设计对比
 
 | 旧设计 | 新设计 |
 |--------|--------|
