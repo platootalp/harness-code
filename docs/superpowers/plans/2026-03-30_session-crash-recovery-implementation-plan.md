@@ -1210,14 +1210,302 @@ git commit -m "feat(orchestrator): add crash recovery integration with continue_
 
 ---
 
+## Task 10: Orchestrator 主循环集成（传递 continue_from）
+
+**Files:**
+- Create: `mozi/orchestrator/orchestrator.py`
+- Create: `tests/unit/orchestrator/test_orchestrator_resume.py`
+
+> **注：** 此 Task 展示 Orchestrator 主循环如何调用 crash recovery helper 并将 `continue_from` 传递给 LLM 层。
+
+### 10.1 Orchestrator 主循环集成点
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Orchestrator.run(session_id)                                     │
+│                                                                   │
+│  1. session = await session_manager.get(session_id)              │
+│         │                                                        │
+│         ▼                                                        │
+│  2. recovery_state = detect_crash_recovery_state(session)        │
+│         │                                                        │
+│         ├──► needs_streaming_resume=True                          │
+│         │      │                                                 │
+│         │      ▼                                                 │
+│         │   LLM 请求带上 continue_from=recovery_state.continue_from │
+│         │                                                        │
+│         └──► needs_streaming_resume=False                         │
+│                │                                                 │
+│                ▼                                                 │
+│             正常 LLM 请求                                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 10.2 实现代码
+
+- [ ] **Step 1: 创建 Orchestrator 主循环（带 crash recovery 集成）**
+
+```python
+# mozi/orchestrator/orchestrator.py
+"""Orchestrator 主循环 - 带崩溃恢复集成"""
+
+from __future__ import annotations
+
+from typing import Optional
+
+from mozi.orchestrator.session.manager import SessionManager
+from mozi.orchestrator.session.models import Session
+from mozi.orchestrator.crash_recovery import detect_crash_recovery_state
+
+
+class Orchestrator:
+    """会话级 Agent - 带崩溃恢复支持"""
+
+    def __init__(self, session_manager: SessionManager) -> None:
+        self._session_manager = session_manager
+
+    async def run(self, session_id: str) -> None:
+        """主工作循环
+
+        崩溃恢复流程：
+        1. 加载 session
+        2. 检测是否需要从流式输出恢复
+        3. 如果需要，带 continue_from 重新发送 LLM 请求
+        4. 否则正常处理
+        """
+        session = await self._session_manager.get(session_id)
+        if session is None:
+            raise ValueError(f"Session {session_id} not found")
+
+        # 检测崩溃恢复状态
+        recovery_state = detect_crash_recovery_state(session)
+
+        if recovery_state.needs_streaming_resume:
+            # 从未完成的流式输出恢复
+            await self._resume_streaming(
+                session=recovery_state.session,
+                continue_from=recovery_state.continue_from,
+            )
+        else:
+            # 正常工作循环
+            await self._normal_workflow(session)
+
+    async def _resume_streaming(
+        self,
+        session: Session,
+        continue_from: str,
+    ) -> None:
+        """从流式输出中断处恢复
+
+        Args:
+            session: 会话
+            continue_from: 已输出的内容，用于继续生成
+        """
+        # 获取最后一条用户消息作为上下文
+        user_messages = [
+            msg for msg in session.messages
+            if msg.role == MessageRole.USER
+        ]
+        last_user_input = user_messages[-1].content if user_messages else ""
+
+        # 调用 LLM，带上 continue_from
+        # Model 层需要支持 continue_from 参数
+        response = await self._call_llm(
+            prompt=last_user_input,
+            continue_from=continue_from,
+        )
+
+        # 将响应追加到 session
+        from mozi.orchestrator.session.models import Message, MessageRole
+        assistant_message = Message(
+            role=MessageRole.ASSISTANT,
+            content=response.content,
+            streaming_content=response.content,
+            is_streaming=False,
+        )
+        await self._session_manager.append_message(session.id, assistant_message)
+
+    async def _normal_workflow(self, session: Session) -> None:
+        """正常工作循环（理解→规划→执行→评估）"""
+        # TODO: 实现正常的工作循环
+        pass
+
+    async def _call_llm(
+        self,
+        prompt: str,
+        continue_from: Optional[str] = None,
+    ) -> "LLMResponse":
+        """调用 LLM
+
+        Args:
+            prompt: 用户输入
+            continue_from: 如果从流式输出恢复，带上已输出的内容
+        """
+        # TODO: Model 层实现
+        # 如果 continue_from 不为空，指示 LLM 从该内容继续生成
+        pass
+```
+
+- [ ] **Step 2: 创建集成测试**
+
+```python
+# tests/unit/orchestrator/test_orchestrator_resume.py
+import pytest
+from unittest.mock import AsyncMock, MagicMock, patch
+from mozi.orchestrator.session.models import Message, MessageRole, Session, SessionMetadata
+from mozi.orchestrator.crash_recovery import CrashRecoveryState
+
+
+class TestOrchestratorResume:
+    @pytest.mark.asyncio
+    async def test_resume_from_streaming_output(self):
+        """测试从流式输出中断处恢复"""
+        # 模拟 session，最后一条是未完成的流式消息
+        session = Session(
+            id="test-123",
+            metadata=SessionMetadata(),
+            messages=[
+                Message(role=MessageRole.USER, content="Write a long story"),
+                Message(
+                    role=MessageRole.ASSISTANT,
+                    content="",
+                    streaming_content="Once upon a time",
+                    is_streaming=True,
+                ),
+            ],
+        )
+
+        # 验证 recovery_state 正确检测
+        recovery_state = CrashRecoveryState(
+            session=session,
+            continue_from="Once upon a time",
+            last_message=session.messages[-1],
+            needs_streaming_resume=True,
+        )
+
+        assert recovery_state.needs_streaming_resume is True
+        assert recovery_state.continue_from == "Once upon a time"
+
+    @pytest.mark.asyncio
+    async def test_normal_workflow_no_resume(self):
+        """测试正常工作流不需要恢复"""
+        session = Session(
+            id="test-123",
+            metadata=SessionMetadata(),
+            messages=[
+                Message(role=MessageRole.USER, content="Hello"),
+                Message(role=MessageRole.ASSISTANT, content="Hi there!"),
+            ],
+        )
+
+        recovery_state = CrashRecoveryState(
+            session=session,
+            continue_from=None,
+            last_message=session.messages[-1],
+            needs_streaming_resume=False,
+        )
+
+        assert recovery_state.needs_streaming_resume is False
+```
+
+- [ ] **Step 3: 提交**
+
+```bash
+git add mozi/orchestrator/orchestrator.py tests/unit/orchestrator/test_orchestrator_resume.py
+git commit -m "feat(orchestrator): integrate crash recovery with continue_from in main loop"
+```
+
+---
+
+## Task 11: 端到端集成测试
+
+**Files:**
+- Create: `tests/integration/test_crash_recovery_e2e.py`
+
+- [ ] **Step 1: 创建端到端测试**
+
+```python
+# tests/integration/test_crash_recovery_e2e.py
+"""崩溃恢复端到端测试
+
+测试完整流程：
+1. 创建 session
+2. 模拟流式输出中断（保存 is_streaming=True 的消息）
+3. 模拟进程崩溃
+4. resume session
+5. 验证流式输出恢复
+"""
+
+import pytest
+import tempfile
+from mozi.orchestrator.session.manager import SessionManager
+from mozi.orchestrator.session.storage import FileSessionStorage
+from mozi.orchestrator.session.models import SessionConfig, Message, MessageRole
+from mozi.orchestrator.orchestrator import Orchestrator
+
+
+@pytest.fixture
+def e2e_setup():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        storage = FileSessionStorage(storage_dir=tmpdir)
+        config = SessionConfig(auto_save_message_count=1)
+        manager = SessionManager(storage=storage, config=config)
+        orchestrator = Orchestrator(session_manager=manager)
+        yield {"storage": storage, "config": config, "manager": manager, "orchestrator": orchestrator}
+
+
+@pytest.mark.asyncio
+async def test_full_crash_recovery_flow(e2e_setup):
+    """完整崩溃恢复流程"""
+    manager = e2e_setup["manager"]
+    orchestrator = e2e_setup["orchestrator"]
+
+    # 1. 创建会话
+    session = await manager.create(user_id="test-user")
+    await manager.append_message(
+        session.id,
+        Message(role=MessageRole.USER, content="Write a long story"),
+    )
+
+    # 2. 模拟 LLM 流式输出开始（未完成）
+    streaming_msg = Message(
+        role=MessageRole.ASSISTANT,
+        content="",
+        streaming_content="Once upon a time in a land far",
+        is_streaming=True,
+    )
+    await manager.append_message(session.id, streaming_msg)
+
+    # 3. 验证消息已保存（崩溃恢复关键）
+    saved_session = await manager.get(session.id)
+    assert saved_session.messages[-1].is_streaming is True
+    assert saved_session.messages[-1].streaming_content == "Once upon a time in a land far"
+
+    # 4. 模拟进程重启后 resume
+    # (在同一进程中模拟：重新加载 session)
+    resumed_session = await manager.get(session.id)
+    assert resumed_session.messages[-1].streaming_content == "Once upon a time in a land far"
+    assert resumed_session.messages[-1].is_streaming is True
+```
+
+- [ ] **Step 2: 提交**
+
+```bash
+git add tests/integration/test_crash_recovery_e2e.py
+git commit -m "test: add e2e crash recovery integration test"
+```
+
+---
+
 ## 变更记录
 
 | 版本 | 日期 | 修改内容 |
 |------|------|----------|
+| 1.2 | 2026-03-30 | 添加 Task 10 (Orchestrator 主循环集成) 和 Task 11 (E2E 测试) |
 | 1.1 | 2026-03-30 | 添加 Task 8 (resume 命令) 和 Task 9 (Orchestrator 集成) |
 | 1.0 | 2026-03-30 | 初始实现计划 |
 
 ---
 
-_版本: 1.1_
+_版本: 1.2_
 _更新日期: 2026-03-30_
