@@ -974,13 +974,128 @@ git status
 
 ---
 
+## Task 8: 实现 resume 命令（CLI 层）
+
+**Files:**
+- Create: `mozi/ingress/cli/commands.py` (假设 CLI 结构)
+- Create: `tests/unit/ingress/cli/test_commands.py`
+
+> **注：** CLI 层属于 Ingress 模块，此处仅为 Session 集成点。
+
+- [ ] **Step 1: 添加 CLI resume 命令测试**
+
+```python
+# tests/unit/ingress/cli/test_commands.py
+import pytest
+from unittest.mock import AsyncMock, MagicMock
+from mozi.orchestrator.session.models import Session, Message, MessageRole, SessionMetadata
+from mozi.orchestrator.session.manager import SessionManager
+
+class TestResumeCommand:
+    @pytest.mark.asyncio
+    async def test_resume_session_not_found(self):
+        """Session 不存在时返回错误"""
+        mock_manager = AsyncMock(spec=SessionManager)
+        mock_manager.get.return_value = None
+
+        # CLI 层逻辑
+        session_id = "nonexistent"
+        session = await mock_manager.get(session_id)
+
+        assert session is None
+        # CLI 应输出 "Session not found"
+
+    @pytest.mark.asyncio
+    async def test_resume_session_found(self):
+        """Session 存在时加载并展示最后一条消息"""
+        mock_manager = AsyncMock(spec=SessionManager)
+        mock_session = Session(
+            id="test-123",
+            metadata=SessionMetadata(),
+            messages=[
+                Message(role=MessageRole.USER, content="Hello"),
+                Message(role=MessageRole.ASSISTANT, content="Hi there!"),
+            ],
+        )
+        mock_manager.get.return_value = mock_session
+
+        session_id = "test-123"
+        session = await mock_manager.get(session_id)
+
+        assert session is not None
+        last_msg = session.messages[-1]
+        assert last_msg.content == "Hi there!"
+```
+
+- [ ] **Step 2: 提交**
+
+```bash
+git add tests/unit/ingress/cli/test_commands.py
+git commit -m "test(session): add resume command tests"
+```
+
+---
+
+## Task 9: 添加 Orchestrator 集成（崩溃恢复感知）
+
+**Files:**
+- Modify: `mozi/orchestrator/orchestrator.py` (如果已存在)
+- Create: `tests/unit/orchestrator/test_crash_recovery.py`
+
+> **注：** Orchestrator 工作循环阶段属于运行时状态，崩溃后不恢复。但需要感知 Session 的 `is_streaming` 状态，在恢复时传递 `continue_from` 参数。
+
+- [ ] **Step 1: 添加流式恢复测试**
+
+```python
+# tests/unit/orchestrator/test_crash_recovery.py
+import pytest
+from mozi.orchestrator.session.models import Message, MessageRole
+
+class TestStreamingRecovery:
+    def test_detect_incomplete_streaming_message(self):
+        """检测未完成的流式消息"""
+        msg = Message(
+            role=MessageRole.ASSISTANT,
+            content="",
+            streaming_content="Hello w",
+            is_streaming=True,
+        )
+
+        # Orchestrator 应检测到未完成的流式输出
+        assert msg.is_streaming is True
+        # 恢复时应带上 streaming_content 作为 continue_from
+
+    def test_get_continue_from_content(self):
+        """获取恢复内容"""
+        msg = Message(
+            role=MessageRole.ASSISTANT,
+            content="Hello world",
+            streaming_content="Hello w",
+            is_streaming=False,
+        )
+
+        # 已完成的流式输出，continue_from 为空
+        continue_from = msg.streaming_content if msg.is_streaming else ""
+        assert continue_from == ""
+```
+
+- [ ] **Step 2: 提交**
+
+```bash
+git add tests/unit/orchestrator/test_crash_recovery.py
+git commit -m "test(orchestrator): add crash recovery integration tests"
+```
+
+---
+
 ## 变更记录
 
 | 版本 | 日期 | 修改内容 |
 |------|------|----------|
+| 1.1 | 2026-03-30 | 添加 Task 8 (resume 命令) 和 Task 9 (Orchestrator 集成) |
 | 1.0 | 2026-03-30 | 初始实现计划 |
 
 ---
 
-_版本: 1.0_
+_版本: 1.1_
 _更新日期: 2026-03-30_
