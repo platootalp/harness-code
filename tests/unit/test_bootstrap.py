@@ -122,7 +122,7 @@ class TestCreateFromTemplateRelative:
         create_from_template(path)
         content = path.read_text()
         # The rule name "test-rule" -> "test_rule" -> "test rule" -> title cased, plus " Rule" suffix
-        assert content.startswith("# Test Rule Rule\n\n")
+        assert content.startswith("# Test Rule\n\n")
 
     def test_creates_docs_foundation_as_directory_relative(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """docs/foundation/ paths are created as directories with relative path."""
