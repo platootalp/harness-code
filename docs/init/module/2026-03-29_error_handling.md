@@ -2,7 +2,7 @@
 
 > **模板版本**: 2.0
 > **创建日期**: 2026-03-29
-> **最后更新**: 2026-03-30
+> **最后更新**: 2026-03-31
 
 ---
 
@@ -100,7 +100,9 @@ MoziError (基类)
 │   ├── ToolNotFoundError
 │   ├── ToolExecutionError
 │   ├── ToolValidationError
-│   └── SecurityViolationError
+│   ├── SecurityViolationError
+│   ├── WhitelistViolationError
+│   └── SandboxEscapeError
 ├── ModelError
 │   ├── ModelInvokeError
 │   ├── ModelResponseParseError
@@ -119,8 +121,6 @@ MoziError (基类)
 │   └── EventDeliveryError
 ├── SecurityError
 │   ├── PermissionDeniedError
-│   ├── WhitelistViolationError
-│   ├── SandboxEscapeError
 │   └── SecretDetectedError
 ├── ResilienceError
 │   ├── CircuitBreakerOpenError
@@ -370,8 +370,9 @@ class LoopDetector:
 
 | 版本 | 日期 | 变更内容 |
 | ---- | ---- | -------- |
+| 2.1 | 2026-03-31 | 调整异常继承树：WhitelistViolationError/SandboxEscapeError 移至 ToolsError |
 | 2.0 | 2026-03-30 | 重构为模板 v2.0 结构，核心问题改为段落描述 |
 | 1.0 | 2026-03-29 | 初始版本，包含统一异常体系和 Agent 错误处理 |
 
-_版本: 2.0_
-_更新日期: 2026-03-30_
+_版本: 2.1_
+_更新日期: 2026-03-31_
