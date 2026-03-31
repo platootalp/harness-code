@@ -1,0 +1,7 @@
+line-length = 100
+
+[lint]
+extend-select = ["E", "W", "F", "I", "B", "C4", "UP"]
+
+[lint.isort]
+known-first-party = ["mozi"]

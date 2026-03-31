@@ -1,0 +1,343 @@
+{
+  "version": "2.0",
+  "description": "并行优化的开发计划 - Phase 2 (编排层)",
+  "total_weeks": 4,
+  "timeline": "Week 7-10",
+  "parallel_streams": 5,
+
+  "phase": {
+    "id": "phase_2_parallel",
+    "name": "编排层（并行版）",
+    "duration_weeks": 4,
+    "goal": "并行实现 Memory、Context、Orchestrator 三大模块"
+  },
+
+  "work_streams": [
+    {
+      "id": "WS4",
+      "name": "Memory 工作组",
+      "modules": ["memory"],
+      "weeks": "7-8",
+      "dependencies": ["WS1"]
+    },
+    {
+      "id": "WS5",
+      "name": "Context 工作组",
+      "modules": ["context"],
+      "weeks": "7-8",
+      "dependencies": ["WS1", "WS2"]
+    },
+    {
+      "id": "WS6",
+      "name": "Orchestrator 工作组",
+      "modules": ["orchestrator"],
+      "weeks": "8-9",
+      "dependencies": ["WS4", "WS5"]
+    },
+    {
+      "id": "WS7",
+      "name": "Phase 2 集成组",
+      "modules": ["integration"],
+      "weeks": "10",
+      "dependencies": ["WS4", "WS5", "WS6"]
+    }
+  ],
+
+  "sprints": [
+    {
+      "id": "S2.1",
+      "name": "Sprint 2.1 - Memory & Context 基础",
+      "week": 7,
+      "parallel_groups": [
+        {
+          "group_id": "G2.1-a",
+          "name": "短期记忆",
+          "assignee": "WS4",
+          "tasks": [
+            {"id": "T2.1.1.1", "name": "ShortTermMemory 类", "file": "memory/short_term.py", "estimate": "2d"},
+            {"id": "T2.1.1.2", "name": "add/get_recent/trim 方法", "file": "memory/short_term.py", "estimate": "2d"},
+            {"id": "T2.1.1.5", "name": "short_term 单元测试", "file": "tests/unit/memory/test_short_term.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.1-b",
+          "name": "长期记忆",
+          "assignee": "WS4",
+          "tasks": [
+            {"id": "T2.1.2.1", "name": "MemoryType 枚举与 MemoryBlock 数据类", "file": "memory/long_term.py", "estimate": "1d"},
+            {"id": "T2.1.2.3", "name": "LongTermMemory 类", "file": "memory/long_term.py", "estimate": "2d"},
+            {"id": "T2.1.2.4", "name": "add/search/delete/update_importance", "file": "memory/long_term.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G2.1-c",
+          "name": "记忆检索器",
+          "assignee": "WS4",
+          "tasks": [
+            {"id": "T2.1.3.1", "name": "MemoryRetriever 类", "file": "memory/retriever.py", "estimate": "2d"},
+            {"id": "T2.1.3.2", "name": "recall/hybrid_search/rerank", "file": "memory/retriever.py", "estimate": "3d"}
+          ]
+        },
+        {
+          "group_id": "G2.1-d",
+          "name": "向量存储实现",
+          "assignee": "WS4",
+          "tasks": [
+            {"id": "T2.1.4.1", "name": "MilvusVectorStore", "file": "memory/stores/milvus.py", "estimate": "2d", "dependency": "T1.1.2.2"},
+            {"id": "T2.1.4.2", "name": "PGVectorStore", "file": "memory/stores/pgvector.py", "estimate": "2d", "dependency": "T1.1.2.3"},
+            {"id": "T2.1.4.5", "name": "stores 单元测试", "file": "tests/unit/memory/test_stores.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.1-e",
+          "name": "Context 数据模型",
+          "assignee": "WS5",
+          "tasks": [
+            {"id": "T2.2.1.1", "name": "BuiltContext/ContextConfig 数据类", "file": "context/models.py", "estimate": "2d"},
+            {"id": "T2.2.1.3", "name": "CompressionResult 数据类", "file": "context/models.py", "estimate": "1d"},
+            {"id": "T2.2.1.4", "name": "models 单元测试", "file": "tests/unit/context/test_models.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G2.1-f",
+          "name": "Context 构建器",
+          "assignee": "WS5",
+          "tasks": [
+            {"id": "T2.2.2.1", "name": "ContextBuilder 类", "file": "context/builder.py", "estimate": "2d"},
+            {"id": "T2.2.2.2", "name": "build/_build_system_prompt", "file": "context/builder.py", "estimate": "2d"},
+            {"id": "T2.2.2.4", "name": "_gather_history/_gather_memory", "file": "context/builder.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.1-g",
+          "name": "窗口管理器",
+          "assignee": "WS5",
+          "tasks": [
+            {"id": "T2.2.3.1", "name": "WindowManager 类", "file": "context/window.py", "estimate": "2d"},
+            {"id": "T2.2.3.2", "name": "check_threshold/should_compress/get_snapshot", "file": "context/window.py", "estimate": "3d"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S2.2",
+      "name": "Sprint 2.2 - Context 完善 + Orchestrator 启动",
+      "week": 8,
+      "parallel_groups": [
+        {
+          "group_id": "G2.2-a",
+          "name": "Context 压缩与隔离",
+          "assignee": "WS5",
+          "tasks": [
+            {"id": "T2.2.4.1", "name": "Compactor 类与 compress", "file": "context/compactor.py", "estimate": "2d"},
+            {"id": "T2.2.4.2", "name": "create_snapshot/merge_snapshots", "file": "context/compactor.py", "estimate": "2d"},
+            {"id": "T2.2.5.1", "name": "Offloader 类", "file": "context/offloader.py", "estimate": "2d"},
+            {"id": "T2.2.6.1", "name": "Isolator 类", "file": "context/isolator.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.2-b",
+          "name": "Context 测试",
+          "assignee": "WS5",
+          "tasks": [
+            {"id": "T2.2.2.6", "name": "builder 单元测试", "file": "tests/unit/context/test_builder.py", "estimate": "2d"},
+            {"id": "T2.2.3.5", "name": "window 单元测试", "file": "tests/unit/context/test_window.py", "estimate": "2d"},
+            {"id": "T2.2.4.5", "name": "compactor 单元测试", "file": "tests/unit/context/test_compactor.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.2-c",
+          "name": "Memory 测试补全",
+          "assignee": "WS4",
+          "tasks": [
+            {"id": "T2.1.2.8", "name": "long_term 单元测试", "file": "tests/unit/memory/test_long_term.py", "estimate": "2d"},
+            {"id": "T2.1.3.5", "name": "retriever 单元测试", "file": "tests/unit/memory/test_retriever.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G2.2-d",
+          "name": "Orchestrator 分类与状态",
+          "assignee": "WS6",
+          "tasks": [
+            {"id": "T2.3.1.1", "name": "Category 枚举与 CategoryRouter", "file": "orchestrator/category.py", "estimate": "2d"},
+            {"id": "T2.3.2.1", "name": "TodoItem/Decision/OrchestratorState", "file": "orchestrator/state.py", "estimate": "2d"},
+            {"id": "T2.3.2.4", "name": "StateStore 类", "file": "orchestrator/state.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.2-e",
+          "name": "Orchestrator Workers - 探索与规划",
+          "assignee": "WS6",
+          "tasks": [
+            {"id": "T2.3.3.1", "name": "ExplorerWorker 类", "file": "orchestrator/workers/explorer.py", "estimate": "2d"},
+            {"id": "T2.3.3.2", "name": "search_codebase/get_file_info", "file": "orchestrator/workers/explorer.py", "estimate": "2d"},
+            {"id": "T2.3.4.1", "name": "PlannerWorker 类", "file": "orchestrator/workers/planner.py", "estimate": "2d"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S2.3",
+      "name": "Sprint 2.3 - Orchestrator 核心",
+      "week": 9,
+      "parallel_groups": [
+        {
+          "group_id": "G2.3-a",
+          "name": "Orchestrator Workers - 编码与质量",
+          "assignee": "WS6",
+          "tasks": [
+            {"id": "T2.3.4.3", "name": "generate_todo_list/decompose_task", "file": "orchestrator/workers/planner.py", "estimate": "2d"},
+            {"id": "T2.3.5.1", "name": "CoderWorker 类", "file": "orchestrator/workers/coder.py", "estimate": "2d"},
+            {"id": "T2.3.5.3", "name": "apply_diff/validate_change", "file": "orchestrator/workers/coder.py", "estimate": "2d"},
+            {"id": "T2.3.6.1", "name": "QualityChecker 类", "file": "orchestrator/quality.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G2.3-b",
+          "name": "Orchestrator 核心逻辑",
+          "assignee": "WS6",
+          "tasks": [
+            {"id": "T2.3.7.1", "name": "Reviewer 类与 review", "file": "orchestrator/reviewer.py", "estimate": "2d"},
+            {"id": "T2.3.8.1", "name": "Orchestrator 主类框架", "file": "orchestrator/orchestrator.py", "estimate": "2d"},
+            {"id": "T2.3.8.2", "name": "run/_thought/_decide/_delegate", "file": "orchestrator/orchestrator.py", "estimate": "3d"}
+          ]
+        },
+        {
+          "group_id": "G2.3-c",
+          "name": "Orchestrator 单元测试",
+          "assignee": "WS6",
+          "tasks": [
+            {"id": "T2.3.1.4", "name": "category 单元测试", "file": "tests/unit/orchestrator/test_category.py", "estimate": "1d"},
+            {"id": "T2.3.2.9", "name": "state 单元测试", "file": "tests/unit/orchestrator/test_state.py", "estimate": "1d"},
+            {"id": "T2.3.3.5", "name": "explorer 单元测试", "file": "tests/unit/orchestrator/workers/test_explorer.py", "estimate": "1d"},
+            {"id": "T2.3.4.5", "name": "planner 单元测试", "file": "tests/unit/orchestrator/workers/test_planner.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.3-d",
+          "name": "Orchestrator 测试续",
+          "assignee": "WS6",
+          "tasks": [
+            {"id": "T2.3.5.5", "name": "coder 单元测试", "file": "tests/unit/orchestrator/workers/test_coder.py", "estimate": "1d"},
+            {"id": "T2.3.6.6", "name": "quality 单元测试", "file": "tests/unit/orchestrator/test_quality.py", "estimate": "1d"},
+            {"id": "T2.3.7.4", "name": "reviewer 单元测试", "file": "tests/unit/orchestrator/test_reviewer.py", "estimate": "1d"},
+            {"id": "T2.3.8.9", "name": "orchestrator 单元测试", "file": "tests/unit/orchestrator/test_orchestrator.py", "estimate": "2d"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S2.4",
+      "name": "Sprint 2.4 - 全面集成",
+      "week": 10,
+      "parallel_groups": [
+        {
+          "group_id": "G2.4-a",
+          "name": "Orchestrator-Session 集成",
+          "assignee": "WS7",
+          "tasks": [
+            {"id": "T2.4.1.1", "name": "会话上下文传递", "estimate": "2d"},
+            {"id": "T2.4.1.2", "name": "状态持久化到 Session", "estimate": "2d"},
+            {"id": "T2.4.1.3", "name": "集成测试通过", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.4-b",
+          "name": "Orchestrator-Context 集成",
+          "assignee": "WS7",
+          "tasks": [
+            {"id": "T2.4.2.1", "name": "上下文分配给 Worker", "estimate": "2d"},
+            {"id": "T2.4.2.2", "name": "Worker 结果摘要归档", "estimate": "2d"},
+            {"id": "T2.4.2.3", "name": "集成测试通过", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.4-c",
+          "name": "Orchestrator-Memory 集成",
+          "assignee": "WS7",
+          "tasks": [
+            {"id": "T2.4.3.1", "name": "记忆召回触发", "estimate": "2d"},
+            {"id": "T2.4.3.2", "name": "新记忆存储", "estimate": "2d"},
+            {"id": "T2.4.3.3", "name": "集成测试通过", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G2.4-d",
+          "name": "Orchestrator-Model/EventBus 集成",
+          "assignee": "WS7",
+          "tasks": [
+            {"id": "T2.4.4.1", "name": "LLM 调用正常", "estimate": "2d"},
+            {"id": "T2.4.4.2", "name": "工具调用结果处理", "estimate": "2d"},
+            {"id": "T2.4.5.1", "name": "状态变更/Worker 执行事件", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G2.4-e",
+          "name": "端到端流程测试",
+          "assignee": "WS7",
+          "tasks": [
+            {"id": "T2.4.6.1", "name": "QUICK 任务流程", "estimate": "1d"},
+            {"id": "T2.4.6.2", "name": "DEEP 任务流程", "estimate": "1d"},
+            {"id": "T2.4.6.3", "name": "STRATEGIC 任务流程", "estimate": "1d"},
+            {"id": "T2.4.6.4", "name": "崩溃恢复测试", "estimate": "1d"}
+          ]
+        }
+      ]
+    }
+  ],
+
+  "milestones": [
+    {
+      "id": "M2.1",
+      "name": "Memory 模块完成",
+      "week": 8,
+      "criteria": ["短期记忆", "长期记忆", "记忆检索", "向量存储", "单元测试≥80%"],
+      "deliverables": ["memory/short_term.py", "memory/long_term.py", "memory/retriever.py"]
+    },
+    {
+      "id": "M2.2",
+      "name": "Context 模块完成",
+      "week": 8,
+      "criteria": ["上下文构建", "窗口管理", "压缩与隔离", "单元测试≥80%"],
+      "deliverables": ["context/builder.py", "context/window.py", "context/compactor.py"]
+    },
+    {
+      "id": "M2.3",
+      "name": "Orchestrator 核心完成",
+      "week": 9,
+      "criteria": ["任务分类", "状态管理", "4个Worker", "质量检查", "单元测试≥80%"],
+      "deliverables": ["orchestrator/orchestrator.py", "orchestrator/workers/*.py"]
+    },
+    {
+      "id": "M2.4",
+      "name": "Phase 2 集成完成",
+      "week": 10,
+      "criteria": ["全流程集成", "E2E测试通过", "三种任务模式"],
+      "deliverables": ["集成测试报告", "E2E测试报告"]
+    }
+  ],
+
+  "cross_stream_contracts": [
+    {
+      "name": "Memory-Context 契约",
+      "provider": "WS4",
+      "consumer": "WS5",
+      "contract": "MemoryBlock/search接口定义",
+      "week": 7
+    },
+    {
+      "name": "Context-Orchestrator 契约",
+      "provider": "WS5",
+      "consumer": "WS6",
+      "contract": "BuiltContext/ContextConfig 格式",
+      "week": 8
+    },
+    {
+      "name": "Memory-Orchestrator 契约",
+      "provider": "WS4",
+      "consumer": "WS6",
+      "contract": "recall接口定义",
+      "week": 8
+    }
+  ]
+}

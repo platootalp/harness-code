@@ -1,0 +1,282 @@
+{
+  "version": "2.0",
+  "description": "并行优化的开发计划 - Phase 3 (接入层与集成)",
+  "total_weeks": 3,
+  "timeline": "Week 11-13",
+  "parallel_streams": 4,
+
+  "phase": {
+    "id": "phase_3_parallel",
+    "name": "接入层与集成（并行版）",
+    "duration_weeks": 3,
+    "goal": "并行实现 Tools、Ingress 模块并完成系统集成"
+  },
+
+  "work_streams": [
+    {
+      "id": "WS8",
+      "name": "Tools 核心工作组",
+      "modules": ["core/tools"],
+      "weeks": "11",
+      "dependencies": ["WS6"]
+    },
+    {
+      "id": "WS9",
+      "name": "Tools 扩展工作组",
+      "modules": ["core/tools/builtin"],
+      "weeks": "11-12",
+      "dependencies": ["WS8"]
+    },
+    {
+      "id": "WS10",
+      "name": "Ingress 工作组",
+      "modules": ["ingress"],
+      "weeks": "12",
+      "dependencies": ["WS6"]
+    },
+    {
+      "id": "WS11",
+      "name": "系统集成组",
+      "modules": ["integration"],
+      "weeks": "13",
+      "dependencies": ["WS8", "WS9", "WS10"]
+    }
+  ],
+
+  "sprints": [
+    {
+      "id": "S3.1",
+      "name": "Sprint 3.1 - Tools 框架与核心工具",
+      "week": 11,
+      "parallel_groups": [
+        {
+          "group_id": "G3.1-a",
+          "name": "Tools 框架",
+          "assignee": "WS8",
+          "tasks": [
+            {"id": "T3.1.1.1", "name": "ToolContext/ToolResult 数据类", "file": "core/tools/framework.py", "estimate": "1d"},
+            {"id": "T3.1.1.3", "name": "Tool 抽象基类与 execute 方法", "file": "core/tools/framework.py", "estimate": "2d"},
+            {"id": "T3.1.2.1", "name": "ToolRegistry 类", "file": "core/tools/registry.py", "estimate": "2d"},
+            {"id": "T3.1.2.2", "name": "register/get/list_tools/execute", "file": "core/tools/registry.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G3.1-b",
+          "name": "Tools 安全",
+          "assignee": "WS8",
+          "tasks": [
+            {"id": "T3.1.3.1", "name": "PermissionLevel/ViolationSeverity 枚举", "file": "core/tools/security.py", "estimate": "1d"},
+            {"id": "T3.1.3.4", "name": "DangerousFunctionDetector", "file": "core/tools/security.py", "estimate": "2d"},
+            {"id": "T3.1.3.5", "name": "path_whitelist_validation", "file": "core/tools/security.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G3.1-c",
+          "name": "文件操作工具",
+          "assignee": "WS9",
+          "tasks": [
+            {"id": "T3.1.4.1", "name": "ReadFileTool 类", "file": "core/tools/builtin/read.py", "estimate": "1d", "dependency": "T3.1.3.5"},
+            {"id": "T3.1.5.1", "name": "WriteFileTool 类与原子写入", "file": "core/tools/builtin/write.py", "estimate": "2d", "dependency": "T3.1.3.5"},
+            {"id": "T3.1.6.1", "name": "EditFileTool 类与字符串替换", "file": "core/tools/builtin/edit.py", "estimate": "2d", "dependency": "T3.1.3.5"}
+          ]
+        },
+        {
+          "group_id": "G3.1-d",
+          "name": "代码搜索工具",
+          "assignee": "WS9",
+          "tasks": [
+            {"id": "T3.1.7.1", "name": "BashTool 类与危险命令检测", "file": "core/tools/builtin/bash.py", "estimate": "2d", "dependency": "T3.1.3.4"},
+            {"id": "T3.1.8.1", "name": "GrepTool 类", "file": "core/tools/builtin/grep.py", "estimate": "2d"},
+            {"id": "T3.1.9.1", "name": "GlobTool 类", "file": "core/tools/builtin/glob.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G3.1-e",
+          "name": "Tools 单元测试",
+          "assignee": "WS9",
+          "tasks": [
+            {"id": "T3.1.1.5", "name": "framework 单元测试", "file": "tests/unit/core/tools/test_framework.py", "estimate": "1d"},
+            {"id": "T3.1.2.7", "name": "registry 单元测试", "file": "tests/unit/core/tools/test_registry.py", "estimate": "1d"},
+            {"id": "T3.1.3.6", "name": "security 单元测试", "file": "tests/unit/core/tools/test_security.py", "estimate": "1d"},
+            {"id": "T3.1.4.4", "name": "read 单元测试", "file": "tests/unit/core/tools/builtin/test_read.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G3.1-f",
+          "name": "Tools 单元测试续",
+          "assignee": "WS9",
+          "tasks": [
+            {"id": "T3.1.5.4", "name": "write 单元测试", "file": "tests/unit/core/tools/builtin/test_write.py", "estimate": "1d"},
+            {"id": "T3.1.6.4", "name": "edit 单元测试", "file": "tests/unit/core/tools/builtin/test_edit.py", "estimate": "1d"},
+            {"id": "T3.1.7.5", "name": "bash 单元测试", "file": "tests/unit/core/tools/builtin/test_bash.py", "estimate": "1d"},
+            {"id": "T3.1.8.3", "name": "grep 单元测试", "file": "tests/unit/core/tools/builtin/test_grep.py", "estimate": "1d"},
+            {"id": "T3.1.9.3", "name": "glob 单元测试", "file": "tests/unit/core/tools/builtin/test_glob.py", "estimate": "1d"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S3.2",
+      "name": "Sprint 3.2 - Ingress + 高级工具",
+      "week": 12,
+      "parallel_groups": [
+        {
+          "group_id": "G3.2-a",
+          "name": "Ingress 数据模型",
+          "assignee": "WS10",
+          "tasks": [
+            {"id": "T3.2.1.1", "name": "CliMode/SessionAction 枚举", "file": "ingress/models.py", "estimate": "1d"},
+            {"id": "T3.2.1.3", "name": "UserInput/CliResult 数据类", "file": "ingress/models.py", "estimate": "2d"},
+            {"id": "T3.2.1.5", "name": "models 单元测试", "file": "tests/unit/ingress/test_models.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G3.2-b",
+          "name": "Ingress 输出与命令",
+          "assignee": "WS10",
+          "tasks": [
+            {"id": "T3.2.2.1", "name": "OutputFormatter 类", "file": "ingress/output.py", "estimate": "2d"},
+            {"id": "T3.2.2.2", "name": "print/print_error/print_progress", "file": "ingress/output.py", "estimate": "2d"},
+            {"id": "T3.2.3.1", "name": "parse_command 函数", "file": "ingress/commands.py", "estimate": "2d"},
+            {"id": "T3.2.3.2", "name": "do/session 命令解析", "file": "ingress/commands.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G3.2-c",
+          "name": "Ingress CLI 核心",
+          "assignee": "WS10",
+          "tasks": [
+            {"id": "T3.2.4.1", "name": "BaseCLI 抽象基类", "file": "ingress/main.py", "estimate": "1d"},
+            {"id": "T3.2.4.2", "name": "ReplCLI 类", "file": "ingress/main.py", "estimate": "2d"},
+            {"id": "T3.2.4.3", "name": "CommandCLI 类", "file": "ingress/main.py", "estimate": "2d"},
+            {"id": "T3.2.4.4", "name": "run/参数解析/命令路由", "file": "ingress/main.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G3.2-d",
+          "name": "Ingress 测试",
+          "assignee": "WS10",
+          "tasks": [
+            {"id": "T3.2.2.5", "name": "output 单元测试", "file": "tests/unit/ingress/test_output.py", "estimate": "1d"},
+            {"id": "T3.2.3.4", "name": "commands 单元测试", "file": "tests/unit/ingress/test_commands.py", "estimate": "1d"},
+            {"id": "T3.2.4.7", "name": "main 单元测试", "file": "tests/unit/ingress/test_main.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G3.2-e",
+          "name": "高级工具 (P1)",
+          "assignee": "WS9",
+          "tasks": [
+            {"id": "T3.1.10.1", "name": "ASTGrepTool", "file": "core/tools/analysis/ast_grep.py", "estimate": "2d", "priority": "P1"},
+            {"id": "T3.1.10.2", "name": "LSPTool", "file": "core/tools/analysis/lsp.py", "estimate": "2d", "priority": "P1"},
+            {"id": "T3.1.10.5", "name": "TaskCreateTool/TaskGetTool", "file": "core/tools/task/", "estimate": "2d", "priority": "P1"}
+          ]
+        },
+        {
+          "group_id": "G3.2-f",
+          "name": "外部工具 (P1)",
+          "assignee": "WS9",
+          "tasks": [
+            {"id": "T3.1.10.3", "name": "WebSearchTool", "file": "core/tools/external/web_search.py", "estimate": "2d", "priority": "P1"},
+            {"id": "T3.1.10.4", "name": "WebFetchTool", "file": "core/tools/external/web_fetch.py", "estimate": "2d", "priority": "P1"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S3.3",
+      "name": "Sprint 3.3 - 系统集成",
+      "week": 13,
+      "parallel_groups": [
+        {
+          "group_id": "G3.3-a",
+          "name": "端到端流程测试",
+          "assignee": "WS11",
+          "tasks": [
+            {"id": "T3.3.1.1", "name": "简单任务测试", "estimate": "1d"},
+            {"id": "T3.3.1.2", "name": "单文件编辑测试", "estimate": "1d"},
+            {"id": "T3.3.1.3", "name": "复杂任务测试", "estimate": "2d"},
+            {"id": "T3.3.1.4", "name": "会话恢复测试", "estimate": "1d"},
+            {"id": "T3.3.1.5", "name": "多会话隔离测试", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G3.3-b",
+          "name": "EventBus 集成测试",
+          "assignee": "WS11",
+          "tasks": [
+            {"id": "T3.3.2.1", "name": "user_message 事件", "estimate": "1d"},
+            {"id": "T3.3.2.2", "name": "agent_response 事件", "estimate": "1d"},
+            {"id": "T3.3.2.3", "name": "tool_execution 事件", "estimate": "1d"},
+            {"id": "T3.3.2.4", "name": "session_created 事件", "estimate": "1d"},
+            {"id": "T3.3.2.5", "name": "error 事件", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G3.3-c",
+          "name": "错误处理集成测试",
+          "assignee": "WS11",
+          "tasks": [
+            {"id": "T3.3.3.1", "name": "工具不存在错误", "estimate": "1d"},
+            {"id": "T3.3.3.2", "name": "工具执行超时错误", "estimate": "1d"},
+            {"id": "T3.3.3.3", "name": "路径权限错误", "estimate": "1d"},
+            {"id": "T3.3.3.4", "name": "模型调用错误", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G3.3-d",
+          "name": "配置与可观测性测试",
+          "assignee": "WS11",
+          "tasks": [
+            {"id": "T3.3.4.1", "name": "配置文件加载", "estimate": "1d"},
+            {"id": "T3.3.4.2", "name": "环境变量覆盖", "estimate": "1d"},
+            {"id": "T3.3.4.3", "name": "配置验证", "estimate": "1d"},
+            {"id": "T3.3.5.1", "name": "Tracing 集成", "estimate": "1d", "priority": "P1"},
+            {"id": "T3.3.5.2", "name": "Metrics 集成", "estimate": "1d", "priority": "P1"}
+          ]
+        }
+      ]
+    }
+  ],
+
+  "milestones": [
+    {
+      "id": "M3.1",
+      "name": "Tools 核心完成",
+      "week": 11,
+      "criteria": ["Tools框架", "6个基础工具", "安全检测", "单元测试≥80%"],
+      "deliverables": ["core/tools/framework.py", "core/tools/registry.py", "core/tools/builtin/*.py"]
+    },
+    {
+      "id": "M3.2",
+      "name": "Ingress 模块完成",
+      "week": 12,
+      "criteria": ["REPL模式", "命令模式", "会话管理", "单元测试≥80%"],
+      "deliverables": ["ingress/main.py", "ingress/commands.py", "ingress/output.py"]
+    },
+    {
+      "id": "M3.3",
+      "name": "Phase 3 集成完成",
+      "week": 13,
+      "criteria": ["E2E测试通过", "EventBus集成", "错误处理完善", "配置管理正常"],
+      "deliverables": ["E2E测试报告", "集成测试报告"]
+    }
+  ],
+
+  "cross_stream_contracts": [
+    {
+      "name": "Tools-Orchestrator 契约",
+      "provider": "WS8",
+      "consumer": "WS6",
+      "contract": "Tool/ToolResult 接口定义",
+      "week": 11
+    },
+    {
+      "name": "Ingress-Orchestrator 契约",
+      "provider": "WS10",
+      "consumer": "WS6",
+      "contract": "UserInput/CliResult 格式",
+      "week": 12
+    }
+  ]
+}

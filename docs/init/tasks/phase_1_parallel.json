@@ -1,0 +1,304 @@
+{
+  "version": "2.0",
+  "description": "并行优化的开发计划 - Phase 1-4",
+  "total_weeks": 13,
+  "timeline": "Week 3-15",
+  "parallel_streams": 4,
+
+  "phase": {
+    "id": "phase_1_parallel",
+    "name": "核心基础设施（并行版）",
+    "duration_weeks": 4,
+    "goal": "并行实现 Storage、Session、Model 三大核心模块"
+  },
+
+  "work_streams": [
+    {
+      "id": "WS1",
+      "name": "数据层工作组",
+      "modules": ["infrastructure", "session"],
+      "weeks": "3-5",
+      "dependencies": []
+    },
+    {
+      "id": "WS2",
+      "name": "模型层工作组",
+      "modules": ["core/model"],
+      "weeks": "3-5",
+      "dependencies": []
+    },
+    {
+      "id": "WS3",
+      "name": "集成测试组",
+      "modules": ["integration"],
+      "weeks": "6",
+      "dependencies": ["WS1", "WS2"]
+    }
+  ],
+
+  "sprints": [
+    {
+      "id": "S1.1",
+      "name": "Sprint 1.1 - 基础构建",
+      "week": 3,
+      "parallel_groups": [
+        {
+          "group_id": "G1.1-a",
+          "name": "Storage 基础",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.1.1.1", "name": "SQLiteSessionStorage 类", "file": "infrastructure/database.py", "estimate": "2d"},
+            {"id": "T1.1.1.2", "name": "init_db / save_session / load_session", "file": "infrastructure/database.py", "estimate": "2d"},
+            {"id": "T1.1.1.3", "name": "消息存储与流式输出持久化", "file": "infrastructure/database.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G1.1-b",
+          "name": "VectorStore 抽象",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.1.2.1", "name": "VectorStore 抽象基类", "file": "infrastructure/vector_db.py", "estimate": "1d"},
+            {"id": "T1.1.2.2", "name": "MilvusVectorStore 实现", "file": "infrastructure/vector_db.py", "estimate": "2d"},
+            {"id": "T1.1.2.3", "name": "PGVectorStore 实现", "file": "infrastructure/vector_db.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.1-c",
+          "name": "EventBus 核心",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.1.3.1", "name": "EventBus 类与 publish/subscribe", "file": "infrastructure/event_bus.py", "estimate": "2d"},
+            {"id": "T1.1.3.2", "name": "异步 publish 与事件过滤", "file": "infrastructure/event_bus.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.1-d",
+          "name": "Model 数据模型",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.3.1.1", "name": "ModelProvider/MessageRole 枚举", "file": "core/model/adapter.py", "estimate": "1d"},
+            {"id": "T1.3.1.2", "name": "Message/ToolCall/ModelRequest 数据类", "file": "core/model/adapter.py", "estimate": "2d"},
+            {"id": "T1.3.1.3", "name": "ModelResponse/ModelUsage/ModelInfo 数据类", "file": "core/model/adapter.py", "estimate": "1d"},
+            {"id": "T1.3.1.4", "name": "ModelAdapter 抽象基类", "file": "core/model/adapter.py", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G1.1-e",
+          "name": "Model 错误与重试",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.3.6.1", "name": "ModelInvocationError/ModelNotFoundError", "file": "core/model/errors.py", "estimate": "1d"},
+            {"id": "T1.3.6.2", "name": "RateLimitError/AuthenticationError", "file": "core/model/errors.py", "estimate": "1d"},
+            {"id": "T1.3.7.1", "name": "RetryStrategy 类", "file": "core/model/retry.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.1-f",
+          "name": "熔断器实现",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.3.8.1", "name": "CircuitState 枚举与 CircuitBreaker 类", "file": "core/model/circuit_breaker.py", "estimate": "2d"},
+            {"id": "T1.3.8.2", "name": "状态转换与恢复逻辑", "file": "core/model/circuit_breaker.py", "estimate": "2d"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S1.2",
+      "name": "Sprint 1.2 - 核心实现",
+      "week": 4,
+      "parallel_groups": [
+        {
+          "group_id": "G1.2-a",
+          "name": "Session 数据模型",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.2.1.1", "name": "MessageRole/SessionStatus 枚举", "file": "session/models.py", "estimate": "1d"},
+            {"id": "T1.2.1.2", "name": "Message/Session 数据类", "file": "session/models.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.2-b",
+          "name": "Session 存储接口",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.2.2.1", "name": "SessionStorage 抽象接口", "file": "session/storage.py", "estimate": "1d"},
+            {"id": "T1.2.3.1", "name": "SQLiteSessionStorage 实现", "file": "session/database.py", "estimate": "3d", "dependency": "T1.1.1.1"}
+          ]
+        },
+        {
+          "group_id": "G1.2-c",
+          "name": "Session 管理器",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.2.4.1", "name": "BaseSessionManager 抽象基类", "file": "session/manager.py", "estimate": "1d"},
+            {"id": "T1.2.4.2", "name": "SessionManager CRUD 方法", "file": "session/manager.py", "estimate": "2d"},
+            {"id": "T1.2.4.3", "name": "状态机转换逻辑", "file": "session/manager.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.2-d",
+          "name": "Anthropic 适配器",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.3.2.1", "name": "AnthropicAdapter 类框架", "file": "core/model/anthropic.py", "estimate": "1d"},
+            {"id": "T1.3.2.2", "name": "invoke 方法实现", "file": "core/model/anthropic.py", "estimate": "2d"},
+            {"id": "T1.3.2.3", "name": "invoke_stream 方法实现", "file": "core/model/anthropic.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.2-e",
+          "name": "OpenAI 适配器",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.3.3.1", "name": "OpenAIAdapter 类框架", "file": "core/model/openai.py", "estimate": "1d"},
+            {"id": "T1.3.3.2", "name": "invoke 方法实现", "file": "core/model/openai.py", "estimate": "2d"},
+            {"id": "T1.3.3.3", "name": "invoke_stream 方法实现", "file": "core/model/openai.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.2-f",
+          "name": "Model 注册与模板",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.3.4.1", "name": "ModelRegistry 类", "file": "core/model/registry.py", "estimate": "2d"},
+            {"id": "T1.3.5.1", "name": "PromptTemplateManager 类", "file": "core/model/template.py", "estimate": "3d"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S1.3",
+      "name": "Sprint 1.3 - 模块完善",
+      "week": 5,
+      "parallel_groups": [
+        {
+          "group_id": "G1.3-a",
+          "name": "Session 集成",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.2.5.1", "name": "resume 命令功能", "estimate": "2d"},
+            {"id": "T1.2.5.2", "name": "多会话并发测试", "estimate": "2d"},
+            {"id": "T1.2.5.3", "name": "流式输出恢复测试", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G1.3-b",
+          "name": "Session 单元测试",
+          "assignee": "WS1",
+          "tasks": [
+            {"id": "T1.2.1.6", "name": "models 单元测试", "file": "tests/unit/session/test_models.py", "estimate": "1d"},
+            {"id": "T1.2.3.12", "name": "database 单元测试", "file": "tests/unit/session/test_database.py", "estimate": "2d"},
+            {"id": "T1.2.4.10", "name": "manager 单元测试", "file": "tests/unit/session/test_manager.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.3-c",
+          "name": "Model 配置管理",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.4.1.1", "name": "config/model.json 配置", "file": "config/model.json", "estimate": "1d"},
+            {"id": "T1.4.1.2", "name": "ConfigLoader 实现", "file": "infrastructure/config.py", "estimate": "2d"},
+            {"id": "T1.4.1.3", "name": "环境变量覆盖与密钥安全读取", "file": "infrastructure/config.py", "estimate": "2d"}
+          ]
+        },
+        {
+          "group_id": "G1.3-d",
+          "name": "Model 单元测试",
+          "assignee": "WS2",
+          "tasks": [
+            {"id": "T1.3.1.12", "name": "adapter 单元测试", "file": "tests/unit/core/model/test_adapter.py", "estimate": "1d"},
+            {"id": "T1.3.2.8", "name": "anthropic 单元测试", "file": "tests/unit/core/model/test_anthropic.py", "estimate": "2d"},
+            {"id": "T1.3.3.8", "name": "openai 单元测试", "file": "tests/unit/core/model/test_openai.py", "estimate": "2d"},
+            {"id": "T1.3.4.5", "name": "registry 单元测试", "file": "tests/unit/core/model/test_registry.py", "estimate": "1d"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S1.4",
+      "name": "Sprint 1.4 - 集成测试",
+      "week": 6,
+      "parallel_groups": [
+        {
+          "group_id": "G1.4-a",
+          "name": "Model 与 Session 集成",
+          "assignee": "WS3",
+          "tasks": [
+            {"id": "T1.4.3.1", "name": "模型响应追加到会话", "estimate": "2d"},
+            {"id": "T1.4.3.2", "name": "工具调用结果追加到会话", "estimate": "2d"},
+            {"id": "T1.4.3.3", "name": "集成测试通过", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G1.4-b",
+          "name": "Model 与 EventBus 集成",
+          "assignee": "WS3",
+          "tasks": [
+            {"id": "T1.4.2.1", "name": "model_invoked 事件发布", "estimate": "2d"},
+            {"id": "T1.4.2.2", "name": "model_error 事件发布", "estimate": "2d"},
+            {"id": "T1.4.2.3", "name": "事件 payload 正确性验证", "estimate": "1d"}
+          ]
+        },
+        {
+          "group_id": "G1.4-c",
+          "name": "基础设施测试",
+          "assignee": "WS3",
+          "tasks": [
+            {"id": "T1.1.1.10", "name": "database 单元测试", "file": "tests/unit/infrastructure/test_database.py", "estimate": "2d"},
+            {"id": "T1.1.2.8", "name": "vector_db 单元测试", "file": "tests/unit/infrastructure/test_vector_db.py", "estimate": "2d"},
+            {"id": "T1.1.3.7", "name": "event_bus 单元测试", "file": "tests/unit/infrastructure/test_event_bus.py", "estimate": "2d"}
+          ]
+        }
+      ]
+    }
+  ],
+
+  "milestones": [
+    {
+      "id": "M1.1",
+      "name": "基础设施层完成",
+      "week": 3,
+      "criteria": ["SQLite存储", "向量存储抽象", "EventBus核心"],
+      "deliverables": ["infrastructure/database.py", "infrastructure/vector_db.py", "infrastructure/event_bus.py"]
+    },
+    {
+      "id": "M1.2",
+      "name": "Session 模块完成",
+      "week": 5,
+      "criteria": ["数据模型", "存储实现", "会话管理", "单元测试覆盖率≥80%"],
+      "deliverables": ["session/models.py", "session/manager.py", "session/database.py"]
+    },
+    {
+      "id": "M1.3",
+      "name": "Model 模块完成",
+      "week": 5,
+      "criteria": ["Anthropic/OpenAI适配器", "注册表", "重试与熔断", "单元测试覆盖率≥80%"],
+      "deliverables": ["core/model/anthropic.py", "core/model/openai.py", "core/model/registry.py"]
+    },
+    {
+      "id": "M1.4",
+      "name": "Phase 1 集成完成",
+      "week": 6,
+      "criteria": ["Model-Session集成", "Model-EventBus集成", "集成测试通过"],
+      "deliverables": ["集成测试报告"]
+    }
+  ],
+
+  "cross_stream_contracts": [
+    {
+      "name": "Session-Model 契约",
+      "provider": "WS1",
+      "consumer": "WS2",
+      "contract": "Message数据类定义",
+      "week": 3
+    },
+    {
+      "name": "EventBus-Model 契约",
+      "provider": "WS1",
+      "consumer": "WS2",
+      "contract": "model_invoked/model_error 事件格式",
+      "week": 4
+    }
+  ]
+}
