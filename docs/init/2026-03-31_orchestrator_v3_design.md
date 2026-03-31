@@ -15,7 +15,7 @@
 - Category-based routing（任务分类路由）
 - Todo Enforcer（任务强制执行）
 - Recursive Loop（递归优化循环）
-- 专业化 Specialist Agent 体系
+- 专业化 Agent 体系（计划/探索/执行/验证/Review）
 
 ### 1.2 核心定位
 
@@ -28,11 +28,11 @@
 
 | 方面 | v2.0 设计 | v3.0 设计 |
 |------|-----------|-----------|
-| 架构 | 统一工作循环 | TaskOrchestrator + SpecialistAgents |
+| 架构 | 统一工作循环 | OrchestratorAgent + Agents |
 | 路由 | 规划决策（action: execute/delegate） | Category-based routing |
 | 任务完成 | 依赖 Agent 自觉 | TodoEnforcer 强制监控 |
 | 完成度 | 无递归优化 | RecursiveLoop 确保 100% |
-| Specialist | 统一 Agent + 委托模板 | Quick/Deep/Strategic 专业化 |
+| Agents | 统一 Agent + 委托模板 | Plan/Explore/Execute/Verify/Review 分工 |
 
 ---
 
@@ -43,17 +43,17 @@
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│           TaskOrchestrator（会话级）          │
+│         OrchestratorAgent（会话级）            │
 │  - 驱动任务完成                              │
 │  - 管理会话生命周期                          │
-│  - 选择 Category 路由到 Specialist           │
+│  - 选择 Category 路由到 Agent                │
 └─────────────────────────────────────────────┘
     │
-    ├──► Category.QUICK → QuickExecutor
+    ├──► Category.QUICK → ExecutionAgent
     │
-    ├──► Category.DEEP → DeepExecutor
+    ├──► Category.DEEP → ResearchAgent
     │
-    └──► Category.STRATEGIC → StrategicPlanner
+    └──► Category.STRATEGIC → PlanningAgent
 ```
 
 ---
@@ -62,19 +62,21 @@
 
 ### 3.1 Agent 类型
 
-| Agent | 类型 | 职责 | 默认场景 |
-|-------|------|------|----------|
-| **TaskOrchestrator** | 会话级 | 主编排器，持续运行，管理整体进度，驱动任务完成 | 会话生命周期 |
-| **QuickExecutor** | 任务级 | 快速执行，简单修改 | ≤10行改动、拼写修正 |
-| **DeepExecutor** | 任务级 | 自主探索，深度执行 | 多文件重构、探索代码库 |
-| **StrategicPlanner** | 任务级 | 战略规划，架构决策 | 架构设计、技术选型 |
+| Agent | 层级 | 职责 | 模式 |
+|-------|------|------|------|
+| **OrchestratorAgent** | 会话级 | 统帅全局，路由决策，驱动任务完成 | 管理 |
+| **ExecutionAgent** | 任务级 | 快速执行，无需规划 | Do |
+| **ResearchAgent** | 任务级 | 探索执行，生成 TodoList | Plan → ReAct → Reflect |
+| **PlanningAgent** | 任务级 | 战略规划，需用户确认 | Plan → 用户确认 → 执行 |
+| **VerifyAgent** | 任务级 | 结果验证，质量检查 | Verify |
+| **ReviewAgent** | 任务级 | 自我反思，持续优化 | Review |
 
 ### 3.2 层级差异
 
-| 层级 | 名称 | scope | 工具 |
-|------|------|-------|------|
-| 会话级 | TaskOrchestrator | 整个会话 | SpecialistAgents |
-| 任务级 | SpecialistAgents | 单次任务 | 工具 + 子任务委托 |
+| 层级 | Agent | scope | 工具 |
+|------|-------|-------|------|
+| 会话级 | OrchestratorAgent | 整个会话 | Agents |
+| 任务级 | 其他 Agents | 单次任务 | 工具 + 子任务委托 |
 
 ---
 
@@ -100,7 +102,7 @@ class Category(Enum):
 
 ```python
 class CategoryRouter:
-    """根据任务特征路由到对应 Specialist"""
+    """根据任务特征路由到对应 Agent"""
 
     def route(self, task: TaskSpec, user_intent: UserIntent) -> Category:
         """
@@ -141,14 +143,14 @@ class CategoryRouter:
 
 ### 4.4 路由示例
 
-| 任务 | Category | 触发 | Specialist |
-|------|----------|------|------------|
-| 修复拼写错误 | QUICK | 自动 | QuickExecutor |
-| 添加单文件功能 | QUICK | 自动 | QuickExecutor |
-| Bug 修复（多文件） | DEEP | 自动 | DeepExecutor |
-| 代码重构（多模块） | DEEP | 自动 | DeepExecutor |
-| 系统架构设计 | STRATEGIC | `/plan` 触发 | StrategicPlanner |
-| 技术选型决策 | STRATEGIC | `/plan` 触发 | StrategicPlanner |
+| 任务 | Category | 触发 | Agent |
+|------|----------|------|-------|
+| 修复拼写错误 | QUICK | 自动 | ExecutionAgent |
+| 添加单文件功能 | QUICK | 自动 | ExecutionAgent |
+| Bug 修复（多文件） | DEEP | 自动 | ResearchAgent |
+| 代码重构（多模块） | DEEP | 自动 | ResearchAgent |
+| 系统架构设计 | STRATEGIC | `/plan` 触发 | PlanningAgent |
+| 技术选型决策 | STRATEGIC | `/plan` 触发 | PlanningAgent |
 
 ---
 
@@ -157,13 +159,13 @@ class CategoryRouter:
 ### 5.1 主循环
 
 ```
-TaskOrchestrator.run(session_id)
+OrchestratorAgent.run(session_id)
     │
     ├──► Understand: 解析用户输入
     │
     ├──► Route: Category Routing
     │
-    ├──► Execute: 委托给 Specialist
+    ├──► Execute: 委托给 Agent
     │
     ├──► Monitor: TodoEnforcer 后台监控
     │
@@ -175,20 +177,20 @@ TaskOrchestrator.run(session_id)
 ### 5.2 委托流程
 
 ```
-TaskOrchestrator.execute()
+OrchestratorAgent.execute()
     │
     ▼
 构建 DelegationTemplate
     │
     ▼
-根据 Category 选择 Specialist
+根据 Category 选择 Agent
     │
-    ├──► QUICK → QuickExecutor
-    ├──► DEEP → DeepExecutor
-    └──► STRATEGIC → StrategicPlanner
+    ├──► QUICK → ExecutionAgent
+    ├──► DEEP → ResearchAgent
+    └──► STRATEGIC → PlanningAgent
     │
     ▼
-调用 Specialist.execute(template, context)
+调用 Agent.execute(template, context)
     │
     ▼
 TodoEnforcer.monitor()  # 后台并行监控
@@ -197,10 +199,10 @@ TodoEnforcer.monitor()  # 后台并行监控
 RecursiveLoop 递归优化直到 100% 完成
     │
     ▼
-返回结果给 TaskOrchestrator
+返回结果给 OrchestratorAgent
     │
     ▼
-TaskOrchestrator.evaluate() 结果
+OrchestratorAgent.evaluate() 结果
 ```
 
 ---
@@ -209,7 +211,7 @@ TaskOrchestrator.evaluate() 结果
 
 ### 6.1 问题背景
 
-任务被 Specialist 接收后可能中途放弃（idle、超时、失败未重试）。
+任务被 Agent 接收后可能中途放弃（idle、超时、失败未重试）。
 
 ### 6.2 设计
 
@@ -240,11 +242,11 @@ class TodoEnforcer:
             # 超过重试次数，升级处理
             await self.escalate(task)
         else:
-            # 重新分配给原 Specialist 或降级
+            # 重新分配给原 Agent 或降级
             await self.reassign(task)
 
     async def escalate(self, task: Task):
-        """升级任务：委托给更高级别 Specialist"""
+        """升级任务：委托给更高级别 Agent"""
         if task.category == Category.QUICK:
             await self.reassign(task, Category.DEEP)
         elif task.category == Category.DEEP:
@@ -315,9 +317,9 @@ class RecursiveLoop:
         self, task: Task, context: dict, iteration: int
     ) -> Result:
         """单次执行"""
-        # 根据 Category 选择执行策略
-        specialist = self.get_specialist(task.category)
-        return await specialist.execute(task, context)
+        # 根据 Category 选择执行 Agent
+        agent = self.get_agent(task.category)
+        return await agent.execute(task, context)
 
     def assess_completion(self, result: Result) -> float:
         """
@@ -440,62 +442,123 @@ class RecursiveLoop:
 
 ---
 
-## 8. Specialist Agents
+## 8. Agents 详细设计
 
-### 8.1 QuickExecutor
+### 8.1 OrchestratorAgent
 
 ```python
-class QuickExecutor(Specialist):
-    """快速执行器"""
+class OrchestratorAgent:
+    """主编排 Agent（会话级）"""
+
+    async def run(self, session_id: str):
+        """主工作循环"""
+        while True:
+            # Understand: 解析用户输入
+            task_spec = await self.understand(session_id)
+
+            # Route: Category 路由
+            category = self.route(task_spec, self.get_user_intent())
+
+            # Execute: 委托给对应 Agent
+            result = await self.delegate(category, task_spec)
+
+            # Evaluate: 验证结果
+            evaluation = await self.evaluate(result)
+
+            if evaluation.next_action == "complete":
+                await self.notify_user(result)
+            elif evaluation.next_action == "fail":
+                await self.handle_failure(evaluation)
+```
+
+**职责**：统帅全局，路由决策，驱动任务完成
+**特点**：会话级，持续运行，管理整体进度
+
+### 8.2 ExecutionAgent
+
+```python
+class ExecutionAgent:
+    """执行 Agent"""
 
     async def execute(self, task: Task, context: dict) -> Result:
         # 1. 验证任务确实简单
         # 2. 直接执行工具调用
-        # 3. 快速验证
+        # 3. 验证结果
         # 4. 返回结果
 ```
 
 **职责**：≤10行改动、拼写修正、简单修改
-**特点**：快速执行，无需深度规划
+**特点**：快速执行，无需规划，直接 Do
 
-### 8.2 DeepExecutor
+### 8.3 ResearchAgent
 
 ```python
-class DeepExecutor(Specialist):
-    """深度执行器"""
+class ResearchAgent:
+    """研究 Agent"""
 
     async def execute(self, task: Task, context: dict) -> Result:
         # 1. 理解任务
         # 2. Plan → 生成 TodoList
-        # 3. 探索相关代码（如果需要）
-        # 4. 按 TodoList 执行任务
-        # 5. 验证结果
-        # 6. 收集证据
+        # 3. ReAct → 按 TodoList 执行
+        # 4. Verify → 验证结果
+        # 5. Reflect → 自我反思
+        # 6. 返回结果
 ```
 
 **职责**：多文件重构、代码探索、深度研究
-**特点**：自主工作，端到端执行
+**特点**：Plan + ReAct + Reflect 循环
 **规划产出**：TodoList（内部使用，无需用户确认）
 
-### 8.3 StrategicPlanner
+### 8.4 PlanningAgent
 
 ```python
-class StrategicPlanner(Specialist):
-    """战略规划器"""
+class PlanningAgent:
+    """规划 Agent"""
 
     async def execute(self, task: Task, context: dict) -> Result:
         # 1. 与用户澄清范围（如果需要）
         # 2. Plan → 生成 Planning Document
         # 3. 展示计划给用户
         # 4. 用户确认计划
-        # 5. 分解为子任务
-        # 6. 委托子任务给 DeepExecutor
-        # 7. 汇总结果
+        # 5. 分解为子任务委托 ResearchAgent
+        # 6. 汇总结果
 ```
 
 **职责**：架构设计、技术选型、复杂规划
-**特点**：规划驱动，需要用户参与确认
+**特点**：规划优先，需要用户确认
 **规划产出**：Planning Document（需用户审阅确认）
+
+### 8.5 VerifyAgent
+
+```python
+class VerifyAgent:
+    """验证 Agent"""
+
+    async def execute(self, task: Task, context: dict) -> Result:
+        # 1. 检查语法正确性
+        # 2. 检查 lint 通过
+        # 3. 检查测试通过
+        # 4. 返回验证结果
+```
+
+**职责**：结果验证，质量检查
+**特点**：独立的验证阶段，确保输出质量
+
+### 8.6 ReviewAgent
+
+```python
+class ReviewAgent:
+    """Review Agent"""
+
+    async def execute(self, task: Task, result: Result, context: dict) -> Result:
+        # 1. 评估完成度
+        # 2. 分析剩余工作
+        # 3. 决定是否需要重试
+        # 4. 返回优化建议
+```
+
+**职责**：自我反思，持续优化
+**特点**：递归优化，确保 100% 完成
 
 ---
 
@@ -570,19 +633,20 @@ class Task(BaseModel):
 ```
 mozi/orchestrator/
     __init__.py
-    task_orchestrator.py    # 主编排器（会话级）
-    category_router.py       # Category 路由
-    specialists/
+    orchestrator_agent.py     # 主编排 Agent（会话级）
+    category_router.py        # Category 路由
+    agents/
         __init__.py
-        base.py             # Specialist 基类
-        quick_executor.py    # 快速执行器
-        deep_executor.py     # 深度执行器
-        strategic_planner.py # 战略规划器
-    todo_enforcer.py         # Todo 强制执行
+        base.py              # Agent 基类
+        execution_agent.py   # 执行 Agent
+        research_agent.py     # 研究 Agent
+        planning_agent.py     # 规划 Agent
+        verify_agent.py       # 验证 Agent
+        review_agent.py       # Review Agent
+    todo_enforcer.py          # Todo 强制执行
     recursive_loop.py         # 递归优化循环
-    delegation.py            # 委托协议
+    delegation.py             # 委托协议
     recovery.py               # 失败恢复
-    verification.py           # 验证机制
 ```
 
 ---
@@ -591,10 +655,10 @@ mozi/orchestrator/
 
 | 原则 | 说明 |
 |------|------|
-| 主动驱动 | Orchestrator 主动驱动任务完成，而非被动等待 |
-| 专业化分工 | Quick/Deep/Strategic 各司其职 |
+| 主动驱动 | OrchestratorAgent 主动驱动任务完成 |
+| 专业化分工 | Plan/Explore/Execute/Verify/Review 各司其职 |
 | 路由自动化 | Category-based routing 自动选择 |
-| 完成度保证 | RecursiveLoop 确保 100% 完成 |
+| 完成度保证 | ReviewAgent + RecursiveLoop 确保 100% |
 | 任务不放弃 | TodoEnforcer 强制监控和恢复 |
 | 证据驱动 | NO EVIDENCE = NOT COMPLETE |
 
@@ -621,9 +685,10 @@ mozi/orchestrator/
 触发: 自动
 期望:
   1. CategoryRouter 识别为 QUICK
-  2. QuickExecutor 直接执行
-  3. 修复完成，返回结果
-  4. 完成度 = 100%
+  2. ExecutionAgent 直接执行
+  3. VerifyAgent 验证
+  4. ReviewAgent 评估完成度
+  5. 完成度 = 100%
 ```
 
 **UC-02: DEEP 任务执行**
@@ -633,10 +698,10 @@ mozi/orchestrator/
 触发: 自动
 期望:
   1. CategoryRouter 识别为 DEEP
-  2. DeepExecutor 生成 TodoList
-  3. 按 TodoList 探索并执行重构
-  4. 验证修改正确性
-  5. 返回结果和证据
+  2. ResearchAgent Plan → TodoList
+  3. ResearchAgent ReAct → 按 TodoList 执行
+  4. VerifyAgent 验证
+  5. ReviewAgent 评估完成度
 ```
 
 **UC-03: STRATEGIC 任务执行**
@@ -645,11 +710,11 @@ mozi/orchestrator/
 输入: "/plan design microservice architecture for our app"
 触发: /plan 命令
 期望:
-  1. StrategicPlanner 生成 Planning Document
+  1. PlanningAgent 生成 Planning Document
   2. 展示计划给用户审阅
   3. 用户确认方案
-  4. 分解为子任务委托执行
-  5. 汇总结果
+  4. 分解为子任务委托 ResearchAgent
+  5. VerifyAgent + ReviewAgent 验证评估
 ```
 
 ---
@@ -660,18 +725,18 @@ mozi/orchestrator/
 
 | 优先级 | 内容 | 说明 |
 |--------|------|------|
-| **P0 (Must)** | TaskOrchestrator 主循环、CategoryRouter、QuickExecutor | 核心框架，简单任务闭环 |
-| **P1 (Should)** | DeepExecutor、StrategicPlanner、TodoEnforcer | 重要功能，提升复杂任务处理 |
-| **P2 (Could)** | RecursiveLoop 完整实现、评估算法优化 | 增强功能，可延后 |
+| **P0 (Must)** | OrchestratorAgent + CategoryRouter + ExecutionAgent | 核心框架，简单任务闭环 |
+| **P1 (Should)** | ResearchAgent + PlanningAgent + VerifyAgent + TodoEnforcer | 重要功能，复杂任务支持 |
+| **P2 (Could)** | ReviewAgent + RecursiveLoop 完整实现 | 增强功能，完成度保证 |
 | **P3 (Won't)** | 多轮递归优化、复杂分析算法 | 未来探索，当前不做 |
 
 ### 11.2 迭代范围
 
 | 迭代 | 内容 | 目标 |
 |------|------|------|
-| **Iter 1** | TaskOrchestrator + CategoryRouter + QuickExecutor | 能够完成一个 QUICK 任务的全流程 |
-| **Iter 2** | DeepExecutor + StrategicPlanner | Specialist 完善，支持复杂任务 |
-| **Iter 3** | TodoEnforcer + RecursiveLoop | 完成度保证和任务恢复 |
+| **Iter 1** | OrchestratorAgent + CategoryRouter + ExecutionAgent + VerifyAgent | 能够完成一个 QUICK 任务的全流程 |
+| **Iter 2** | ResearchAgent + PlanningAgent | 支持 DEEP/STRATEGIC 任务 |
+| **Iter 3** | ReviewAgent + TodoEnforcer + RecursiveLoop | 完成度保证和任务恢复 |
 
 ---
 
@@ -681,13 +746,14 @@ mozi/orchestrator/
 
 | 功能 | 验收条件 | 验证方法 | 量化指标 |
 |------|----------|----------|----------|
-| TaskOrchestrator | 能接收用户输入并路由到对应 Specialist | 单元测试 | 100% 路由成功 |
+| OrchestratorAgent | 能接收用户输入并路由到对应 Agent | 单元测试 | 100% 路由成功 |
 | CategoryRouter | QUICK/DEEP/STRATEGIC 路由正确 | 参数化测试 | ≥90% 路由准确 |
-| QuickExecutor | 能执行简单修改（≤10行） | E2E 测试 | 完成度 = 100% |
-| DeepExecutor | 能执行多文件修改任务 | 集成测试 | 证据完整率 ≥80% |
-| StrategicPlanner | 能制定计划并委托子任务 | 场景测试 | 计划通过率 ≥80% |
+| ExecutionAgent | 能执行简单修改（≤10行） | E2E 测试 | 完成度 = 100% |
+| ResearchAgent | 能执行多文件修改任务 | 集成测试 | 证据完整率 ≥80% |
+| PlanningAgent | 能制定计划并委托子任务 | 场景测试 | 计划通过率 ≥80% |
+| VerifyAgent | 能验证修改正确性 | 单元测试 | 验证准确率 ≥90% |
+| ReviewAgent | 能评估完成度 | 评估测试 | 收敛率 ≥90% |
 | TodoEnforcer | idle 任务能被重新激活 | 模拟测试 | 恢复率 ≥95% |
-| RecursiveLoop | 能检测完成度并递归优化 | 评估测试 | 收敛率 ≥90% |
 
 ### 12.2 非功能需求
 
@@ -696,7 +762,7 @@ mozi/orchestrator/
 | 响应时间 | 单次任务 < 30s | 不含用户交互等待 |
 | 路由准确率 | > 90% | Category 路由正确性 |
 | 任务完成率 | > 95% | TodoEnforcer 启用后 |
-| 递归收敛 | ≤ 5 次迭代 | RecursiveLoop 最大次数 |
+| 递归收敛 | ≤ 5 次迭代 | ReviewAgent 最大次数 |
 
 ---
 
@@ -707,8 +773,8 @@ mozi/orchestrator/
 | 风险 | 影响 | 缓解措施 |
 |------|------|----------|
 | Category 路由误判 | 任务分配错误 | 提供降级机制（升级到更高类别） |
-| RecursiveLoop 无限循环 | 资源耗尽 | max_iterations=5 硬限制 |
-| TodoEnforcer 过度干预 | Specialist 无法完成 | 只在 idle 超时后干预 |
+| ReviewAgent 无限循环 | 资源耗尽 | max_iterations=5 硬限制 |
+| TodoEnforcer 过度干预 | Agent 无法完成 | 只在 idle 超时后干预 |
 
 ### 13.2 依赖
 
@@ -725,15 +791,15 @@ mozi/orchestrator/
 
 ### 14.1 假设
 
-1. Specialist 执行结果可通过 Evidence 量化
+1. Agent 执行结果可通过 Evidence 量化
 2. Category 路由在大多数场景下可准确判断
 3. TodoEnforcer 的 idle_timeout=5min 是合理值
 
 ### 14.2 约束
 
-1. 单个会话内 TaskOrchestrator 不重启
-2. Specialist 失败后最多重试 2 次
-3. RecursiveLoop 最大迭代 5 次
+1. 单个会话内 OrchestratorAgent 不重启
+2. Agent 失败后最多重试 2 次
+3. ReviewAgent 最大迭代 5 次
 
 ---
 
@@ -743,9 +809,9 @@ mozi/orchestrator/
 
 | 功能 | 原因 |
 |------|------|
-| 多 TaskOrchestrator 集群 | 单会话设计足够 |
+| 多 OrchestratorAgent 集群 | 单会话设计足够 |
 | 复杂分析算法（如语义完成度评估） | P3 优先级 |
-| Specialist 自动学习/适应 | 未来探索 |
+| Agent 自动学习/适应 | 未来探索 |
 
 ---
 
@@ -757,11 +823,11 @@ mozi/orchestrator/
 - 用于决定是否需要分解任务
 
 **v3.0 设计**：Category 路由（QUICK / DEEP / STRATEGIC）
-- 用于决定委托给哪个 Specialist
+- 用于决定委托给哪个 Agent
 
 **关系**：两层路由
 1. 第一层：复杂度路由（判断是否需要分解）
-2. 第二层：Category 路由（决定 Specialist 类型）
+2. 第二层：Category 路由（决定 Agent 类型）
 
 ```
 用户输入
@@ -769,13 +835,13 @@ mozi/orchestrator/
     ▼
 复杂度路由 → 判断是否需要分解
     │
-    ├──► 需要分解 → StrategicPlanner 分解
+    ├──► 需要分解 → PlanningAgent 分解
     │
     └──► 不需要分解 → Category 路由
               │
-              ├──► QUICK → QuickExecutor
-              ├──► DEEP → DeepExecutor
-              └──► STRATEGIC → StrategicPlanner
+              ├──► QUICK → ExecutionAgent
+              ├──► DEEP → ResearchAgent
+              └──► STRATEGIC → PlanningAgent
 ```
 
 ---
