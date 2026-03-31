@@ -1,8 +1,8 @@
-# {Module} 模块设计文档
+# {ModuleName} 模块设计文档
 
-> **模板版本**: 2.0
-> **创建日期**: {date}
-> **最后更新**: {date}
+> **模板版本**: 2.1
+> **创建日期**: 2026-03-31
+> **最后更新**: 2026-03-31
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1.1 模块名称
 
-{ModuleName}
+`{ModuleName}` (示例: "Context", "Session", "Orchestrator")
 
 ### 1.2 职责
 
@@ -22,8 +22,8 @@
 
 | 能力 | 说明 |
 | ---- | ---- |
-| {能力1} | {说明} |
-| {能力2} | {说明} |
+| 能力1 | 示例: 上下文构建 - 根据用户输入和历史会话构建请求上下文 |
+| 能力2 | 示例: 窗口管理 - 管理消息窗口，控制 token 数量 |
 
 ---
 
@@ -58,15 +58,27 @@ from enum import Enum
 from typing import Any
 
 
-class {Entity}Type(Enum):
-    """实体类型枚举"""
+class {EntityName}Type(Enum):
+    """实体类型枚举
+
+    示例:
+    - TYPE_A: 类型A描述
+    - TYPE_B: 类型B描述
+    """
     TYPE_A = "type_a"
     TYPE_B = "type_b"
 
 
 @dataclass
-class {Entity}:
-    """实体结构"""
+class {EntityName}:
+    """实体结构
+
+    属性:
+        id: 唯一标识符
+        name: 名称
+        created_at: 创建时间
+        metadata: 元数据
+    """
     id: str
     name: str
     created_at: datetime = field(default_factory=datetime.now)
@@ -90,24 +102,25 @@ class {Entity}:
 ### 4.1 目录结构
 
 ```
-{module_path}/
+module_path/                    # 例如: src/mozi/context/
     __init__.py              # 模块导出
-    {file1}.py               # {职责}
-    {file2}.py               # {职责}
+    core.py                   # 核心功能
+    models.py                 # 数据模型
 ```
 
 ### 4.2 关键文件
 
 | 文件 | 职责 |
 | ---- | ---- |
-| `{file1}.py` | {职责描述} |
-| `{file2}.py` | {职责描述} |
+| `core.py` | 核心功能实现 |
+| `models.py` | 数据模型定义 |
 
 ### 4.3 依赖项
 
 | 依赖 | 版本 | 用途 |
 | ---- | ---- | ---- |
-| `{package}` | {version} | {purpose} |
+| `pydantic` | ^2.0 | 数据验证 |
+| `pytest` | ^8.0 | 测试框架 |
 
 ---
 
@@ -119,7 +132,7 @@ class {Entity}:
 from abc import ABC, abstractmethod
 
 
-class {Module}Interface(ABC):
+class {ModuleName}Interface(ABC):
     """模块抽象接口"""
 
     @abstractmethod
@@ -131,7 +144,7 @@ class {Module}Interface(ABC):
 ### 5.2 模块交互图
 
 ```
-{ExternalModule1}        {Module}              {ExternalModule2}
+{ExternalModule1}        {ModuleName}              {ExternalModule2}
       │                     │                       │
       │                     │                       │
       │<────────────────────>│                       │
@@ -141,16 +154,16 @@ class {Module}Interface(ABC):
 
 ### 5.3 模块上下文交互
 
-| 层级 | 与 {Module} 的交互 |
+| 层级 | 与 {ModuleName} 的交互 |
 | ---- | ----------------- |
-| {ModuleA} | {交互描述} |
-| {ModuleB} | {交互描述} |
+| Orchestrator | 调用 build() 构建上下文 |
+| Memory | 召回相关记忆 |
 
 ### 5.4 EventBus 事件
 
 | 事件 | 方向 | Payload | 说明 |
 | ---- | ---- | ------- | ---- |
-| `{event_name}` | → EventBus | `{payload}` | {说明} |
+| `context.built` | → EventBus | `BuiltContext` | 上下文构建完成 |
 
 ---
 
@@ -159,30 +172,29 @@ class {Module}Interface(ABC):
 ### 6.1 主要流程
 
 ```
-{actor}              {module}              {dependency}
-   │                    │                      │
-   │──► {action_1} ────►│                      │
-   │                    │──► {call_dep} ──────►│
-   │                    │◄── {response} ◄─────│
-   │◄── {result} ◄──────│                      │
-   │                    │                      │
+Orchestrator          Context               Memory
+   │                    │                     │
+   │──► build() ────────►│                     │
+   │                    │──► retrieve() ──────►│
+   │                    │◄── memories ─────────│
+   │◄── BuiltContext ───│                     │
+   │                    │                     │
 ```
 
 **步骤说明**：
 
 | 步骤 | 操作 | 说明 |
 | ---- | ---- | ---- |
-| 1 | {action_1} | {描述} |
-| 2 | {call_dep} | {描述} |
-| 3 | {response} | {描述} |
-| 4 | {result} | {描述} |
+| 1 | build() | 接收用户输入，构建上下文 |
+| 2 | retrieve() | 从 Memory 召回相关记忆 |
+| 3 | 合并返回 | 返回完整上下文 |
 
 ### 6.2 异常流程
 
 | 异常场景 | 处理方式 |
 | -------- | -------- |
-| {scenario_1} | {handling} |
-| {scenario_2} | {handling} |
+| Memory 服务不可用 | 返回降级上下文，仅含会话历史 |
+| Token 超限 | 触发压缩策略 |
 
 ### 6.3 关键决策点
 
@@ -209,18 +221,21 @@ class {Module}Interface(ABC):
 ## 8. 配置
 
 > 如模块有独立配置项（非全局配置），在此描述；否则引用 Config 模块
+>
+> **配置前缀**: `{module}.` (参考 context_storage_overview.md §5)
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | ------ | ---- | ------ | ---- |
-| `{config_key}` | {type} | {default} | {description} |
+| `context.window_messages` | int | 50 | 滑动窗口消息数量 |
+| `context.max_tokens` | int | 12000 | 最大 token 数阈值 |
 
 ---
 
 ## 9. 参考
 
-- **错误处理**：遵循统一异常体系，见 [error_handling.md](./2026-03-29_error_handling.md)
-- **测试策略**：见 [testing.md](./2026-03-29_testing.md)
-- **相关模块**：{模块名}、[链接]()
+- **错误处理**：遵循统一异常体系，见 [module/2026-03-29_error_handling.md](./module/2026-03-29_error_handling.md)
+- **测试策略**：见 [testing.md](./module/2026-03-29_testing.md)
+- **相关模块**：Context、Session、Memory
 
 ---
 
@@ -228,9 +243,9 @@ class {Module}Interface(ABC):
 
 | 版本 | 日期 | 变更内容 |
 | ---- | ---- | -------- |
-| 2.1 | {date} | 新增核心业务流程章节 |
-| 2.0 | {date} | 优化章节结构，核心问题改为段落描述，移除适配器模式假设 |
-| 1.0 | {date} | 初始版本 |
+| 2.1 | 2026-03-31 | 替换占位符为示例值，说明配置前缀规则 |
+| 2.0 | 2026-03-26 | 优化章节结构，核心问题改为段落描述 |
+| 1.0 | 2026-03-20 | 初始版本 |
 
 _版本: 2.1_
-_更新日期: {date}_
+_更新日期: 2026-03-31_

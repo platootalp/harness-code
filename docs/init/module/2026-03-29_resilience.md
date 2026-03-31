@@ -399,22 +399,7 @@ MetricsCollector 记录指标
 
 ## 7. 配置
 
-### 7.1 配置项汇总
-
-| 配置项 | 类型 | 默认值 | 说明 |
-| ------ | ---- | ------ | ---- |
-| `rate_limit.global` | int | 1000 | 全局限流阈值 |
-| `rate_limit.per_user` | int | 10 | 用户级限流阈值 |
-| `circuit_breaker.failure_threshold` | int | 5 | 熔断触发失败次数 |
-| `circuit_breaker.success_threshold` | int | 2 | 恢复成功次数 |
-| `circuit_breaker.timeout` | float | 30.0 | OPEN 状态持续时间（秒） |
-| `retry.max_attempts` | int | 3 | 最大重试次数 |
-| `retry.base_delay` | float | 1.0 | 重试基础延迟（秒） |
-| `retry.max_delay` | float | 60.0 | 重试最大延迟（秒） |
-| `timeout.connect` | float | 10.0 | 连接超时（秒） |
-| `timeout.read` | float | 30.0 | 读取超时（秒） |
-| `timeout.request` | float | 60.0 | 请求超时（秒） |
-| `timeout.task` | float | 300.0 | 任务超时（秒） |
+> **说明**：本模块的配置项已汇总到 [Config 模块设计文档](./2026-03-29_config.md#79-resilience-配置)。
 
 ---
 
@@ -430,8 +415,9 @@ MetricsCollector 记录指标
 
 | 版本 | 日期 | 变更内容 |
 | ---- | ---- | -------- |
+| 2.1 | 2026-03-31 | 配置项迁移至 Config 模块统一管理 |
 | 2.0 | 2026-03-30 | 重构为模板 v2.0 结构，核心问题改为段落描述 |
 | 1.0 | 2026-03-29 | 初始版本 |
 
-_版本: 2.0_
-_更新日期: 2026-03-30_
+_版本: 2.1_
+_更新日期: 2026-03-31_

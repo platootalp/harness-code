@@ -349,13 +349,7 @@ class LoopDetector:
 
 ### 7.1 错误处理配置
 
-| 配置项 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `error.max_retries` | int | 3 | 最大重试次数 |
-| `error.retry_backoff` | str | "exponential" | 退避策略 |
-| `error.loop.max_iterations` | int | 20 | 最大迭代次数 |
-| `error.hallucination.threshold` | float | 0.7 | 置信度阈值 |
-| `error.uncaught_handler` | str | "log_and_raise" | 未捕获异常处理 |
+> **说明**：本模块的配置项已汇总到 [Config 模块设计文档](./2026-03-29_config.md#711-error-handling-配置)。
 
 ---
 
@@ -370,9 +364,10 @@ class LoopDetector:
 
 | 版本 | 日期 | 变更内容 |
 | ---- | ---- | -------- |
+| 2.2 | 2026-03-31 | 配置项迁移至 Config 模块统一管理 |
 | 2.1 | 2026-03-31 | 调整异常继承树：WhitelistViolationError/SandboxEscapeError 移至 ToolsError |
 | 2.0 | 2026-03-30 | 重构为模板 v2.0 结构，核心问题改为段落描述 |
 | 1.0 | 2026-03-29 | 初始版本，包含统一异常体系和 Agent 错误处理 |
 
-_版本: 2.1_
+_版本: 2.2_
 _更新日期: 2026-03-31_
