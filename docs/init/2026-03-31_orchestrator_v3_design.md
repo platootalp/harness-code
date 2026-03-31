@@ -46,14 +46,18 @@
 │         OrchestratorAgent（会话级）            │
 │  - 驱动任务完成                              │
 │  - 管理会话生命周期                          │
-│  - 选择 Category 路由到 Agent                │
+│  - 驱动外部阶段和 Smart Execution            │
 └─────────────────────────────────────────────┘
     │
-    ├──► Category.QUICK → ExecutionAgent
+    ├──► PreAnalysisAgent（DEEP/STRATEGIC 需要）
     │
-    ├──► Category.DEEP → PreAnalysisAgent → ResearchAgent/ExecutionAgent
+    ├──► PlanningAgent（仅 STRATEGIC，全局规划需用户确认）
     │
-    └──► Category.STRATEGIC → PlanningAgent
+    └──► Smart Execution（核心执行阶段）
+            ├──► ResearchAgent（探索）
+            ├──► ExecutionAgent（编码 + 任务规划 + 自测）
+            ├──► VerifyAgent（外部验证）
+            └──► ReviewAgent（最终评估）
 ```
 
 ---
@@ -209,55 +213,81 @@ OrchestratorAgent.evaluate() 结果
 
 ### 5.3 执行流水线
 
-所有任务共享统一的执行流水线，各阶段根据 Category 决定是否跳过：
+所有任务共享统一的执行流水线，分为**外部阶段**和**Smart Execution 内部阶段**：
 
 ```
-编排 → 预分析 → 路由 → 探索 → 规划 → 执行 → 验证 → Review
+编排 → 预分析 → [STRATEGIC: 全局规划] → Smart Execution → 外部验证 → Review
 ```
 
-| 阶段 | 说明 | QUICK | DEEP | STRATEGIC |
-|------|------|-------|------|-----------|
-| **编排** | OrchestratorAgent 接收并初始化 | ✅ | ✅ | ✅ |
-| **预分析** | PreAnalysisAgent 分析目标、拆解任务 | ❌ 跳过 | ✅ | ✅ |
-| **路由** | 根据预分析结果路由到执行 Agent | ❌ 跳过 | ✅ | ✅ |
-| **探索** | ResearchAgent 搜索信息 | ❌ 跳过 | ✅ | ✅ |
-| **规划** | PlanningAgent 制定计划（需用户确认） | ❌ 跳过 | ❌ 跳过 | ✅ |
-| **执行** | ExecutionAgent 执行任务 | ✅ | ✅ | ✅ |
-| **验证** | VerifyAgent 验证结果 | ✅ | ✅ | ✅ |
-| **Review** | ReviewAgent 评估完成度 | ✅ | ✅ | ✅ |
+#### 5.3.1 外部阶段
 
-#### 5.3.1 QUICK 流水线
+| 阶段 | Agent | 职责 | QUICK | DEEP | STRATEGIC |
+|------|-------|------|-------|------|-----------|
+| **编排** | OrchestratorAgent | 接收任务，初始化上下文，驱动流水线 | ✅ | ✅ | ✅ |
+| **预分析** | PreAnalysisAgent | 分析目标，拆解任务类型，识别搜索/执行需求 | ❌ | ✅ | ✅ |
+| **全局规划** | PlanningAgent | 输出设计文档（需用户确认） | ❌ | ❌ | ✅ |
 
-```
-编排 → (跳过预分析/路由/探索/规划) → 执行 → 验证 → Review → 完成
-```
+#### 5.3.2 Smart Execution（智能执行）
 
-#### 5.3.2 DEEP 流水线
+Smart Execution 是任务执行的核心阶段，内部包含以下子阶段：
 
 ```
-编排 → 预分析 → 路由 → 探索 → (跳过规划) → 执行 → 验证 → Review → 完成
+探索 → 任务级规划 → 编码 → 自测 → 完成
 ```
 
-#### 5.3.3 STRATEGIC 流水线
+| 子阶段 | 说明 | QUICK | DEEP | STRATEGIC |
+|--------|------|-------|------|-----------|
+| **探索** | 检索代码库、理解上下文 | ⚠️ 轻量 | ✅ 深度 | ✅ 深度 |
+| **任务级规划** | 生成 TODO 列表（机器自治） | ❌ 隐式 | ✅ 显式 | ✅ 显式 |
+| **编码** | 编写/修改代码 | ✅ | ✅ | ✅ |
+| **自测** | 本地 Lint/简单运行 | ⚠️ 可选 | ✅ 强制 | ✅ 强制 |
 
+#### 5.3.3 外部验证与 Review
+
+| 阶段 | Agent | 职责 | QUICK | DEEP | STRATEGIC |
+|------|-------|------|-------|------|-----------|
+| **外部验证** | VerifyAgent | 单元测试/集成测试/编译 | ✅ | ✅ | ✅ |
+| **Review** | ReviewAgent | 最终评估、交付确认 | ✅ | ✅ | ✅ |
+
+#### 5.3.4 流水线示意
+
+**QUICK 流水线**
 ```
-编排 → 预分析 → 路由 → 探索 → 规划(用户确认) → 执行 → 验证 → Review → 完成
+编排 → Smart Execution(轻量探索 + 编码 + 可选自测) → 验证 → Review → 完成
+```
+
+**DEEP 流水线**
+```
+编排 → 预分析 → Smart Execution(深度探索 + 任务规划 + 编码 + 强制自测) → 验证 → Review → 完成
+```
+
+**STRATEGIC 流水线**
+```
+编排 → 预分析 → 全局规划(用户确认) → Smart Execution(深度探索 + 任务规划 + 编码 + 强制自测) → 验证 → Review → 完成
 ```
 
 ---
 
-### 5.4 各 Agent 职责总览
+### 5.4 两层规划的区别
 
-| 阶段 | Agent | 职责 |
-|------|-------|------|
-| 编排 | OrchestratorAgent | 接收任务，初始化上下文，驱动流水线 |
-| 预分析 | PreAnalysisAgent | 分析目标，拆解任务类型，识别搜索/执行需求 |
-| 路由 | OrchestratorAgent | 根据预分析结果选择执行 Agent |
-| 探索 | ResearchAgent | 搜索本地/企业/互联网代码 |
-| 规划 | PlanningAgent | 制定计划，需用户确认 |
-| 执行 | ExecutionAgent | 执行工具调用 |
-| 验证 | VerifyAgent | 语法检查、lint、测试 |
-| Review | ReviewAgent | 评估完成度，决定是否重试 |
+| 规划层级 | 归属 | 输出物 | 目的 | 确认方式 |
+|----------|------|--------|------|----------|
+| **全局规划** | 外部阶段 (PlanningAgent) | `ARCHITECTURE.md`, `API_DESIGN.md`, `DB_SCHEMA.md` | 确定**做什么**、**架构如何**、**边界在哪** | 需用户确认 |
+| **任务级规划** | Smart Execution 内部 | `TODO.md`, `IMPLEMENTATION_STEPS` | 确定**怎么做**、**文件顺序**、**依赖关系** | 机器自治 |
+
+---
+
+### 5.5 各 Agent 职责总览
+
+| Agent | 归属 | 职责 |
+|-------|------|------|
+| OrchestratorAgent | 外部 | 接收任务，初始化上下文，驱动流水线 |
+| PreAnalysisAgent | 外部 | 分析目标，拆解任务类型 |
+| PlanningAgent | 外部 | 全局规划，输出设计文档，需用户确认 |
+| ResearchAgent | Smart Execution 内部 | 搜索本地/企业/互联网代码 |
+| ExecutionAgent | Smart Execution 内部 | 编码执行，任务级规划，自测 |
+| VerifyAgent | 外部 | 外部验证，单元测试/集成测试/编译 |
+| ReviewAgent | 外部 | 最终评估，交付确认 |
 
 ---
 
