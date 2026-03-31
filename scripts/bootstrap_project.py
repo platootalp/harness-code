@@ -64,14 +64,17 @@ def process_manifest(manifest: dict, force: bool) -> tuple[list[str], list[str],
 
 
 def create_from_template(path: Path) -> bool:
-    """Create file from embedded template based on file path. Returns True if created, False if skipped."""
+    """Create file from embedded template based on file path.
+
+    Returns True if created, False if skipped.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
 
     # Check specific paths first before general suffix checks
     if str(path).startswith(".claude/rules/"):
         # Rules from manifest - create minimal stub
         rule_name = path.stem.replace("-", "_")
-        path.write_text(f"# {rule_name.replace('_', ' ').title()} Rule\n\n")
+        path.write_text(f"# {rule_name.replace('_', ' ').title()}\n\n")
         return True
     elif str(path).startswith("docs/foundation/"):
         # Docs directories - create as placeholders
@@ -146,7 +149,7 @@ class ExecutionError(MoziError):
 
     pass
 ''',
-    "pyproject.toml": '''\
+    "pyproject.toml": """\
 [project]
 name = "mozi"
 version = "0.1.0"
@@ -190,20 +193,20 @@ markers = [
     "e2e: End-to-end tests",
     "slow: Slow running tests",
 ]
-''',
-    "ruff.toml": '''\
+""",
+    "ruff.toml": """\
 line-length = 100
 quote-style = "double"
 
 [isort]
 known-first-party = ["mozi"]
-''',
-    "mypy.ini": '''\
+""",
+    "mypy.ini": """\
 [mypy]
 python_version = 3.11
 strict = true
-''',
-    "pytest.ini": '''\
+""",
+    "pytest.ini": """\
 [pytest]
 testpaths = tests
 markers =
@@ -211,14 +214,14 @@ markers =
     integration: Integration tests
     e2e: End-to-end tests
     slow: Slow running tests
-''',
-    "bandit.toml": '''\
+""",
+    "bandit.toml": """\
 [bandit]
 targets = ["mozi/"]
 confidence_level = 1
 severity_level = 1
-''',
-    ".gitignore": '''\
+""",
+    ".gitignore": """\
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -242,8 +245,8 @@ htmlcov/
 
 # OS
 .DS_Store
-''',
-    ".pre-commit-config.yaml": '''\
+""",
+    ".pre-commit-config.yaml": """\
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -260,7 +263,7 @@ repos:
         language: system
         types: [python]
         pass_filenames = true
-''',
+""",
 }
 
 
