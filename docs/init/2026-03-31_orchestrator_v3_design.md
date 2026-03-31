@@ -12,929 +12,265 @@
 ### 1.1 设计目标
 
 参考 oh-my-openagent 的 Sisyphus 架构，重新设计 Mozi 编排层，引入：
-- Category-based routing（任务分类路由）
-- Todo Enforcer（任务强制执行）
-- Recursive Loop（递归优化循环）
-- 专业化 Agent 体系（计划/探索/执行/验证/Review）
-
-### 1.2 核心定位
-
-**Orchestrator 是会话级 Agent**，其特殊性在于：
-- scope 是整个会话生命周期
-- 它的"工具"包括其他 Agent
-- **主动驱动任务完成**，而非仅规划委托
-
-### 1.3 与 v2.0 设计对比
-
-| 方面 | v2.0 设计 | v3.0 设计 |
-|------|-----------|-----------|
-| 架构 | 统一工作循环 | OrchestratorAgent + Agents |
-| 路由 | 规划决策（action: execute/delegate） | Category-based routing |
-| 任务完成 | 依赖 Agent 自觉 | TodoEnforcer 强制监控 |
-| 完成度 | 无递归优化 | RecursiveLoop 确保 100% |
-| Agents | 统一 Agent + 委托模板 | Plan/Explore/Execute/Verify/Review 分工 |
-
----
-
-## 2. 整体架构
-
-```
-用户输入
-    │
-    ▼
-┌─────────────────────────────────────────────┐
-│         OrchestratorAgent（会话级）            │
-│  - 驱动任务完成                              │
-│  - 管理会话生命周期                          │
-│  - 驱动外部阶段和 Smart Execution            │
-└─────────────────────────────────────────────┘
-    │
-    ├──► PreAnalysisAgent（DEEP/STRATEGIC 需要）
-    │
-    ├──► PlanningAgent（仅 STRATEGIC，全局规划需用户确认）
-    │
-    └──► Smart Execution
-            └──► ExecutionAgent（探索 + 任务规划 + 编码 + 自测）
-                    └──► 内置验证能力
-```
-
----
-
-## 3. Agent 体系
-
-### 3.1 Agent 类型
-
-| Agent | 层级 | 职责 | 模式 |
-|-------|------|------|------|
-| **OrchestratorAgent** | 会话级 | 统帅全局，路由决策，驱动任务完成 | 管理 |
-| **ExecutionAgent** | 任务级 | 快速执行，无需规划 | Do |
-| **PreAnalysisAgent** | 任务级 | 预规划分析、范围澄清 | Analyze |
-| **ResearchAgent** | 任务级 | 代码库搜索（本地、企业、互联网） | Search |
-| **PlanningAgent** | 任务级 | 战略规划，需用户确认 | Plan → 用户确认 → 执行 |
-| **VerifyAgent** | 任务级 | 结果验证，质量检查 | Verify |
-| **ReviewAgent** | 任务级 | 自我反思，持续优化 | Review |
-
-### 3.2 层级差异
-
-| 层级 | Agent | scope | 工具 |
-|------|-------|-------|------|
-| 会话级 | OrchestratorAgent | 整个会话 | Agents |
-| 任务级 | 其他 Agents | 单次任务 | 工具 + 子任务委托 |
-
----
-
-## 4. Category Routing
-
-### 4.1 任务分类
-
-| Category | 触发方式 | 场景 | 规划产出 | 用户确认 |
-|----------|----------|------|----------|----------|
-| **QUICK** | 自动 | 简单任务 | ❌ 无 | ❌ 无 |
-| **DEEP** | 自动 | 常规复杂任务 | TodoList | ❌ 无 |
-| **STRATEGIC** | 用户触发 `/plan` | 需要规划的任务 | Planning Doc | ✅ 需要 |
-
-```python
-class Category(Enum):
-    """任务分类"""
-    QUICK = "quick"           # 简单任务，无需规划，直接执行
-    DEEP = "deep"            # 常规复杂任务，规划生成 TodoList
-    STRATEGIC = "strategic"  # 用户触发，规划生成 Planning Doc，需确认
-```
-
-### 4.2 路由规则
-
-```python
-class CategoryRouter:
-    """根据任务特征路由到对应 Agent"""
-
-    def route(self, task: TaskSpec, user_intent: UserIntent) -> Category:
-        """
-        路由决策：
-        - STRATEGIC: 用户主动触发 /plan 命令
-        - QUICK: ≤10行改动，单文件，简单修改
-        - DEEP: 其他复杂任务，规划生成 TodoList
-        """
-        # STRATEGIC 由用户显式触发
-        if user_intent.is_planning_mode:
-            return Category.STRATEGIC
-
-        # 简单任务直接执行
-        if self.is_simple_task(task):
-            return Category.QUICK
-
-        # 其他复杂任务走 DEEP
-        return Category.DEEP
-
-    def is_simple_task(self, task: TaskSpec) -> bool:
-        """简单任务：代码改动 ≤10 行，单一文件"""
-        return (
-            task.estimated_lines <= 10
-            and task.files_count == 1
-            and task.risk_level == RiskLevel.LOW
-        )
-```
-
-### 4.3 触发机制
-
-```
-用户输入
-    │
-    ├── /plan ──────────→ STRATEGIC（用户主动触发）
-    │
-    └── 普通输入 ───────→ QUICK / DEEP（自动判断）
-```
-
-### 4.4 路由示例
-
-| 任务 | Category | 触发 | Agent |
-|------|----------|------|-------|
-| 修复拼写错误 | QUICK | 自动 | ExecutionAgent |
-| 添加单文件功能 | QUICK | 自动 | ExecutionAgent |
-| 搜索本地代码 | DEEP | 自动 | ResearchAgent |
-| 搜索互联网资源 | DEEP | 自动 | ResearchAgent |
-| 预分析任务范围 | DEEP | 自动 | PreAnalysisAgent |
-| 系统架构设计 | STRATEGIC | `/plan` 触发 | PlanningAgent |
-| 技术选型决策 | STRATEGIC | `/plan` 触发 | PlanningAgent |
-
----
-
-## 5. 工作流程
-
-### 5.1 主循环
-
-```
-OrchestratorAgent.run(session_id)
-    │
-    ├──► Understand: 解析用户输入
-    │
-    ├──► Route: Category Routing
-    │
-    ├──► Execute: 委托给 Agent
-    │
-    ├──► Monitor: TodoEnforcer 后台监控
-    │
-    ├──► Refine: RecursiveLoop 递归优化
-    │
-    └──► Evaluate: 验证结果，决定完成/继续/失败
-```
-
-### 5.2 委托流程
-
-```
-OrchestratorAgent.execute()
-    │
-    ▼
-构建 DelegationTemplate
-    │
-    ▼
-根据 Category 选择 Agent
-    │
-    ├──► QUICK → ExecutionAgent
-    ├──► DEEP → PreAnalysisAgent → 执行Agent
-    └──► STRATEGIC → PlanningAgent
-    │
-    ▼
-调用 Agent.execute(template, context)
-    │
-    ▼
-TodoEnforcer.monitor()  # 后台并行监控
-    │
-    ▼
-RecursiveLoop 递归优化直到 100% 完成
-    │
-    ▼
-返回结果给 OrchestratorAgent
-    │
-    ▼
-OrchestratorAgent.evaluate() 结果
-```
-
-### 5.3 执行流水线
-
-所有任务共享统一的执行流水线，分为**外部阶段**和**Smart Execution 内部阶段**：
-
-```
-编排 → 预分析 → [STRATEGIC: 全局规划] → Smart Execution → 外部验证 → Review
-```
-
-#### 5.3.1 外部阶段
-
-| 阶段 | Agent | 职责 | QUICK | DEEP | STRATEGIC |
-|------|-------|------|-------|------|-----------|
-| **编排** | OrchestratorAgent | 接收任务，初始化上下文，驱动流水线 | ✅ | ✅ | ✅ |
-| **预分析** | PreAnalysisAgent | 分析目标，拆解任务类型，识别搜索/执行需求 | ❌ | ✅ | ✅ |
-| **全局规划** | PlanningAgent | 输出设计文档（需用户确认） | ❌ | ❌ | ✅ |
-
-#### 5.3.2 Smart Execution（智能执行）
-
-Smart Execution 的主体是 ExecutionAgent，它内部包含以下能力：
-
-```
-探索 → 任务级规划 → 编码 → 自测
-```
-
-| 子阶段 | 说明 | QUICK | DEEP | STRATEGIC |
-|--------|------|-------|------|-----------|
-| **探索** | 检索代码库、理解上下文 | ⚠️ 轻量 | ✅ 深度 | ✅ 深度 |
-| **任务级规划** | 生成 TODO 列表（机器自治） | ❌ 隐式 | ✅ 显式 | ✅ 显式 |
-| **编码** | 编写/修改代码 | ✅ | ✅ | ✅ |
-| **自测** | 本地 Lint/简单运行 | ⚠️ 可选 | ✅ 强制 | ✅ 强制 |
-
-#### 5.3.3 外部验证与 Review
-
-| 阶段 | Agent | 职责 | QUICK | DEEP | STRATEGIC |
-|------|-------|------|-------|------|-----------|
-| **外部验证** | VerifyAgent | 单元测试/集成测试/编译 | ✅ | ✅ | ✅ |
-| **Review** | ReviewAgent | 最终评估、交付确认 | ✅ | ✅ | ✅ |
-
-#### 5.3.4 流水线示意
-
-**QUICK 流水线**
-```
-编排 → Smart Execution(轻量探索 + 编码 + 可选自测) → 验证 → Review → 完成
-```
-
-**DEEP 流水线**
-```
-编排 → 预分析 → Smart Execution(深度探索 + 任务规划 + 编码 + 强制自测) → 验证 → Review → 完成
-```
-
-**STRATEGIC 流水线**
-```
-编排 → 预分析 → 全局规划(用户确认) → Smart Execution(深度探索 + 任务规划 + 编码 + 强制自测) → 验证 → Review → 完成
-```
-
----
-
-### 5.4 两层规划的区别
-
-| 规划层级 | 归属 | 输出物 | 目的 | 确认方式 |
-|----------|------|--------|------|----------|
-| **全局规划** | 外部阶段 (PlanningAgent) | `ARCHITECTURE.md`, `API_DESIGN.md`, `DB_SCHEMA.md` | 确定**做什么**、**架构如何**、**边界在哪** | 需用户确认 |
-| **任务级规划** | ExecutionAgent 内部 (Smart Execution) | `TODO.md`, `IMPLEMENTATION_STEPS` | 确定**怎么做**、**文件顺序**、**依赖关系** | 机器自治 |
-
----
-
-### 5.5 各 Agent 职责总览
-
-| Agent | 归属 | 职责 |
-|-------|------|------|
-| OrchestratorAgent | 外部 | 接收任务，初始化上下文，驱动流水线 |
-| PreAnalysisAgent | 外部 | 分析目标，拆解任务类型 |
-| PlanningAgent | 外部 | 全局规划，输出设计文档，需用户确认 |
-| ExecutionAgent | Smart Execution | **探索 + 任务规划 + 编码 + 自测 + 内置验证** |
-| VerifyAgent | 外部 | 外部验证，单元测试/集成测试/编译 |
-| ReviewAgent | 外部 | 最终评估，交付确认 |
-
----
-
-## 6. Todo Enforcer
-
-### 6.1 问题背景
-
-任务被 Agent 接收后可能中途放弃（idle、超时、失败未重试）。
-
-### 6.2 设计
-
-```python
-class TodoEnforcer:
-    """确保任务不放弃"""
-
-    def __init__(self, idle_timeout: timedelta = timedelta(minutes=5)):
-        self.idle_timeout = idle_timeout
-        self.task_states: dict[str, TaskState] = {}
-
-    async def monitor(self, tasks: list[Task]):
-        """监控所有进行中的任务"""
-        for task in tasks:
-            state = self.task_states.get(task.id)
-
-            if state == TaskState.IDLE:
-                if self.is_idle_too_long(task):
-                    await self.rerun(task)
-            elif state == TaskState.FAILED:
-                await self.recover(task)
-
-    async def rerun(self, task: Task):
-        """重新激活 idle 任务"""
-        task.retry_count += 1
-
-        if task.retry_count > MAX_RETRIES:
-            # 超过重试次数，升级处理
-            await self.escalate(task)
-        else:
-            # 重新分配给原 Agent 或降级
-            await self.reassign(task)
-
-    async def escalate(self, task: Task):
-        """升级任务：委托给更高级别 Agent"""
-        if task.category == Category.QUICK:
-            await self.reassign(task, Category.DEEP)
-        elif task.category == Category.DEEP:
-            await self.reassign(task, Category.STRATEGIC)
-        else:
-            # 无法升级，返回用户请求澄清
-            await self.request_clarification(task)
-```
-
-### 6.3 状态机
-
-```
-TaskState:
-    PENDING → ACTIVE → IDLE → (rerun) → ACTIVE
-                ↓
-              FAILED → (retry) → ACTIVE
-                ↓
-           (max retries) → ESCALATED / CLARIFICATION_NEEDED
-```
-
----
-
-## 7. Recursive Loop
-
-### 7.1 问题背景
-
-如何确保任务达到 100% 完成？单次执行可能遗漏部分需求。
-
-### 7.2 设计
-
-```python
-class RecursiveLoop:
-    """递归优化循环，确保 100% 完成"""
-
-    def __init__(self, max_iterations: int = 5):
-        self.max_iterations = max_iterations
-
-    async def run(self, task: Task, context: dict) -> Result:
-        """递归执行直到完成"""
-        iteration = 0
-        result = None
-
-        while iteration < self.max_iterations:
-            # 执行任务
-            result = await self.execute_once(task, context, iteration)
-
-            # 检查完成度
-            completion = self.assess_completion(result)
-
-            if completion >= 100:
-                return result
-
-            # 分析未完成部分
-            remaining = self.analyze_remaining(task, result)
-
-            # 如果没有剩余工作，结束
-            if not remaining:
-                return result
-
-            # 更新任务为剩余部分
-            task = remaining
-            iteration += 1
-
-        # 超过最大迭代次数，返回当前结果并标记
-        return self.finalize_result(result, incomplete=True)
-
-    async def execute_once(
-        self, task: Task, context: dict, iteration: int
-    ) -> Result:
-        """单次执行"""
-        # 根据 Category 选择执行 Agent
-        agent = self.get_agent(task.category)
-        return await agent.execute(task, context)
-
-    def assess_completion(self, result: Result) -> float:
-        """
-        评估完成度（0-100）
-
-        算法：
-        1. 检查是否有执行错误（错误存在则完成度=0）
-        2. 检查证据是否完整（无证据则不完整）
-        3. 基于证据计算基础完成度
-        4. 验证目标达成情况
-        """
-        evidence = result.evidence
-
-        # 1. 执行错误检查
-        if result.error:
-            return 0.0
-
-        # 2. 证据完整性检查
-        if not evidence:
-            return 0.0
-
-        has_files_modified = bool(evidence.files_modified)
-        has_output = bool(evidence.output)
-        has_commands = bool(evidence.commands_executed)
-
-        # 如果没有任何证据，完成度为 0
-        if not (has_files_modified or has_output or has_commands):
-            return 0.0
-
-        # 3. 基础完成度计算（基于证据权重）
-        # 注意：这里使用加权计算而非简单加分，更合理
-        weights = {
-            "files_modified": 0.5,  # 修改文件权重最高
-            "output": 0.3,           # 有输出说明有执行
-            "commands": 0.2,         # 命令执行是辅助证据
-        }
-
-        base_score = 0.0
-        if has_files_modified:
-            base_score += weights["files_modified"] * 100
-        if has_output:
-            base_score += weights["output"] * 100
-        if has_commands:
-            base_score += weights["commands"] * 100
-
-        # 4. 目标达成验证（使用 expected_outcome 对比）
-        # 注意：实际实现应使用 LLM 或结构化对比
-        goal_achieved = self.check_goal_achieved(result)
-        if not goal_achieved:
-            # 未完全达成目标，降低完成度
-            base_score *= 0.7
-
-        return min(base_score, 100.0)
-
-    def check_goal_achieved(self, result: Result) -> bool:
-        """
-        检查目标是否达成
-
-        算法：
-        1. 检查 result.success 标志
-        2. 检查是否有实质性的文件修改或输出
-        3. （未来：可使用 LLM 对比 expected_outcome）
-        """
-        if not result.success:
-            return False
-
-        evidence = result.evidence
-        if not evidence:
-            return False
-
-        # 有文件修改或有意义的输出才算达成
-        if evidence.files_modified:
-            return True
-
-        if evidence.output and len(evidence.output) > 10:
-            return True
-
-        return False
-
-    def analyze_remaining(self, task: Task, result: Result) -> Task | None:
-        """
-        分析剩余工作
-
-        算法：
-        1. 如果完成度 >= 100%，返回 None（已完成）
-        2. 如果完成度 >= 80%，视为实际完成，返回 None
-        3. 否则，返回剩余任务供递归处理
-        """
-        completion = self.assess_completion(result)
-
-        # 完成度阈值：达到 80% 即视为完成
-        COMPLETION_THRESHOLD = 80.0
-
-        if completion >= COMPLETION_THRESHOLD:
-            return None  # 实际完成
-
-        # 如果完成度过低且有错误，不继续递归
-        if completion < 20.0 and result.error:
-            return None
-
-        # 构建剩余任务
-        remaining_goal = f"继续完成未竟任务（当前完成度: {completion:.0f}%）"
-        remaining_spec = TaskSpec(
-            goal=remaining_goal,
-            entities=task.spec.entities,
-            constraints=task.spec.constraints,
-            risk_level=task.spec.risk_level,
-            estimated_lines=max(1, task.spec.estimated_lines // 2),
-            files_count=max(1, task.spec.files_count),
-        )
-
-        return Task(
-            id=f"{task.id}-remaining-{task.iterations}",
-            spec=remaining_spec,
-            category=task.category,
-            state=TaskState.PENDING,
-            iterations=task.iterations + 1,
-        )
-```
-
----
-
-## 8. Agents 详细设计
-
-### 8.1 OrchestratorAgent
-
-```python
-class OrchestratorAgent:
-    """主编排 Agent（会话级）"""
-
-    async def run(self, session_id: str):
-        """主工作循环"""
-        while True:
-            # Understand: 解析用户输入
-            task_spec = await self.understand(session_id)
-
-            # Route: Category 路由
-            category = self.route(task_spec, self.get_user_intent())
-
-            # Execute: 委托给对应 Agent
-            result = await self.delegate(category, task_spec)
-
-            # Evaluate: 验证结果
-            evaluation = await self.evaluate(result)
-
-            if evaluation.next_action == "complete":
-                await self.notify_user(result)
-            elif evaluation.next_action == "fail":
-                await self.handle_failure(evaluation)
-```
-
-**职责**：统帅全局，路由决策，驱动任务完成
-**特点**：会话级，持续运行，管理整体进度
-
-### 8.2 ExecutionAgent
-
-```python
-class ExecutionAgent:
-    """执行 Agent（Smart Execution 主体）"""
-
-    async def execute(self, task: Task, context: dict) -> Result:
-        # 1. 探索：搜索本地/企业/互联网代码，理解上下文
-        # 2. 任务级规划：生成 TODO 列表（机器自治）
-        # 3. 编码：按 TODO 顺序执行
-        # 4. 自测：Lint/简单运行验证
-        # 5. 返回结果
-```
-
-**职责**：探索 + 任务规划 + 编码 + 自测 + 内置验证
-**特点**：Smart Execution 的主体，机器自治
-**TODO 列表**：内部生成，用于管理任务执行顺序
-
-### 8.3 PreAnalysisAgent
-
-```python
-class PreAnalysisAgent:
-    """预分析 Agent"""
-
-    async def execute(self, task: Task, context: dict) -> Result:
-        # 1. 分析任务目标和范围
-        # 2. 识别任务类型（搜索/执行/分析）
-        # 3. 拆解为子任务
-        # 4. 返回任务分解结果
-```
-
-**职责**：预规划分析、任务拆解
-**特点**：在执行前分析任务，确定搜索范围和执行策略
-
-### 8.4 PlanningAgent
-
-```python
-class PlanningAgent:
-    """规划 Agent"""
-
-    async def execute(self, task: Task, context: dict) -> Result:
-        # 1. 与用户澄清范围（如果需要）
-        # 2. Plan → 生成 Planning Document
-        # 3. 展示计划给用户
-        # 4. 用户确认计划
-        # 5. 分解为子任务
-        # 6. 汇总结果
-```
-
-**职责**：架构设计、技术选型、复杂规划
-**特点**：全局规划，需要用户确认
-**规划产出**：Planning Document（需用户审阅确认）
-
-### 8.5 VerifyAgent
-
-```python
-class VerifyAgent:
-    """验证 Agent（外部验证）"""
-
-    async def execute(self, task: Task, context: dict) -> Result:
-        # 1. 检查语法正确性
-        # 2. 检查 lint 通过
-        # 3. 检查测试通过
-        # 4. 返回验证结果
-```
-
-**职责**：外部验证，质量检查
-**特点**：独立的验证阶段，与 ExecutionAgent 内部自测分离
-
-### 8.7 ReviewAgent
-
-```python
-class ReviewAgent:
-    """Review Agent"""
-
-    async def execute(self, task: Task, result: Result, context: dict) -> Result:
-        # 1. 评估完成度
-        # 2. 分析剩余工作
-        # 3. 决定是否需要重试
-        # 4. 返回优化建议
-```
-
-**职责**：自我反思，持续优化
-**特点**：递归优化，确保 100% 完成
-
----
-
-## 9. 数据模型
-
-### 9.1 新增/修改的模型
-
-```python
-class Category(Enum):
-    """任务分类"""
-    QUICK = "quick"
-    DEEP = "deep"
-    STRATEGIC = "strategic"
-
-
-class RiskLevel(Enum):
-    """风险等级"""
-    LOW = "low"       # 单文件、低影响、无副作用
-    MEDIUM = "medium" # 多文件、中等影响、可回滚
-    HIGH = "high"     # 架构变更、跨模块、高风险
-
-
-class TaskSpec(BaseModel):
-    """任务规约"""
-    goal: str
-    entities: dict[str, str]
-    constraints: list[str]
-    risk_level: RiskLevel
-    delegation_hint: str = ""
-
-    # 新增 v3.0 字段
-    estimated_lines: int = 0
-    files_count: int = 1
-    requires_planning: bool = False
-    requires_architecture_decision: bool = False
-
-
-class DelegationTemplate(BaseModel):
-    """委托模板"""
-    task: str
-    expected_outcome: str
-    must_do: list[str]
-    must_not_do: list[str]
-    context: dict
-    category: Category  # 新增：指定分类
-
-
-class TaskState(Enum):
-    """任务状态"""
-    PENDING = "pending"
-    ACTIVE = "active"
-    IDLE = "idle"
-    FAILED = "failed"
-    ESCALATED = "escalated"
-    CLARIFICATION_NEEDED = "clarification_needed"
-    COMPLETED = "completed"
-
-
-class Task(BaseModel):
-    """任务"""
-    id: str
-    spec: TaskSpec
-    category: Category
-    state: TaskState = TaskState.PENDING
-    retry_count: int = 0
-    iterations: int = 0
-    result: Result | None = None
-```
-
-### 9.2 模块结构
-
-```
-mozi/orchestrator/
-    __init__.py
-    orchestrator_agent.py     # 主编排 Agent（会话级）
-    category_router.py        # Category 路由
-    agents/
-        __init__.py
-        base.py              # Agent 基类
-        execution_agent.py    # 执行 Agent（探索+规划+编码+自测）
-        pre_analysis_agent.py # 预分析 Agent
-        planning_agent.py    # 规划 Agent
-        verify_agent.py      # 验证 Agent
-        review_agent.py      # Review Agent
-    todo_enforcer.py          # Todo 强制执行
-    recursive_loop.py         # 递归优化循环
-    delegation.py             # 委托协议
-    recovery.py               # 失败恢复
-```
-
----
-
-## 10. 设计原则总结
+- **Manager-Worker 模式**：编排器是智能大脑，Worker 是无状态执行者
+- **核心 ReAct 循环**：编排器内部持有 Thought → Decide → Delegate → Review 循环
+- **分层上下文管理**：L1 常驻 / L2 按需 / L3 归档
+- **Worker 池**：Explorer / Planner / Coder / Tester 无状态执行
+
+### 1.2 核心原则
 
 | 原则 | 说明 |
 |------|------|
-| 主动驱动 | OrchestratorAgent 主动驱动任务完成 |
-| 专业化分工 | Plan/Explore/Execute/Verify/Review 各司其职 |
-| 路由自动化 | Category-based routing 自动选择 |
-| 完成度保证 | ReviewAgent + RecursiveLoop 确保 100% |
-| 任务不放弃 | TodoEnforcer 强制监控和恢复 |
-| 证据驱动 | NO EVIDENCE = NOT COMPLETE |
+| **编排器 = 大脑** | 有状态，做决策，管上下文 |
+| **Worker = 手脚** | 无状态，只执行，用完即焚 |
+| **核心循环在编排器** | ReAct: Thought → Decide → Delegate → Review |
+| **上下文爆炸通过 Worker 隔离解决** | 只给必要信息，返回摘要 |
 
 ---
 
-## 10.1 用户故事与用例
+## 2. 核心架构
 
-### 10.1.1 用户故事
+### 2.1 Manager-Worker 模式
 
-| ID | 用户 | 故事 |
-|----|------|------|
-| US-01 | 用户 | 我希望简单任务直接执行，无需等待 |
-| US-02 | 用户 | 我希望复杂任务自动规划为 TodoList 并自主执行 |
-| US-03 | 用户 | 我希望重要任务有详细规划并经我确认后再执行 |
-| US-04 | 用户 | 我希望被中断的任务能被自动恢复 |
-| US-05 | 用户 | 我希望系统能告诉我任务完成到了什么程度 |
-
-### 10.1.2 关键用例
-
-**UC-01: QUICK 任务执行**
 ```
-场景: 用户要求修复拼写错误
-输入: "fix typo in README.md"
-触发: 自动
-期望:
-  1. CategoryRouter 识别为 QUICK
-  2. ExecutionAgent 直接执行
-  3. VerifyAgent 验证
-  4. ReviewAgent 评估完成度
-  5. 完成度 = 100%
-```
-
-**UC-02: DEEP 搜索任务**
-```
-场景: 用户要求搜索代码库
-输入: "find how authentication is implemented in our codebase"
-触发: 自动
-期望:
-  1. CategoryRouter 识别为 DEEP
-  2. ResearchAgent 搜索本地代码库
-  3. ResearchAgent 整理搜索结果
-  4. 返回信息汇总
-```
-
-**UC-03: DEEP 预分析任务**
-```
-场景: 用户要求分析任务范围
-输入: "analyze what needs to be done for the user auth feature"
-触发: 自动
-期望:
-  1. CategoryRouter 识别为 DEEP
-  2. PreAnalysisAgent 分析任务目标
-  3. PreAnalysisAgent 收集相关上下文
-  4. PreAnalysisAgent 澄清范围
-  5. 返回分析结果
-```
-
-**UC-04: STRATEGIC 任务执行**
-```
-场景: 用户要求设计微服务架构
-输入: "/plan design microservice architecture for our app"
-触发: /plan 命令
-期望:
-  1. PlanningAgent 生成 Planning Document
-  2. 展示计划给用户审阅
-  3. 用户确认方案
-  4. 分解为子任务委托 ResearchAgent
-  5. VerifyAgent + ReviewAgent 验证评估
+┌─────────────────────────────────────────────────────────────────┐
+│                    编排器 (Orchestrator)                         │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  核心 ReAct 循环 (Thought → Decide → Delegate → Review)     │  │
+│  │  - 思考：当前状态是什么？下一步需要什么？                    │  │
+│  │  - 决策：调用哪个 Worker？给什么上下文？                     │  │
+│  │  - 委托：发送任务给 Worker，等待结果                         │  │
+│  │  - 审查：Worker 返回的结果是否满意？是否需要重试？          │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  全局状态存储 (State Store)                                │  │
+│  │  - TODO 列表及进度                                         │  │
+│  │  - 已完成任务摘要                                          │  │
+│  │  - 关键决策历史                                            │  │
+│  │  - 上下文引用索引                                          │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  上下文管理器 (Context Manager)                            │  │
+│  │  - L1 常驻：System Prompt + 当前任务                       │  │
+│  │  - L2 按需：动态注入 Worker 所需上下文                      │  │
+│  │  - L3 归档：已完成任务压缩摘要                              │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ 委托 (带上下文)
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Worker 池 (无状态执行器)                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ Explorer │  │ Planner  │  │  Coder  │  │ Tester   │        │
+│  │  探索    │  │  规划    │  │  编码    │  │  测试    │        │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │
+│  任务级生命周期 | 只接收必要上下文 | 返回结果摘要 | 用完即焚       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 11. 优先级与迭代范围
+## 3. 编排器核心循环
 
-### 11.1 MoSCoW 优先级
+### 3.1 ReAct 循环
 
-| 优先级 | 内容 | 说明 |
-|--------|------|------|
-| **P0 (Must)** | OrchestratorAgent + CategoryRouter + ExecutionAgent | 核心框架，简单任务闭环 |
-| **P1 (Should)** | PreAnalysisAgent + PlanningAgent + VerifyAgent + TodoEnforcer | 重要功能，预分析和规划支持 |
-| **P2 (Could)** | ReviewAgent + RecursiveLoop 完整实现 | 增强功能，完成度保证 |
-| **P3 (Won't)** | 多轮递归优化、复杂分析算法 | 未来探索，当前不做 |
+编排器内部是一个完整的 **ReAct 循环**：
 
-### 11.2 迭代范围
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  编排器核心循环                               │
+│                                                             │
+│   ┌─────────┐      ┌─────────┐      ┌─────────┐            │
+│   │ Thought │ ────▶│ Decide  │ ────▶│ Delegate│            │
+│   │ 思考    │      │ 决策    │      │ 委托    │            │
+│   └─────────┘      └─────────┘      └─────────┘            │
+│        ▲                                  │                 │
+│        │                                  ▼                 │
+│   ┌─────────┐      ┌─────────┐      ┌─────────┐            │
+│   │ Review  │ ◀────│ Receive │ ◀────│ Execute │            │
+│   │ 审查    │      │ 接收    │      │ (Worker)│            │
+│   └─────────┘      └─────────┘      └─────────┘            │
+│        │                                                  │
+│        ▼ (满意？)                                          │
+│   ┌─────────┐                                             │
+│   │  Update │                                             │
+│   │  状态   │                                             │
+│   └─────────┘                                             │
+│        │                                                  │
+│        ▼ (任务完成？)                                       │
+│   ┌─────────┐                                             │
+│   │  结束   │  或  继续下一轮                               │
+│   └─────────┘                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
-| 迭代 | 内容 | 目标 |
-|------|------|------|
-| **Iter 1** | OrchestratorAgent + CategoryRouter + ExecutionAgent + VerifyAgent | 能够完成一个 QUICK 任务的全流程 |
-| **Iter 2** | PreAnalysisAgent + PlanningAgent + ExecutionAgent(深度探索+任务规划) | 支持 DEEP/STRATEGIC 任务 |
-| **Iter 3** | ReviewAgent + TodoEnforcer + RecursiveLoop | 完成度保证和任务恢复 |
+### 3.2 编排器职责
 
----
-
-## 12. 验收标准
-
-### 12.1 功能验收
-
-| 功能 | 验收条件 | 验证方法 | 量化指标 |
-|------|----------|----------|----------|
-| OrchestratorAgent | 能接收用户输入并路由到对应 Agent | 单元测试 | 100% 路由成功 |
-| CategoryRouter | QUICK/DEEP/STRATEGIC 路由正确 | 参数化测试 | ≥90% 路由准确 |
-| ExecutionAgent | 能探索、规划、编码、自测 | E2E 测试 | 完成度 = 100% |
-| PreAnalysisAgent | 能分析任务目标和拆解任务 | 单元测试 | 拆解准确率 ≥85% |
-| PlanningAgent | 能制定全局计划并获用户确认 | 场景测试 | 计划通过率 ≥80% |
-| VerifyAgent | 能验证修改正确性 | 单元测试 | 验证准确率 ≥90% |
-| ReviewAgent | 能评估完成度 | 评估测试 | 收敛率 ≥90% |
-| TodoEnforcer | idle 任务能被重新激活 | 模拟测试 | 恢复率 ≥95% |
-
-### 12.2 非功能需求
-
-| 指标 | 要求 | 说明 |
-|------|------|------|
-| 响应时间 | 单次任务 < 30s | 不含用户交互等待 |
-| 路由准确率 | > 90% | Category 路由正确性 |
-| 任务完成率 | > 95% | TodoEnforcer 启用后 |
-| 递归收敛 | ≤ 5 次迭代 | ReviewAgent 最大次数 |
-
----
-
-## 13. 风险与依赖
-
-### 13.1 风险
-
-| 风险 | 影响 | 缓解措施 |
-|------|------|----------|
-| Category 路由误判 | 任务分配错误 | 提供降级机制（升级到更高类别） |
-| ReviewAgent 无限循环 | 资源耗尽 | max_iterations=5 硬限制 |
-| TodoEnforcer 过度干预 | Agent 无法完成 | 只在 idle 超时后干预 |
-
-### 13.2 依赖
-
-| 依赖 | 来源模块 | 说明 |
-|------|----------|------|
-| Model Layer | `mozi/capabilities/model/` | LLM 调用能力（已完成） |
-| Tool Layer | `mozi/capabilities/tools/` | 工具执行能力（已完成） |
-| Session Layer | `mozi/session/` | 会话管理（已完成） |
-| Context Layer | `mozi/context/` | 上下文传递（已完成） |
-
----
-
-## 14. 假设与约束
-
-### 14.1 假设
-
-1. Agent 执行结果可通过 Evidence 量化
-2. Category 路由在大多数场景下可准确判断
-3. TodoEnforcer 的 idle_timeout=5min 是合理值
-
-### 14.2 约束
-
-1. 单个会话内 OrchestratorAgent 不重启
-2. Agent 失败后最多重试 2 次
-3. ReviewAgent 最大迭代 5 次
-
----
-
-## 15. 不在范围内
-
-以下功能当前版本不包含：
-
-| 功能 | 原因 |
+| 职责 | 说明 |
 |------|------|
-| 多 OrchestratorAgent 集群 | 单会话设计足够 |
-| 复杂分析算法（如语义完成度评估） | P3 优先级 |
-| Agent 自动学习/适应 | 未来探索 |
+| **状态管理** | 维护 TODO 列表、进度、决策历史 |
+| **上下文管理** | L1/L2/L3 分层，动态注入 |
+| **决策** | 决定下一步调用哪个 Worker |
+| **审查** | 评估 Worker 返回结果，决定重试或继续 |
+| **生命周期** | 会话级，贯穿整个任务 |
+
+### 3.3 Worker 职责
+
+| Worker | 职责 | 特点 |
+|--------|------|------|
+| **Explorer** | 探索代码库、搜索信息 | 无状态，只返回搜索结果 |
+| **Planner** | 生成 TODO 列表、任务分解 | 无状态，只生成计划 |
+| **Coder** | 编码执行、代码修改 | 无状态，只返回 diff |
+| **Tester** | 测试执行、验证结果 | 无状态，只返回测试报告 |
 
 ---
 
-## 16. 与现有架构的关系
+## 4. 上下文管理
 
-### 16.1 Category Routing vs 复杂度路由
-
-**现有设计**（v2.0）：复杂度路由（SIMPLE ≤40 / MEDIUM 41-70 / COMPLEX >70）
-- 用于决定是否需要分解任务
-
-**v3.0 设计**：Category 路由（QUICK / DEEP / STRATEGIC）
-- 用于决定委托给哪个 Agent
-
-**关系**：两层路由
-1. 第一层：复杂度路由（判断是否需要分解）
-2. 第二层：Category 路由（决定 Agent 类型）
+### 4.1 分层上下文
 
 ```
-用户输入
+┌─────────────────────────────────────────────────────────────┐
+│                    上下文管理器 (Context Manager)               │
+├─────────────────────────────────────────────────────────────┤
+│  L1 常驻 (Always in Context)                                 │
+│  - System Prompt                                             │
+│  - 当前任务描述                                              │
+│  - 用户约束                                                  │
+├─────────────────────────────────────────────────────────────┤
+│  L2 按需 (Dynamic Injection)                                 │
+│  - Worker 所需的相关文件                                      │
+│  - 探索结果（给 Planner）                                    │
+│  - TODO 列表（给 Coder）                                     │
+├─────────────────────────────────────────────────────────────┤
+│  L3 归档 (Archived)                                          │
+│  - 已完成任务的压缩摘要                                       │
+│  - 不再活跃的上下文                                          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 4.2 Worker 上下文隔离
+
+| 原则 | 说明 |
+|------|------|
+| **最小暴露** | Worker 只接收完成当前任务所需的上下文 |
+| **摘要返回** | Worker 返回结果的压缩摘要，而非完整输出 |
+| **用完即焚** | Worker 完成后不保留其上下文 |
+
+---
+
+## 5. 执行流程示例
+
+以"实现支付宝支付功能"为例：
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Round 1: 探索阶段                                               │
+│  Thought: "我需要先了解现有支付模块的结构"                         │
+│  Decide:  调用 Explorer Worker                                   │
+│  Delegate: {query: "支付相关代码", scope: "src/payment"}        │
+│  Receive:  [文件列表 + 关键函数签名]                              │
+│  Review:  "信息足够，可以开始规划"                                 │
+│  Update:  状态 → 探索完成                                        │
+└─────────────────────────────────────────────────────────────────┘
     │
     ▼
-复杂度路由 → 判断是否需要分解
+┌─────────────────────────────────────────────────────────────────┐
+│  Round 2: 规划阶段                                               │
+│  Thought: "需要生成 TODO 列表来管理复杂度"                         │
+│  Decide:  调用 Planner Worker                                    │
+│  Delegate: {context: 探索结果, goal: "实现支付宝支付"}             │
+│  Receive:  [TODO.md: 5 个任务项]                                 │
+│  Review:  "计划合理，开始执行"                                    │
+│  Update:  状态 → TODO 列表已生成                                  │
+└─────────────────────────────────────────────────────────────────┘
     │
-    ├──► 需要分解 → PlanningAgent 分解
+    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Round 3-N: 执行循环 (每个 TODO 项一轮)                           │
+│  Thought: "当前 TODO: 安装依赖"                                  │
+│  Decide:  调用 Coder Worker                                      │
+│  Delegate: {task: "安装 alipay-sdk", context: 当前文件}           │
+│  Receive:  [diff + 安装日志]                                     │
+│  Review:  "成功，标记 TODO 完成"                                   │
+│  Update:  TODO[0] → ✅, 归档本轮上下文                            │
+│  ─────────────────────────────────────────────────────────────  │
+│  Thought: "当前 TODO: 创建 PaymentService"                       │
+│  Decide:  调用 Coder Worker                                      │
+│  ... (循环直到所有 TODO 完成)                                      │
+└─────────────────────────────────────────────────────────────────┘
     │
-    └──► 不需要分解 → Category 路由
-              │
-              ├──► QUICK → ExecutionAgent
-              ├──► DEEP → ResearchAgent
-              └──► STRATEGIC → PlanningAgent
+    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  最终审查                                                        │
+│  Thought: "所有任务完成，需要最终验证"                            │
+│  Decide:  调用 Tester Worker                                     │
+│  Receive:  [测试报告 + 覆盖率]                                    │
+│  Review:  "通过，可以交付"                                        │
+│  Update:  状态 → 任务完成                                         │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 6. Category 与流水线
+
+### 6.1 三种 Category
+
+| Category | 触发 | 探索 | 任务规划 | 编码 | 自测 | 用户确认 |
+|----------|------|------|----------|------|------|----------|
+| **QUICK** | 自动 | ⚠️ 轻量 | ❌ | ✅ | ⚠️ 可选 | ❌ |
+| **DEEP** | 自动 | ✅ | ✅ 显式 | ✅ | ✅ 强制 | ❌ |
+| **STRATEGIC** | `/plan` | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+### 6.2 执行流水线
+
+所有任务共享流水线，编排器根据 Category 决定跳过哪些阶段：
+
+```
+预分析 → 全局规划(可选) → 执行循环 → 验证 → Review
+```
+
+---
+
+## 7. 架构优势
+
+| 优势 | 说明 |
+|------|------|
+| **上下文可控** | 编排器决定给 Worker 什么上下文，避免信息泄露和爆炸 |
+| **状态持久化** | TODO 列表、进度、决策历史都在编排器，支持断点续传 |
+| **Worker 复用** | 同一个 Worker 可以用于任何任务，无需维护状态 |
+| **灵活调度** | 编排器可以根据情况并行调用多个 Worker |
+| **审计友好** | 所有决策和委托记录都在编排器，便于追溯和调试 |
+| **成本优化** | Worker 用完即焚，不积累上下文，Token 消耗可控 |
+
+---
+
+## 8. 架构矩阵
+
+| 阶段 | 核心组件 | 输出物 | QUICK | DEEP | STRATEGIC |
+|------|----------|--------|-------|------|-----------|
+| **预分析** | PreAnalysis | 任务分类 + 权限 | ✅ | ✅ | ✅ |
+| **全局规划** | Planner Worker (可选) | 📄 设计文档 | ❌ | ❌ | ✅ |
+| **探索** | Explorer Worker | 搜索结果 | ⚠️ 轻量 | ✅ | ✅ |
+| **任务规划** | Planner Worker | ✅ TODO 列表 | ❌ | ✅ | ✅ |
+| **编码** | Coder Worker | Code Diff | ✅ | ✅ | ✅ |
+| **自测** | Tester Worker | 测试报告 | ⚠️ 可选 | ✅ | ✅ |
+| **外部验证** | Verifier | 验收报告 | ✅ | ✅ | ✅ |
+| **Review** | Reviewer | 交付报告 | ✅ | ✅ | ✅ |
+
+---
+
+## 9. 与 v2.0 设计对比
+
+| 方面 | v2.0 设计 | v3.0 设计 |
+|------|-----------|-----------|
+| 架构 | 统一工作循环 | Manager-Worker 模式 |
+| 编排器 | 简单路由器 | **智能大脑 + ReAct 循环** |
+| 状态 | 无状态 | **有状态**（TODO、历史、上下文） |
+| 执行 | 单 Agent 执行 | **Worker 池无状态执行** |
+| 上下文 | 全部传递 | **分层管理 + 按需注入** |
 
 ---
 
