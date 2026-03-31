@@ -66,7 +66,8 @@
 |-------|------|------|------|
 | **OrchestratorAgent** | 会话级 | 统帅全局，路由决策，驱动任务完成 | 管理 |
 | **ExecutionAgent** | 任务级 | 快速执行，无需规划 | Do |
-| **ResearchAgent** | 任务级 | 探索执行，生成 TodoList | Plan → ReAct → Reflect |
+| **PreAnalysisAgent** | 任务级 | 预规划分析、范围澄清 | Analyze |
+| **ResearchAgent** | 任务级 | 代码库搜索（本地、企业、互联网） | Search |
 | **PlanningAgent** | 任务级 | 战略规划，需用户确认 | Plan → 用户确认 → 执行 |
 | **VerifyAgent** | 任务级 | 结果验证，质量检查 | Verify |
 | **ReviewAgent** | 任务级 | 自我反思，持续优化 | Review |
@@ -147,8 +148,9 @@ class CategoryRouter:
 |------|----------|------|-------|
 | 修复拼写错误 | QUICK | 自动 | ExecutionAgent |
 | 添加单文件功能 | QUICK | 自动 | ExecutionAgent |
-| Bug 修复（多文件） | DEEP | 自动 | ResearchAgent |
-| 代码重构（多模块） | DEEP | 自动 | ResearchAgent |
+| 搜索本地代码 | DEEP | 自动 | ResearchAgent |
+| 搜索互联网资源 | DEEP | 自动 | ResearchAgent |
+| 预分析任务范围 | DEEP | 自动 | PreAnalysisAgent |
 | 系统架构设计 | STRATEGIC | `/plan` 触发 | PlanningAgent |
 | 技术选型决策 | STRATEGIC | `/plan` 触发 | PlanningAgent |
 
@@ -490,26 +492,41 @@ class ExecutionAgent:
 **职责**：≤10行改动、拼写修正、简单修改
 **特点**：快速执行，无需规划，直接 Do
 
-### 8.3 ResearchAgent
+### 8.3 PreAnalysisAgent
+
+```python
+class PreAnalysisAgent:
+    """预分析 Agent"""
+
+    async def execute(self, task: Task, context: dict) -> Result:
+        # 1. 分析任务目标和范围
+        # 2. 识别需要搜索的信息
+        # 3. 收集相关上下文
+        # 4. 澄清范围（与用户确认如果需要）
+        # 5. 返回分析结果
+```
+
+**职责**：预规划分析、范围澄清
+**特点**：在执行前分析任务，确定搜索范围和上下文
+
+### 8.4 ResearchAgent
 
 ```python
 class ResearchAgent:
-    """研究 Agent"""
+    """探索 Agent"""
 
     async def execute(self, task: Task, context: dict) -> Result:
-        # 1. 理解任务
-        # 2. Plan → 生成 TodoList
-        # 3. ReAct → 按 TodoList 执行
-        # 4. Verify → 验证结果
-        # 5. Reflect → 自我反思
-        # 6. 返回结果
+        # 1. 搜索本地代码库
+        # 2. 搜索企业代码库
+        # 3. 搜索互联网资源
+        # 4. 整理搜索结果
+        # 5. 返回信息汇总
 ```
 
-**职责**：多文件重构、代码探索、深度研究
-**特点**：Plan + ReAct + Reflect 循环
-**规划产出**：TodoList（内部使用，无需用户确认）
+**职责**：代码库搜索（本地、企业、互联网）
+**特点**：专注于信息检索和探索，不做执行
 
-### 8.4 PlanningAgent
+### 8.5 PlanningAgent
 
 ```python
 class PlanningAgent:
@@ -528,7 +545,7 @@ class PlanningAgent:
 **特点**：规划优先，需要用户确认
 **规划产出**：Planning Document（需用户审阅确认）
 
-### 8.5 VerifyAgent
+### 8.6 VerifyAgent
 
 ```python
 class VerifyAgent:
@@ -544,7 +561,7 @@ class VerifyAgent:
 **职责**：结果验证，质量检查
 **特点**：独立的验证阶段，确保输出质量
 
-### 8.6 ReviewAgent
+### 8.7 ReviewAgent
 
 ```python
 class ReviewAgent:
@@ -639,7 +656,8 @@ mozi/orchestrator/
         __init__.py
         base.py              # Agent 基类
         execution_agent.py   # 执行 Agent
-        research_agent.py     # 研究 Agent
+        pre_analysis_agent.py # 预分析 Agent
+        research_agent.py     # 探索 Agent
         planning_agent.py     # 规划 Agent
         verify_agent.py       # 验证 Agent
         review_agent.py       # Review Agent
@@ -691,20 +709,32 @@ mozi/orchestrator/
   5. 完成度 = 100%
 ```
 
-**UC-02: DEEP 任务执行**
+**UC-02: DEEP 搜索任务**
 ```
-场景: 用户要求重构认证模块
-输入: "refactor auth module to use JWT"
+场景: 用户要求搜索代码库
+输入: "find how authentication is implemented in our codebase"
 触发: 自动
 期望:
   1. CategoryRouter 识别为 DEEP
-  2. ResearchAgent Plan → TodoList
-  3. ResearchAgent ReAct → 按 TodoList 执行
-  4. VerifyAgent 验证
-  5. ReviewAgent 评估完成度
+  2. ResearchAgent 搜索本地代码库
+  3. ResearchAgent 整理搜索结果
+  4. 返回信息汇总
 ```
 
-**UC-03: STRATEGIC 任务执行**
+**UC-03: DEEP 预分析任务**
+```
+场景: 用户要求分析任务范围
+输入: "analyze what needs to be done for the user auth feature"
+触发: 自动
+期望:
+  1. CategoryRouter 识别为 DEEP
+  2. PreAnalysisAgent 分析任务目标
+  3. PreAnalysisAgent 收集相关上下文
+  4. PreAnalysisAgent 澄清范围
+  5. 返回分析结果
+```
+
+**UC-04: STRATEGIC 任务执行**
 ```
 场景: 用户要求设计微服务架构
 输入: "/plan design microservice architecture for our app"
@@ -726,7 +756,7 @@ mozi/orchestrator/
 | 优先级 | 内容 | 说明 |
 |--------|------|------|
 | **P0 (Must)** | OrchestratorAgent + CategoryRouter + ExecutionAgent | 核心框架，简单任务闭环 |
-| **P1 (Should)** | ResearchAgent + PlanningAgent + VerifyAgent + TodoEnforcer | 重要功能，复杂任务支持 |
+| **P1 (Should)** | ResearchAgent + PreAnalysisAgent + PlanningAgent + VerifyAgent + TodoEnforcer | 重要功能，搜索和规划支持 |
 | **P2 (Could)** | ReviewAgent + RecursiveLoop 完整实现 | 增强功能，完成度保证 |
 | **P3 (Won't)** | 多轮递归优化、复杂分析算法 | 未来探索，当前不做 |
 
@@ -735,7 +765,7 @@ mozi/orchestrator/
 | 迭代 | 内容 | 目标 |
 |------|------|------|
 | **Iter 1** | OrchestratorAgent + CategoryRouter + ExecutionAgent + VerifyAgent | 能够完成一个 QUICK 任务的全流程 |
-| **Iter 2** | ResearchAgent + PlanningAgent | 支持 DEEP/STRATEGIC 任务 |
+| **Iter 2** | ResearchAgent + PreAnalysisAgent + PlanningAgent | 支持 DEEP/STRATEGIC 任务 |
 | **Iter 3** | ReviewAgent + TodoEnforcer + RecursiveLoop | 完成度保证和任务恢复 |
 
 ---
@@ -749,7 +779,8 @@ mozi/orchestrator/
 | OrchestratorAgent | 能接收用户输入并路由到对应 Agent | 单元测试 | 100% 路由成功 |
 | CategoryRouter | QUICK/DEEP/STRATEGIC 路由正确 | 参数化测试 | ≥90% 路由准确 |
 | ExecutionAgent | 能执行简单修改（≤10行） | E2E 测试 | 完成度 = 100% |
-| ResearchAgent | 能执行多文件修改任务 | 集成测试 | 证据完整率 ≥80% |
+| PreAnalysisAgent | 能分析任务目标和范围 | 单元测试 | 分析准确率 ≥85% |
+| ResearchAgent | 能搜索本地/企业/互联网代码 | 集成测试 | 搜索召回率 ≥80% |
 | PlanningAgent | 能制定计划并委托子任务 | 场景测试 | 计划通过率 ≥80% |
 | VerifyAgent | 能验证修改正确性 | 单元测试 | 验证准确率 ≥90% |
 | ReviewAgent | 能评估完成度 | 评估测试 | 收敛率 ≥90% |
