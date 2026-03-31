@@ -39,7 +39,13 @@ docs/foundation/architecture/
 **Files:**
 - Create: `scripts/bootstrap_project.py`
 
-- [ ] **Step 1: Write the bootstrap script**
+**Notes on manifest processing:**
+- Script iterates ALL `iterations` (both `iter_0_1` and `iter_0_2`)
+- `bandit.toml` is in `iter_0_2` → will be generated
+- `.claude/rules/` files: if they exist, skip (idempotent); if missing, create from templates
+- Tasks without `file` field (e.g., `T0.1.4.2 "安装 pre-commit hooks"`) are skipped — installation is a manual step
+
+- [ ] **Step 1: Write the bootstrap script
 
 ```python
 #!/usr/bin/env python3
@@ -134,8 +140,16 @@ def create_from_template(path: Path) -> None:
     elif path.name == "exceptions.py":
         path.write_text(TEMPLATES["exceptions.py"])
     elif str(path).startswith(".claude/rules/"):
-        # Rules already exist in .claude/rules/, skip
-        pass
+        # Rules from manifest - use existing files if present, create minimal stub if missing
+        if path.exists() and not force:
+            pass  # Skip, file exists
+        else:
+            rule_name = path.stem.replace("-", "_")
+            path.write_text(f"# {rule_name.replace('_', ' ').title()} Rule\n\n")
+    elif str(path).startswith("docs/foundation/"):
+        # Docs directories - create as placeholders
+        path.mkdir(parents=True, exist_ok=True)
+        return
     else:
         path.write_text("")
 
@@ -338,7 +352,12 @@ Expected: No errors
 Run: `uv run pytest tests/ -v`
 Expected: No tests collected (tests/ is empty, no failure)
 
-- [ ] **Step 5: Commit skeleton**
+- [ ] **Step 5: Install pre-commit hooks**
+
+Run: `uv run pre-commit install`
+Expected: Pre-commit hooks installed
+
+- [ ] **Step 6: Commit skeleton**
 
 ```bash
 git add -A mozi/ tests/ .claude/ docs/ pyproject.toml ruff.toml mypy.ini pytest.ini bandit.toml .gitignore .pre-commit-config.yaml
@@ -346,8 +365,9 @@ git commit -m "feat: add phase 0 project skeleton
 
 - mozi/ package with exception classes
 - Test directory structure (unit/integration/e2e)
-- CI configuration files
+- CI configuration files (ruff, mypy, pytest, bandit)
 - Project rules in .claude/rules/
+- Pre-commit hooks configured
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 "
