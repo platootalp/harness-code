@@ -207,6 +207,161 @@ RecursiveLoop 递归优化直到 100% 完成
 OrchestratorAgent.evaluate() 结果
 ```
 
+### 5.3 Category 执行流程
+
+#### QUICK 执行流程
+
+```
+用户输入
+    │
+    ▼
+CategoryRouter.is_simple_task() = true
+    │
+    ▼
+ExecutionAgent.execute()
+    │
+    ├──► 验证任务确实简单
+    ├──► 执行工具调用
+    ├──► 验证结果
+    └──► 返回结果
+    │
+    ▼
+VerifyAgent.execute()
+    │
+    ├──► 检查语法
+    ├──► 检查 lint
+    └──► 返回验证结果
+    │
+    ▼
+ReviewAgent.execute()
+    │
+    ├──► 评估完成度
+    ├──► 决定是否需要重试
+    └──► 返回最终结果
+    │
+    ▼
+完成
+```
+
+#### DEEP 执行流程
+
+**5.3.1 搜索任务**
+
+```
+用户输入（搜索请求）
+    │
+    ▼
+CategoryRouter.is_simple_task() = false
+    │
+    ▼
+ResearchAgent.execute()
+    │
+    ├──► 搜索本地代码库
+    ├──► 搜索企业代码库（如需要）
+    ├──► 搜索互联网资源（如需要）
+    ├──► 整理搜索结果
+    └──► 返回信息汇总
+    │
+    ▼
+VerifyAgent.execute()
+    │
+    ├──► 验证搜索结果完整性
+    └──► 返回验证结果
+    │
+    ▼
+ReviewAgent.execute()
+    │
+    ├──► 评估完成度
+    └──► 返回最终结果
+    │
+    ▼
+完成
+```
+
+**5.3.2 预分析任务**
+
+```
+用户输入（分析请求）
+    │
+    ▼
+CategoryRouter 判断需要预分析
+    │
+    ▼
+PreAnalysisAgent.execute()
+    │
+    ├──► 分析任务目标和范围
+    ├──► 识别需要搜索的信息
+    ├──► 收集相关上下文
+    ├──► 澄清范围（与用户确认如果需要）
+    └──► 返回分析结果
+    │
+    ▼
+（可选）ResearchAgent.execute()
+    │
+    ├──► 根据分析结果搜索
+    └──► 补充信息
+    │
+    ▼
+ReviewAgent.execute()
+    │
+    ├──► 评估分析质量
+    └──► 返回最终结果
+    │
+    ▼
+完成
+```
+
+#### STRATEGIC 执行流程
+
+```
+用户输入(/plan)
+    │
+    ▼
+CategoryRouter 识别 /plan 命令
+    │
+    ▼
+PlanningAgent.execute()
+    │
+    ├──► 与用户澄清范围（如需要）
+    ├──► 制定详细计划
+    ├──► 生成 Planning Document
+    ├──► 展示计划给用户
+    └──► 用户确认计划
+    │
+    ▼
+PlanningAgent 分解子任务
+    │
+    ├──► 委托 ResearchAgent 执行子任务
+    └──► 汇总子任务结果
+    │
+    ▼
+VerifyAgent.execute()
+    │
+    ├──► 检查所有修改
+    └──► 返回验证结果
+    │
+    ▼
+ReviewAgent.execute()
+    │
+    ├──► 评估完成度
+    └──► 返回最终结果
+    │
+    ▼
+完成
+```
+
+---
+
+### 5.4 流程对比
+
+| 阶段 | QUICK | DEEP (搜索) | DEEP (预分析) | STRATEGIC |
+|------|-------|-------------|---------------|-----------|
+| 规划 | ❌ | ❌ | ✅ PreAnalysisAgent | ✅ PlanningAgent |
+| 搜索 | ❌ | ✅ ResearchAgent | ⚠️ 可选 | ✅ ResearchAgent |
+| 用户确认 | ❌ | ❌ | ⚠️ 可选 | ✅ 必须 |
+| 验证 | ✅ VerifyAgent | ✅ VerifyAgent | ✅ VerifyAgent | ✅ VerifyAgent |
+| 评估 | ✅ ReviewAgent | ✅ ReviewAgent | ✅ ReviewAgent | ✅ ReviewAgent |
+
 ---
 
 ## 6. Todo Enforcer
