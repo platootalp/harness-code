@@ -53,11 +53,9 @@
     │
     ├──► PlanningAgent（仅 STRATEGIC，全局规划需用户确认）
     │
-    └──► Smart Execution（核心执行阶段）
-            ├──► ResearchAgent（探索）
-            ├──► ExecutionAgent（编码 + 任务规划 + 自测）
-            ├──► VerifyAgent（外部验证）
-            └──► ReviewAgent（最终评估）
+    └──► Smart Execution
+            └──► ExecutionAgent（探索 + 任务规划 + 编码 + 自测）
+                    └──► 内置验证能力
 ```
 
 ---
@@ -229,10 +227,10 @@ OrchestratorAgent.evaluate() 结果
 
 #### 5.3.2 Smart Execution（智能执行）
 
-Smart Execution 是任务执行的核心阶段，内部包含以下子阶段：
+Smart Execution 的主体是 ExecutionAgent，它内部包含以下能力：
 
 ```
-探索 → 任务级规划 → 编码 → 自测 → 完成
+探索 → 任务级规划 → 编码 → 自测
 ```
 
 | 子阶段 | 说明 | QUICK | DEEP | STRATEGIC |
@@ -273,7 +271,7 @@ Smart Execution 是任务执行的核心阶段，内部包含以下子阶段：
 | 规划层级 | 归属 | 输出物 | 目的 | 确认方式 |
 |----------|------|--------|------|----------|
 | **全局规划** | 外部阶段 (PlanningAgent) | `ARCHITECTURE.md`, `API_DESIGN.md`, `DB_SCHEMA.md` | 确定**做什么**、**架构如何**、**边界在哪** | 需用户确认 |
-| **任务级规划** | Smart Execution 内部 | `TODO.md`, `IMPLEMENTATION_STEPS` | 确定**怎么做**、**文件顺序**、**依赖关系** | 机器自治 |
+| **任务级规划** | ExecutionAgent 内部 (Smart Execution) | `TODO.md`, `IMPLEMENTATION_STEPS` | 确定**怎么做**、**文件顺序**、**依赖关系** | 机器自治 |
 
 ---
 
@@ -284,8 +282,7 @@ Smart Execution 是任务执行的核心阶段，内部包含以下子阶段：
 | OrchestratorAgent | 外部 | 接收任务，初始化上下文，驱动流水线 |
 | PreAnalysisAgent | 外部 | 分析目标，拆解任务类型 |
 | PlanningAgent | 外部 | 全局规划，输出设计文档，需用户确认 |
-| ResearchAgent | Smart Execution 内部 | 搜索本地/企业/互联网代码 |
-| ExecutionAgent | Smart Execution 内部 | 编码执行，任务级规划，自测 |
+| ExecutionAgent | Smart Execution | **探索 + 任务规划 + 编码 + 自测 + 内置验证** |
 | VerifyAgent | 外部 | 外部验证，单元测试/集成测试/编译 |
 | ReviewAgent | 外部 | 最终评估，交付确认 |
 
@@ -562,17 +559,19 @@ class OrchestratorAgent:
 
 ```python
 class ExecutionAgent:
-    """执行 Agent"""
+    """执行 Agent（Smart Execution 主体）"""
 
     async def execute(self, task: Task, context: dict) -> Result:
-        # 1. 验证任务确实简单
-        # 2. 直接执行工具调用
-        # 3. 验证结果
-        # 4. 返回结果
+        # 1. 探索：搜索本地/企业/互联网代码，理解上下文
+        # 2. 任务级规划：生成 TODO 列表（机器自治）
+        # 3. 编码：按 TODO 顺序执行
+        # 4. 自测：Lint/简单运行验证
+        # 5. 返回结果
 ```
 
-**职责**：≤10行改动、拼写修正、简单修改
-**特点**：快速执行，无需规划，直接 Do
+**职责**：探索 + 任务规划 + 编码 + 自测 + 内置验证
+**特点**：Smart Execution 的主体，机器自治
+**TODO 列表**：内部生成，用于管理任务执行顺序
 
 ### 8.3 PreAnalysisAgent
 
@@ -582,33 +581,15 @@ class PreAnalysisAgent:
 
     async def execute(self, task: Task, context: dict) -> Result:
         # 1. 分析任务目标和范围
-        # 2. 识别需要搜索的信息
-        # 3. 收集相关上下文
-        # 4. 澄清范围（与用户确认如果需要）
-        # 5. 返回分析结果
+        # 2. 识别任务类型（搜索/执行/分析）
+        # 3. 拆解为子任务
+        # 4. 返回任务分解结果
 ```
 
-**职责**：预规划分析、范围澄清
-**特点**：在执行前分析任务，确定搜索范围和上下文
+**职责**：预规划分析、任务拆解
+**特点**：在执行前分析任务，确定搜索范围和执行策略
 
-### 8.4 ResearchAgent
-
-```python
-class ResearchAgent:
-    """探索 Agent"""
-
-    async def execute(self, task: Task, context: dict) -> Result:
-        # 1. 搜索本地代码库
-        # 2. 搜索企业代码库
-        # 3. 搜索互联网资源
-        # 4. 整理搜索结果
-        # 5. 返回信息汇总
-```
-
-**职责**：代码库搜索（本地、企业、互联网）
-**特点**：专注于信息检索和探索，不做执行
-
-### 8.5 PlanningAgent
+### 8.4 PlanningAgent
 
 ```python
 class PlanningAgent:
@@ -619,19 +600,19 @@ class PlanningAgent:
         # 2. Plan → 生成 Planning Document
         # 3. 展示计划给用户
         # 4. 用户确认计划
-        # 5. 分解为子任务委托 ResearchAgent
+        # 5. 分解为子任务
         # 6. 汇总结果
 ```
 
 **职责**：架构设计、技术选型、复杂规划
-**特点**：规划优先，需要用户确认
+**特点**：全局规划，需要用户确认
 **规划产出**：Planning Document（需用户审阅确认）
 
-### 8.6 VerifyAgent
+### 8.5 VerifyAgent
 
 ```python
 class VerifyAgent:
-    """验证 Agent"""
+    """验证 Agent（外部验证）"""
 
     async def execute(self, task: Task, context: dict) -> Result:
         # 1. 检查语法正确性
@@ -640,8 +621,8 @@ class VerifyAgent:
         # 4. 返回验证结果
 ```
 
-**职责**：结果验证，质量检查
-**特点**：独立的验证阶段，确保输出质量
+**职责**：外部验证，质量检查
+**特点**：独立的验证阶段，与 ExecutionAgent 内部自测分离
 
 ### 8.7 ReviewAgent
 
@@ -737,12 +718,11 @@ mozi/orchestrator/
     agents/
         __init__.py
         base.py              # Agent 基类
-        execution_agent.py   # 执行 Agent
+        execution_agent.py    # 执行 Agent（探索+规划+编码+自测）
         pre_analysis_agent.py # 预分析 Agent
-        research_agent.py     # 探索 Agent
-        planning_agent.py     # 规划 Agent
-        verify_agent.py       # 验证 Agent
-        review_agent.py       # Review Agent
+        planning_agent.py    # 规划 Agent
+        verify_agent.py      # 验证 Agent
+        review_agent.py      # Review Agent
     todo_enforcer.py          # Todo 强制执行
     recursive_loop.py         # 递归优化循环
     delegation.py             # 委托协议
@@ -838,7 +818,7 @@ mozi/orchestrator/
 | 优先级 | 内容 | 说明 |
 |--------|------|------|
 | **P0 (Must)** | OrchestratorAgent + CategoryRouter + ExecutionAgent | 核心框架，简单任务闭环 |
-| **P1 (Should)** | ResearchAgent + PreAnalysisAgent + PlanningAgent + VerifyAgent + TodoEnforcer | 重要功能，搜索和规划支持 |
+| **P1 (Should)** | PreAnalysisAgent + PlanningAgent + VerifyAgent + TodoEnforcer | 重要功能，预分析和规划支持 |
 | **P2 (Could)** | ReviewAgent + RecursiveLoop 完整实现 | 增强功能，完成度保证 |
 | **P3 (Won't)** | 多轮递归优化、复杂分析算法 | 未来探索，当前不做 |
 
@@ -847,7 +827,7 @@ mozi/orchestrator/
 | 迭代 | 内容 | 目标 |
 |------|------|------|
 | **Iter 1** | OrchestratorAgent + CategoryRouter + ExecutionAgent + VerifyAgent | 能够完成一个 QUICK 任务的全流程 |
-| **Iter 2** | ResearchAgent + PreAnalysisAgent + PlanningAgent | 支持 DEEP/STRATEGIC 任务 |
+| **Iter 2** | PreAnalysisAgent + PlanningAgent + ExecutionAgent(深度探索+任务规划) | 支持 DEEP/STRATEGIC 任务 |
 | **Iter 3** | ReviewAgent + TodoEnforcer + RecursiveLoop | 完成度保证和任务恢复 |
 
 ---
@@ -860,10 +840,9 @@ mozi/orchestrator/
 |------|----------|----------|----------|
 | OrchestratorAgent | 能接收用户输入并路由到对应 Agent | 单元测试 | 100% 路由成功 |
 | CategoryRouter | QUICK/DEEP/STRATEGIC 路由正确 | 参数化测试 | ≥90% 路由准确 |
-| ExecutionAgent | 能执行简单修改（≤10行） | E2E 测试 | 完成度 = 100% |
-| PreAnalysisAgent | 能分析任务目标和范围 | 单元测试 | 分析准确率 ≥85% |
-| ResearchAgent | 能搜索本地/企业/互联网代码 | 集成测试 | 搜索召回率 ≥80% |
-| PlanningAgent | 能制定计划并委托子任务 | 场景测试 | 计划通过率 ≥80% |
+| ExecutionAgent | 能探索、规划、编码、自测 | E2E 测试 | 完成度 = 100% |
+| PreAnalysisAgent | 能分析任务目标和拆解任务 | 单元测试 | 拆解准确率 ≥85% |
+| PlanningAgent | 能制定全局计划并获用户确认 | 场景测试 | 计划通过率 ≥80% |
 | VerifyAgent | 能验证修改正确性 | 单元测试 | 验证准确率 ≥90% |
 | ReviewAgent | 能评估完成度 | 评估测试 | 收敛率 ≥90% |
 | TodoEnforcer | idle 任务能被重新激活 | 模拟测试 | 恢复率 ≥95% |
