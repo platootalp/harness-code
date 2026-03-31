@@ -51,7 +51,7 @@
     │
     ├──► Category.QUICK → ExecutionAgent
     │
-    ├──► Category.DEEP → ResearchAgent
+    ├──► Category.DEEP → PreAnalysisAgent → ResearchAgent/ExecutionAgent
     │
     └──► Category.STRATEGIC → PlanningAgent
 ```
@@ -188,7 +188,7 @@ OrchestratorAgent.execute()
 根据 Category 选择 Agent
     │
     ├──► QUICK → ExecutionAgent
-    ├──► DEEP → ResearchAgent
+    ├──► DEEP → PreAnalysisAgent → 执行Agent
     └──► STRATEGIC → PlanningAgent
     │
     ▼
@@ -245,66 +245,45 @@ ReviewAgent.execute()
 
 #### DEEP 执行流程
 
-**5.3.1 搜索任务**
+DEEP 任务的必经流程：**PreAnalysisAgent → 拆解 → 执行 Agent → VerifyAgent → ReviewAgent**
 
 ```
-用户输入（搜索请求）
+用户输入（复杂任务）
     │
     ▼
 CategoryRouter.is_simple_task() = false
     │
     ▼
-ResearchAgent.execute()
+PreAnalysisAgent.execute()
     │
-    ├──► 搜索本地代码库
-    ├──► 搜索企业代码库（如需要）
-    ├──► 搜索互联网资源（如需要）
-    ├──► 整理搜索结果
-    └──► 返回信息汇总
+    ├──► 分析任务目标和范围
+    ├──► 识别任务类型（搜索/执行/分析）
+    ├──► 拆解为子任务
+    └──► 返回任务分解结果
+    │
+    ▼
+根据任务类型选择执行 Agent
+    │
+    ├──► 搜索类型 → ResearchAgent.execute()
+    │       ├──► 搜索本地代码库
+    │       ├──► 搜索企业代码库（如需要）
+    │       ├──► 搜索互联网资源（如需要）
+    │       └──► 整理搜索结果
+    │
+    └──► 执行类型 → ExecutionAgent.execute()
+            ├──► 执行工具调用
+            └──► 返回执行结果
     │
     ▼
 VerifyAgent.execute()
     │
-    ├──► 验证搜索结果完整性
+    ├──► 验证结果完整性
     └──► 返回验证结果
     │
     ▼
 ReviewAgent.execute()
     │
     ├──► 评估完成度
-    └──► 返回最终结果
-    │
-    ▼
-完成
-```
-
-**5.3.2 预分析任务**
-
-```
-用户输入（分析请求）
-    │
-    ▼
-CategoryRouter 判断需要预分析
-    │
-    ▼
-PreAnalysisAgent.execute()
-    │
-    ├──► 分析任务目标和范围
-    ├──► 识别需要搜索的信息
-    ├──► 收集相关上下文
-    ├──► 澄清范围（与用户确认如果需要）
-    └──► 返回分析结果
-    │
-    ▼
-（可选）ResearchAgent.execute()
-    │
-    ├──► 根据分析结果搜索
-    └──► 补充信息
-    │
-    ▼
-ReviewAgent.execute()
-    │
-    ├──► 评估分析质量
     └──► 返回最终结果
     │
     ▼
@@ -354,13 +333,14 @@ ReviewAgent.execute()
 
 ### 5.4 流程对比
 
-| 阶段 | QUICK | DEEP (搜索) | DEEP (预分析) | STRATEGIC |
-|------|-------|-------------|---------------|-----------|
-| 规划 | ❌ | ❌ | ✅ PreAnalysisAgent | ✅ PlanningAgent |
-| 搜索 | ❌ | ✅ ResearchAgent | ⚠️ 可选 | ✅ ResearchAgent |
-| 用户确认 | ❌ | ❌ | ⚠️ 可选 | ✅ 必须 |
-| 验证 | ✅ VerifyAgent | ✅ VerifyAgent | ✅ VerifyAgent | ✅ VerifyAgent |
-| 评估 | ✅ ReviewAgent | ✅ ReviewAgent | ✅ ReviewAgent | ✅ ReviewAgent |
+| 阶段 | QUICK | DEEP | STRATEGIC |
+|------|-------|------|-----------|
+| 预分析 | ❌ | ✅ PreAnalysisAgent（必须） | ✅ PlanningAgent |
+| 任务拆解 | ❌ | ✅ PreAnalysisAgent 拆解 | ✅ PlanningAgent 拆解 |
+| 执行 | ✅ ExecutionAgent | ✅ ResearchAgent/ExecutionAgent | ✅ ResearchAgent |
+| 用户确认 | ❌ | ❌ | ✅ 必须 |
+| 验证 | ✅ VerifyAgent | ✅ VerifyAgent | ✅ VerifyAgent |
+| 评估 | ✅ ReviewAgent | ✅ ReviewAgent | ✅ ReviewAgent |
 
 ---
 
