@@ -207,140 +207,57 @@ RecursiveLoop 递归优化直到 100% 完成
 OrchestratorAgent.evaluate() 结果
 ```
 
-### 5.3 Category 执行流程
+### 5.3 执行流水线
 
-#### QUICK 执行流程
-
-```
-用户输入
-    │
-    ▼
-CategoryRouter.is_simple_task() = true
-    │
-    ▼
-ExecutionAgent.execute()
-    │
-    ├──► 验证任务确实简单
-    ├──► 执行工具调用
-    ├──► 验证结果
-    └──► 返回结果
-    │
-    ▼
-VerifyAgent.execute()
-    │
-    ├──► 检查语法
-    ├──► 检查 lint
-    └──► 返回验证结果
-    │
-    ▼
-ReviewAgent.execute()
-    │
-    ├──► 评估完成度
-    ├──► 决定是否需要重试
-    └──► 返回最终结果
-    │
-    ▼
-完成
-```
-
-#### DEEP 执行流程
-
-DEEP 任务的必经流程：**PreAnalysisAgent → 拆解 → 执行 Agent → VerifyAgent → ReviewAgent**
+所有任务共享统一的执行流水线，各阶段根据 Category 决定是否跳过：
 
 ```
-用户输入（复杂任务）
-    │
-    ▼
-CategoryRouter.is_simple_task() = false
-    │
-    ▼
-PreAnalysisAgent.execute()
-    │
-    ├──► 分析任务目标和范围
-    ├──► 识别任务类型（搜索/执行/分析）
-    ├──► 拆解为子任务
-    └──► 返回任务分解结果
-    │
-    ▼
-根据任务类型选择执行 Agent
-    │
-    ├──► 搜索类型 → ResearchAgent.execute()
-    │       ├──► 搜索本地代码库
-    │       ├──► 搜索企业代码库（如需要）
-    │       ├──► 搜索互联网资源（如需要）
-    │       └──► 整理搜索结果
-    │
-    └──► 执行类型 → ExecutionAgent.execute()
-            ├──► 执行工具调用
-            └──► 返回执行结果
-    │
-    ▼
-VerifyAgent.execute()
-    │
-    ├──► 验证结果完整性
-    └──► 返回验证结果
-    │
-    ▼
-ReviewAgent.execute()
-    │
-    ├──► 评估完成度
-    └──► 返回最终结果
-    │
-    ▼
-完成
+编排 → 预分析 → 路由 → 探索 → 规划 → 执行 → 验证 → Review
 ```
 
-#### STRATEGIC 执行流程
+| 阶段 | 说明 | QUICK | DEEP | STRATEGIC |
+|------|------|-------|------|-----------|
+| **编排** | OrchestratorAgent 接收并初始化 | ✅ | ✅ | ✅ |
+| **预分析** | PreAnalysisAgent 分析目标、拆解任务 | ❌ 跳过 | ✅ | ✅ |
+| **路由** | 根据预分析结果路由到执行 Agent | ❌ 跳过 | ✅ | ✅ |
+| **探索** | ResearchAgent 搜索信息 | ❌ 跳过 | ✅ | ✅ |
+| **规划** | PlanningAgent 制定计划（需用户确认） | ❌ 跳过 | ❌ 跳过 | ✅ |
+| **执行** | ExecutionAgent 执行任务 | ✅ | ✅ | ✅ |
+| **验证** | VerifyAgent 验证结果 | ✅ | ✅ | ✅ |
+| **Review** | ReviewAgent 评估完成度 | ✅ | ✅ | ✅ |
+
+#### 5.3.1 QUICK 流水线
 
 ```
-用户输入(/plan)
-    │
-    ▼
-CategoryRouter 识别 /plan 命令
-    │
-    ▼
-PlanningAgent.execute()
-    │
-    ├──► 与用户澄清范围（如需要）
-    ├──► 制定详细计划
-    ├──► 生成 Planning Document
-    ├──► 展示计划给用户
-    └──► 用户确认计划
-    │
-    ▼
-PlanningAgent 分解子任务
-    │
-    ├──► 委托 ResearchAgent 执行子任务
-    └──► 汇总子任务结果
-    │
-    ▼
-VerifyAgent.execute()
-    │
-    ├──► 检查所有修改
-    └──► 返回验证结果
-    │
-    ▼
-ReviewAgent.execute()
-    │
-    ├──► 评估完成度
-    └──► 返回最终结果
-    │
-    ▼
-完成
+编排 → (跳过预分析/路由/探索/规划) → 执行 → 验证 → Review → 完成
+```
+
+#### 5.3.2 DEEP 流水线
+
+```
+编排 → 预分析 → 路由 → 探索 → (跳过规划) → 执行 → 验证 → Review → 完成
+```
+
+#### 5.3.3 STRATEGIC 流水线
+
+```
+编排 → 预分析 → 路由 → 探索 → 规划(用户确认) → 执行 → 验证 → Review → 完成
 ```
 
 ---
 
-### 5.4 流程对比
+### 5.4 各 Agent 职责总览
 
-| 阶段 | QUICK | DEEP | STRATEGIC |
-|------|-------|------|-----------|
-| 预分析 | ❌ | ✅ PreAnalysisAgent（必须） | ✅ PlanningAgent |
-| 任务拆解 | ❌ | ✅ PreAnalysisAgent 拆解 | ✅ PlanningAgent 拆解 |
-| 执行 | ✅ ExecutionAgent | ✅ ResearchAgent/ExecutionAgent | ✅ ResearchAgent |
-| 用户确认 | ❌ | ❌ | ✅ 必须 |
-| 验证 | ✅ VerifyAgent | ✅ VerifyAgent | ✅ VerifyAgent |
-| 评估 | ✅ ReviewAgent | ✅ ReviewAgent | ✅ ReviewAgent |
+| 阶段 | Agent | 职责 |
+|------|-------|------|
+| 编排 | OrchestratorAgent | 接收任务，初始化上下文，驱动流水线 |
+| 预分析 | PreAnalysisAgent | 分析目标，拆解任务类型，识别搜索/执行需求 |
+| 路由 | OrchestratorAgent | 根据预分析结果选择执行 Agent |
+| 探索 | ResearchAgent | 搜索本地/企业/互联网代码 |
+| 规划 | PlanningAgent | 制定计划，需用户确认 |
+| 执行 | ExecutionAgent | 执行工具调用 |
+| 验证 | VerifyAgent | 语法检查、lint、测试 |
+| Review | ReviewAgent | 评估完成度，决定是否重试 |
 
 ---
 
