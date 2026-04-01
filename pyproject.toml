@@ -1,6 +1,6 @@
 [project]
 name = "mozi"
-version = "0.1.0"
+version = "1.0.0"
 description = "Mozi AI Coding Agent"
 requires-python = ">=3.11"
 dependencies = [
