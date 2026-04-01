@@ -2,8 +2,7 @@
 
 Provides unified interface for LLM model providers:
 - ModelAdapter: Abstract base class for model adapters
-- AnthropicAdapter: Adapter for Anthropic Claude models
-- OpenAIAdapter: Adapter for OpenAI GPT models
+- LitellmGateway: Unified gateway for 100+ LLM providers via litellm
 - ModelRegistry: Registry for managing available models
 - PromptTemplateManager: Template management for prompts
 """
@@ -30,6 +29,7 @@ from mozi.core.model.errors import (
     RateLimitError,
     ResponseParseError,
 )
+from mozi.core.model.litellm_gateway import LitellmGateway
 from mozi.core.model.registry import ModelRegistry
 from mozi.core.model.template import PromptTemplateManager
 
@@ -46,6 +46,7 @@ __all__ = [
     "ModelInfo",
     # Adapter
     "ModelAdapter",
+    "LitellmGateway",
     # Registry
     "ModelRegistry",
     # Template

@@ -16,21 +16,16 @@ from mozi.core.model.adapter import (
     ModelResponse,
     ModelUsage,
 )
-from mozi.core.model.circuit_breaker import CircuitBreaker
 from mozi.core.model.errors import (
     ModelNotFoundError,
 )
 from mozi.core.model.registry import ModelRegistry
-from mozi.core.model.retry import RetryStrategy
 from mozi.core.model.service import (
     ModelInvocationResult,
     ModelService,
     get_model_service,
 )
-from mozi.infrastructure.config import (
-    CircuitBreakerConfig as ConfigCircuitBreakerConfig,
-)
-from mozi.infrastructure.config import Config, DefaultsConfig, RetryConfig
+from mozi.infrastructure.config import Config, DefaultsConfig
 
 
 class MockAdapter(ModelAdapter):
@@ -93,18 +88,6 @@ def mock_config() -> Config:
             model="test-model",
             temperature=1.0,
             max_tokens=4096,
-        ),
-        retry=RetryConfig(
-            max_retries=3,
-            base_delay=0.01,
-            max_delay=0.1,
-            exponential_base=2.0,
-            jitter=False,
-        ),
-        circuit_breaker=ConfigCircuitBreakerConfig(
-            failure_threshold=5,
-            recovery_timeout=60.0,
-            half_open_max_calls=3,
         ),
     )
 
@@ -169,33 +152,6 @@ class TestModelServiceInitialization:
             config=mock_config,
         )
         assert service._event_bus is mock_event_bus
-
-    def test_circuit_breakers_initialized(
-        self,
-        mock_registry: ModelRegistry,
-        mock_config: Config,
-    ) -> None:
-        """Test circuit breakers are created per provider."""
-        service = ModelService(
-            registry=mock_registry,
-            config=mock_config,
-        )
-        # Should have circuit breaker for ANTHROPIC provider
-        assert "anthropic" in service._circuit_breakers
-        assert isinstance(service._circuit_breakers["anthropic"], CircuitBreaker)
-
-    def test_retry_strategy_initialized(
-        self,
-        mock_registry: ModelRegistry,
-        mock_config: Config,
-    ) -> None:
-        """Test retry strategy is created from config."""
-        service = ModelService(
-            registry=mock_registry,
-            config=mock_config,
-        )
-        assert isinstance(service._retry_strategy, RetryStrategy)
-        assert service._retry_strategy.max_retries == 3
 
 
 class TestModelServiceInvoke:

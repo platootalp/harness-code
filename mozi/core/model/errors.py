@@ -165,3 +165,51 @@ class CircuitBreakerOpenError(ModelError):
             details: Additional error details.
         """
         super().__init__(message, details)
+
+
+# litellm error types (lazy import to avoid circular dependency)
+_LITELLM_ERRORS: dict[str, type[ModelError]] | None = None
+
+
+def _get_litellm_error_map() -> dict[str, type[ModelError]]:
+    """Get litellm error to Mozi error mapping.
+
+    Returns:
+        Dictionary mapping litellm error class names to Mozi error types.
+    """
+    global _LITELLM_ERRORS
+    if _LITELLM_ERRORS is None:
+        import importlib.util
+
+        if importlib.util.find_spec("litellm") is not None:
+            # litellm is available
+            _LITELLM_ERRORS = {
+                "AuthenticationError": AuthenticationError,
+                "RateLimitError": RateLimitError,
+                "InvalidRequestError": InvalidRequestError,
+                "ContextWindowExceededError": InvalidRequestError,
+                "BadRequestError": InvalidRequestError,
+            }
+        else:
+            _LITELLM_ERRORS = {}
+    return _LITELLM_ERRORS
+
+
+def map_litellm_error(error: Exception) -> ModelError:
+    """Map a litellm error to a Mozi error.
+
+    Args:
+        error: The litellm exception.
+
+    Returns:
+        Corresponding Mozi error type.
+    """
+    error_map = _get_litellm_error_map()
+    error_class_name = type(error).__name__
+
+    if error_class_name in error_map:
+        mozi_error_type = error_map[error_class_name]
+        return mozi_error_type(str(error))
+
+    # Default to ModelInvocationError
+    return ModelInvocationError(str(error))
