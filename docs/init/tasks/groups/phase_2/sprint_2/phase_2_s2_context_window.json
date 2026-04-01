@@ -1,0 +1,25 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 2 Sprint 2.2 Context window.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_2", "name": "编排层"},
+  "sprint": {"id": "S2.2", "name": "Sprint 2.2 - Context 文件", "week": 8},
+
+  "group": {
+    "id": "G2.2.3",
+    "name": "Context - window.py",
+    "module": "context",
+    "file": "context/window.py",
+    "test_file": "tests/unit/context/test_window.py"
+  },
+
+  "tasks": [
+    {"id": "T2.2.3.1", "name": "WindowManager 类框架", "estimate": "3h"},
+    {"id": "T2.2.3.2", "name": "check_threshold 方法", "estimate": "4h"},
+    {"id": "T2.2.3.3", "name": "should_compress 方法", "estimate": "4h"},
+    {"id": "T2.2.3.4", "name": "get_snapshot 方法", "estimate": "4h"}
+  ],
+
+  "dependencies": ["context/models.py"],
+  "criteria": "coverage >= 80%"
+}

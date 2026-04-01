@@ -23,9 +23,9 @@
 
 ### 3. 高可用工具体系
 
-- 内置 15+ 工具：文件操作（Read/Write/Edit/Glob/Grep）、命令执行、代码分析（AST-Grep/LSP）、Web 检索
+- 内置 15+ 工具：6 种文件操作工具（Read/Write/Edit/Glob/Grep/Bash）、2 种代码分析工具（AST-Grep/LSP）、3 种外部能力工具（WebSearch/WebFetch/Skills）、4 种任务工具（TaskCreate/TaskGet/TaskUpdate/TaskList）
 - 统一工具抽象接口，支持工具动态注册与发现
-- 多层安全防护：路径白名单验证、危险函数静态检测
+- 安全执行：路径白名单验证、危险函数静态检测、权限级别控制
 
 ### 4. 上下文管理
 

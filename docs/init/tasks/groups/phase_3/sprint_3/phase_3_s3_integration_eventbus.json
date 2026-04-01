@@ -1,0 +1,26 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 3 Sprint 3.3 Integration test_eventbus_integration.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_3", "name": "接入层与集成"},
+  "sprint": {"id": "S3.3", "name": "Sprint 3.3 - 系统集成文件", "week": 13},
+
+  "group": {
+    "id": "G3.3.2",
+    "name": "Integration - test_eventbus_integration.py",
+    "module": "tests/integration",
+    "file": "tests/integration/test_eventbus_integration.py",
+    "test_file": null
+  },
+
+  "tasks": [
+    {"id": "T3.3.2.1", "name": "user_message 事件测试", "estimate": "3h"},
+    {"id": "T3.3.2.2", "name": "agent_response 事件测试", "estimate": "3h"},
+    {"id": "T3.3.2.3", "name": "tool_execution 事件测试", "estimate": "3h"},
+    {"id": "T3.3.2.4", "name": "session_created 事件测试", "estimate": "3h"},
+    {"id": "T3.3.2.5", "name": "error 事件测试", "estimate": "3h"}
+  ],
+
+  "dependencies": ["infrastructure/event_bus.py", "orchestrator/orchestrator.py"],
+  "criteria": "all integration tests pass"
+}

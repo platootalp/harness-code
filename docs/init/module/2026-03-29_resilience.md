@@ -1,8 +1,8 @@
 # Resilience 模块设计文档
 
-> **模板版本**: 2.0
+> **模板版本**: 3.0
 > **创建日期**: 2026-03-29
-> **最后更新**: 2026-03-30
+> **最后更新**: 2026-03-31
 
 ---
 
@@ -69,7 +69,7 @@ Resilience 模块是 Mozi AI Coding Agent 的横切面稳定性组件，负责�
 
 ---
 
-## 3. 数据模型
+## 3. 数据模型与状态机
 
 ### 3.1 核心类型定义
 
@@ -169,6 +169,16 @@ class RetryExhaustedError(ResilienceError):
 | OPEN | 熔断触发 | 请求直接拒绝，快速失败 |
 | HALF_OPEN | 半开探测 | 允许有限探测请求 |
 
+### 3.3 熔断器状态流转表
+
+| 当前状态 | 触发条件 | 下一状态 | 动作 |
+| -------- | -------- | -------- | ---- |
+| CLOSED | 连续失败 >= failure_threshold | OPEN | 开启熔断 |
+| CLOSED | 请求成功 | CLOSED | 重置失败计数 |
+| OPEN | 超过 timeout | HALF_OPEN | 允许探测 |
+| HALF_OPEN | 探测失败 | OPEN | 重新熔断 |
+| HALF_OPEN | 连续成功 >= success_threshold | CLOSED | 恢复正常 |
+
 ---
 
 ## 4. 模块结构
@@ -201,7 +211,7 @@ mozi/capabilities/resilience/
 
 ---
 
-## 5. 接口与交互
+## 5. 接口、交互与流程
 
 ### 5.1 核心接口定义
 
@@ -323,21 +333,76 @@ EventBus.publish("resilience_event", payload)
 MetricsCollector 记录指标
 ```
 
-### 5.3 熔断器状态流转
+---
 
-| 当前状态 | 触发条件 | 下一状态 | 动作 |
-| -------- | -------- | -------- | ---- |
-| CLOSED | 连续失败 >= failure_threshold | OPEN | 开启熔断 |
-| CLOSED | 请求成功 | CLOSED | 重置失败计数 |
-| OPEN | 超过 timeout | HALF_OPEN | 允许探测 |
-| HALF_OPEN | 探测失败 | OPEN | 重新熔断 |
-| HALF_OPEN | 连续成功 >= success_threshold | CLOSED | 恢复正常 |
+## 6. 边界与契约
+
+### 6.1 错误码定义
+
+| 错误码 | 说明 | 触发场景 |
+| ------ | ---- | -------- |
+| `Res_001` | 限流触发 | 请求被限流器拒绝 |
+| `Res_002` | 熔断器开启 | 熔断器处于 OPEN 状态，请求被拒绝 |
+| `Res_003` | 重试次数耗尽 | 达到最大重试次数仍失败 |
+| `Res_004` | 超时 | 操作超过指定超时时间 |
+| `Res_005` | 熔断器状态转换失败 | 熔断器状态机转换异常 |
+
+### 6.2 API 契约
+
+#### 6.2.1 限流器状态
+
+```
+GET /resilience/rate_limit/{key}
+
+Response:
+{
+    "key": "string",
+    "allowed": true,
+    "wait_time": 0.0,
+    "tokens": 100.0
+}
+```
+
+#### 6.2.2 熔断器状态
+
+```
+GET /resilience/circuit_breaker/{name}
+
+Response:
+{
+    "name": "string",
+    "state": "closed|open|half_open",
+    "stats": {
+        "total_calls": 0,
+        "successful_calls": 0,
+        "failed_calls": 0,
+        "rejected_calls": 0,
+        "state_changes": 0
+    },
+    "config": {
+        "failure_threshold": 5,
+        "success_threshold": 2,
+        "timeout": 30.0
+    }
+}
+```
+
+### 6.3 可重试异常类型
+
+| 异常类型 | 可重试 | 说明 |
+| -------- | ------ | ---- |
+| NetworkError | 是 | 网络连接失败 |
+| TimeoutError | 是 | 请求超时 |
+| ServiceUnavailable | 是 | 服务不可用（503） |
+| RateLimitError | 是 | 限流错误（429） |
+| ValidationError | 否 | 参数验证错误 |
+| AuthError | 否 | 认证错误 |
 
 ---
 
-## 6. 实现细节
+## 7. 实现细节
 
-### 6.1 限流算法
+### 7.1 限流算法
 
 **令牌桶算法**：
 
@@ -369,7 +434,7 @@ MetricsCollector 记录指标
     4. 使用链表实现 O(1) 插入删除
 ```
 
-### 6.2 重试策略
+### 7.2 重试策略
 
 指数退避公式：
 
@@ -377,16 +442,7 @@ MetricsCollector 记录指标
 重试间隔 = base_delay * (2 ^ attempt) + jitter
 ```
 
-| 异常类型 | 可重试 | 说明 |
-| -------- | ------ | ---- |
-| NetworkError | 是 | 网络连接失败 |
-| TimeoutError | 是 | 请求超时 |
-| ServiceUnavailable | 是 | 服务不可用（503） |
-| RateLimitError | 是 | 限流错误（429） |
-| ValidationError | 否 | 参数验证错误 |
-| AuthError | 否 | 认证错误 |
-
-### 6.3 多维度限流
+### 7.3 多维度限流
 
 | 维度 | 说明 | 示例 |
 | ---- | ---- | ---- |
@@ -397,13 +453,33 @@ MetricsCollector 记录指标
 
 ---
 
-## 7. 配置
+## 8. 配置
 
 > **说明**：本模块的配置项已汇总到 [Config 模块设计文档](./2026-03-29_config.md#79-resilience-配置)。
 
 ---
 
-## 8. 参考
+## 9. 度量指标
+
+### 9.1 核心指标
+
+| 指标名称 | 类型 | 标签 | 说明 |
+| -------- | ---- | ---- | ---- |
+| `resilience_rate_limit_total` | Counter | key, result | 限流器请求总数 |
+| `resilience_rate_limit_wait_time_seconds` | Histogram | key | 限流等待时间分布 |
+| `resilience_circuit_breaker_state` | Gauge | name, state | 熔断器当前状态 |
+| `resilience_circuit_breaker_calls_total` | Counter | name, result | 熔断器调用总数 |
+| `resilience_retry_total` | Counter | name, exception | 重试次数统计 |
+| `resilience_timeout_total` | Counter | name | 超时次数统计 |
+| `resilience_failure_total` | Counter | name, type | 失败次数统计 |
+
+### 9.2 指标采集状态
+
+**状态**：待定义
+
+---
+
+## 10. 参考
 
 - **错误处理**：遵循统一异常体系，见 [error_handling.md](./2026-03-29_error_handling.md)
 - **测试策略**：见 [testing.md](./2026-03-29_testing.md)
@@ -415,9 +491,10 @@ MetricsCollector 记录指标
 
 | 版本 | 日期 | 变更内容 |
 | ---- | ---- | -------- |
+| 3.0 | 2026-03-31 | 重组为模板 v3.0 结构，新增 §6 边界与契约、§9 度量指标 |
 | 2.1 | 2026-03-31 | 配置项迁移至 Config 模块统一管理 |
 | 2.0 | 2026-03-30 | 重构为模板 v2.0 结构，核心问题改为段落描述 |
 | 1.0 | 2026-03-29 | 初始版本 |
 
-_版本: 2.1_
+_版本: 3.0_
 _更新日期: 2026-03-31_

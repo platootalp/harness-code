@@ -61,7 +61,7 @@ Mozi 是一款 AI Coding Agent，旨在通过智能编排和模块化架构，�
 │  └───────────────────────────────────────────────────────────────────────┘  │
 │  ┌───────────────────────────────────────────────────────────────────────┐  │
 │  │  Worker 池 (无状态执行器)                                              │  │
-│  │  - Explorer / Planner / Coder / Tester                                │  │
+│  │  - Explorer / Planner / Coder + QualityChecker + Reviewer             │  │
 │  └───────────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────┬───────────────────────────────────────────┘
                                   │
@@ -94,11 +94,154 @@ v3 版本的 Orchestrator 在六层架构的**编排层**内部实现了 Orchest
 | ----------------------- | ----------------------------- | --------------------------------------------------- |
 | **编排层 Orchestrator** | Manager（编排器）             | 保持控制平面定位，内部演化为有状态的 ReAct 循环引擎 |
 | **编排层 Planner**      | Planner Worker                | 任务分解职责由专门的 Worker 执行                    |
-| **Core 层**             | Explorer/Coder/Tester Workers | 原有的工具执行能力由无状态 Worker 承担              |
+| **Core 层**             | Explorer/Coder Workers        | 原有的工具执行能力由无状态 Worker 承担              |
 
 ---
 
-## 3. 核心组件
+## 3. 包结构
+
+### 3.1 目录结构
+
+基于四层架构 + Clean Architecture 原则：
+
+```
+mozi/
+├── ingress/                    # 接入层
+│   ├── __init__.py
+│   ├── cli.py                  # REPL 交互入口
+│   ├── rest_api.py             # REST API
+│   ├── websocket.py            # WebSocket
+│   └── ide_plugin/             # IDE 插件集成
+│       ├── __init__.py
+│       └── vscode.py
+│
+├── session/                    # 会话层
+│   ├── __init__.py
+│   ├── manager.py              # 会话管理器
+│   ├── session.py              # 会话实例
+│   └── auth.py                 # 鉴权
+│
+├── orchestrator/               # 编排层 ⭐
+│   ├── __init__.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── orchestrator.py     # 编排器主类
+│   │   ├── react_engine.py     # ReAct 循环引擎
+│   │   ├── state_store.py      # 全局状态存储
+│   │   └── router.py           # Category 路由
+│   │
+│   ├── workers/                 # Worker 池
+│   │   ├── __init__.py
+│   │   ├── explorer.py         # Explorer Worker
+│   │   ├── planner.py          # Planner Worker
+│   │   ├── coder.py            # Coder Worker (= ExecutionAgent)
+│   │   ├── quality_checker.py   # QualityChecker
+│   │   └── reviewer.py          # Reviewer
+│   │
+│   └── adapters/
+│       ├── __init__.py
+│       └── context_adapter.py   # Context 模块适配器
+│
+├── core/                       # Core 层（能力层）
+│   ├── __init__.py
+│   ├── model/                  # Model Gateway
+│   │   ├── __init__.py
+│   │   ├── gateway.py          # 统一模型网关
+│   │   └── adapters/           # 模型适配器
+│   │       ├── __init__.py
+│   │       ├── openai.py
+│   │       └── anthropic.py
+│   │
+│   ├── tools/                  # 工具注册中心
+│   │   ├── __init__.py
+│   │   ├── registry.py         # 工具注册表
+│   │   ├── base.py             # Tool 基类
+│   │   └── builtins/           # 内置工具
+│   │       ├── __init__.py
+│   │       ├── file_ops.py     # Read/Write/Edit/Glob/Grep
+│   │       ├── bash.py         # Bash
+│   │       └── code_analysis.py # AST-Grep/LSP
+│   │
+│   ├── mcp/                    # MCP 客户端
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   └── protocol.py
+│   │
+│   └── skills/                 # Skills 管理
+│       ├── __init__.py
+│       └── registry.py
+│
+├── context/                    # 知识层：上下文管理
+│   ├── __init__.py
+│   ├── builder.py              # ContextBuilder
+│   ├── window.py               # WindowManager
+│   ├── compactor.py            # Compress 策略
+│   ├── offloader.py            # Write 策略
+│   ├── isolator.py             # Isolate 策略
+│   └── models.py                # 数据模型
+│
+├── memory/                     # 知识层：记忆管理
+│   ├── __init__.py
+│   ├── short_term.py           # 短期记忆（滑动窗口）
+│   ├── long_term.py            # 长期记忆（向量存储）
+│   ├── retriever.py            # 记忆检索器
+│   └── stores/                 # 向量存储适配器
+│       ├── __init__.py
+│       ├── milvus.py
+│       └── pgvector.py
+│
+└── infrastructure/             # 基础设施层
+    ├── __init__.py
+    ├── database.py              # SQLite
+    ├── vector_db.py             # Milvus/PGVector
+    ├── observability.py         # Phoenix
+    ├── event_bus.py             # 事件总线
+    ├── security.py              # 安全（加密、白名单）
+    └── resilience.py            # 熔断、限流、重试
+```
+
+### 3.2 包职责
+
+| 包 | 层级 | 职责 |
+|---|------|------|
+| `ingress` | 接入层 | 外部交互入口（CLI、API、WebSocket） |
+| `session` | 会话层 | 会话生命周期、并发控制、鉴权 |
+| `orchestrator` | 编排层 | 决策引擎、Worker 调度、状态管理 |
+| `core` | Core 层 | 模型网关、工具执行、MCP 协议 |
+| `context` | 知识层 | 上下文构建、窗口管理、Snapshot 分层 |
+| `memory` | 知识层 | 短期/长期记忆、向量检索 |
+| `infrastructure` | 基础设施 | 数据库、可观测性、事件总线 |
+
+### 3.3 依赖关系
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           依赖方向（由外到内）                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  Ingress ──► Session ──► Orchestrator ──┬──► Core (tools/model/mcp)
+                                         │
+                                         └──► Context ──► Memory
+                                                             │
+                                                     ┌───────┴───────┐
+                                                     │  Infrastructure │
+                                                     └───────────────┘
+
+说明：
+- 依赖只允许从外向内
+- Orchestrator 依赖 Core 和 Context
+- Context 依赖 Memory 和 Infrastructure
+- Core、Memory、Infrastructure 无外部依赖（可独立测试）
+```
+
+---
+
+## 4. 核心组件
+
+> **注**：以下核心组件详细设计见对应模块设计文档：
+> - [2026-03-31_orchestrator.md](./module/2026-03-31_orchestrator.md)
+> - [2026-03-29_context.md](./module/2026-03-29_context.md)
+> - [2026-03-29_memory.md](./module/2026-03-29_memory.md)
 
 ### 3.1 Orchestrator（编排器）
 
@@ -133,12 +276,15 @@ Orchestrator 是整个系统的**智能大脑**，负责决策和控制。
                               │ 委托 (带上下文)
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Worker 池 (无状态执行器)                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
-│  │ Explorer │  │ Planner  │  │  Coder  │  │ Tester   │        │
-│  │  探索    │  │  规划    │  │  编码    │  │  测试    │        │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │
-│  任务级生命周期 | 只接收必要上下文 | 返回结果摘要 | 用完即焚     │
+│                      执行组件池                                    │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ Worker (无状态)：Explorer / Planner / Coder              │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│  ┌────────────────────┐  ┌──────────────┐                     │
+│  │ QualityChecker     │  │ Reviewer     │                     │
+│  │ 统一质量门禁       │  │ 语义验收     │                     │
+│  │ (Tester+Verifier) │  │ (需求对齐)   │                     │
+│  └────────────────────┘  └──────────────┘                     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -190,10 +336,11 @@ Orchestrator 是整个系统的**智能大脑**，负责决策和控制。
 
 | Worker       | 职责                     | 特点                   |
 | ------------ | ------------------------ | ---------------------- |
-| **Explorer** | 探索代码库、搜索信息     | 无状态，只返回搜索结果 |
-| **Planner**  | 生成 TODO 列表、任务分解 | 无状态，只生成计划     |
-| **Coder**    | 编码执行、代码修改       | 无状态，只返回 diff    |
-| **Tester**   | 测试执行、验证结果       | 无状态，只返回测试报告 |
+| **Explorer**       | 探索代码库、搜索信息     | 无状态，只返回搜索结果 |
+| **Planner**        | 生成 TODO 列表、任务分解 | 无状态，只生成计划     |
+| **Coder**          | 编码执行、代码修改       | 无状态，只返回 diff    |
+| **QualityChecker** | 合并 Tester+Verifier：运行时测试+静态检查 | 统一质量门禁 |
+| **Reviewer**       | 语义验收：需求对齐/最终交付评估 | 复杂任务触发 |
 
 **Worker 设计原则**：
 
@@ -448,7 +595,7 @@ class MemoryBlock:
 
 ---
 
-## 4. 数据流
+## 5. 数据流
 
 ### 4.1 主交互流程
 
@@ -567,7 +714,7 @@ BuiltContext ──► Model
 
 ---
 
-## 5. 模块交互
+## 6. 模块交互
 
 ### 5.1 模块依赖关系
 
@@ -621,7 +768,7 @@ BuiltContext ──► Model
 
 ---
 
-## 6. Category 体系
+## 7. Category 体系
 
 ### 6.1 三种执行模式
 
@@ -644,17 +791,16 @@ BuiltContext ──► Model
 | 阶段         | 核心组件        | 输出物          | QUICK | DEEP | STRATEGIC |
 | ------------ | --------------- | --------------- | ----- | ---- | --------- |
 | **预分析**   | PreAnalysis     | 任务分类 + 权限 | 是    | 是   | 是        |
-| **全局规划** | Planner Worker  | 设计文档        | 否    | 否   | 是        |
-| **探索**     | Explorer Worker | 搜索结果        | 轻量  | 是   | 是        |
-| **任务规划** | Planner Worker  | TODO 列表       | 否    | 是   | 是        |
-| **编码**     | Coder Worker    | Code Diff       | 是    | 是   | 是        |
-| **自测**     | Tester Worker   | 测试报告        | 可选  | 是   | 是        |
-| **外部验证** | Verifier        | 验收报告        | 是    | 是   | 是        |
-| **Review**   | Reviewer        | 交付报告        | 是    | 是   | 是        |
+| **全局规划** | Planner Worker    | 设计文档        | 否    | 否   | 是        |
+| **探索**     | Explorer Worker   | 搜索结果        | 轻量  | 是   | 是        |
+| **任务规划** | Planner Worker    | TODO 列表       | 否    | 是   | 是        |
+| **编码**     | Coder Worker      | Code Diff       | 是    | 是   | 是        |
+| **质量检查** | QualityChecker    | 质量报告        | 可选  | 是   | 是        |
+| **语义验收** | Reviewer          | 交付报告        | 否    | 复杂 | 是        |
 
 ---
 
-## 7. 技术选型
+## 8. 技术选型
 
 ### 7.1 核心依赖
 
@@ -716,7 +862,7 @@ BuiltContext ──► Model
 
 ---
 
-## 8. 上下文精简策略
+## 9. 上下文精简策略
 
 ### 8.1 Compress（阈值触发）
 
@@ -739,7 +885,7 @@ BuiltContext ──► Model
 
 ---
 
-## 9. 未来演进
+## 10. 未来演进
 
 ### 9.1 近期规划
 
@@ -759,7 +905,7 @@ BuiltContext ──► Model
 
 ---
 
-## 10. 参考文档
+## 11. 参考文档
 
 | 文档               | 路径                                                                               |
 | ------------------ | ---------------------------------------------------------------------------------- |

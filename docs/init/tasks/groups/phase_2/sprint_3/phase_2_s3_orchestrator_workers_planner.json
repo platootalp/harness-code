@@ -1,0 +1,25 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 2 Sprint 2.3 Orchestrator workers/planner.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_2", "name": "编排层"},
+  "sprint": {"id": "S2.3", "name": "Sprint 2.3 - Orchestrator 文件", "week": 9},
+
+  "group": {
+    "id": "G2.3.4",
+    "name": "Orchestrator - workers/planner.py",
+    "module": "orchestrator/workers",
+    "file": "orchestrator/workers/planner.py",
+    "test_file": "tests/unit/orchestrator/workers/test_planner.py"
+  },
+
+  "tasks": [
+    {"id": "T2.3.4.1", "name": "PlannerWorker 类框架", "estimate": "3h"},
+    {"id": "T2.3.4.2", "name": "execute 方法", "estimate": "4h"},
+    {"id": "T2.3.4.3", "name": "generate_todo_list 方法", "estimate": "5h"},
+    {"id": "T2.3.4.4", "name": "decompose_task 方法", "estimate": "5h"}
+  ],
+
+  "dependencies": ["orchestrator/state.py"],
+  "criteria": "coverage >= 80%"
+}

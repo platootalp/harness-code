@@ -1,9 +1,3 @@
----
-name: ci-cd
-description: CI/CD 命令
-triggers: ["CI", "测试", "覆盖率"]
----
-
 # CI/CD 命令
 
 ## 质量门禁（阻断性）

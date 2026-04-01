@@ -1,8 +1,8 @@
 # Observability 模块设计文档
 
-> **模板版本**: 2.0
+> **模板版本**: 3.0
 > **创建日期**: 2026-03-29
-> **最后更新**: 2026-03-30
+> **最后更新**: 2026-03-31
 
 ---
 
@@ -69,7 +69,7 @@ Observability 模块是 Mozi AI Coding Agent 的横切面可观测性组件，�
 
 ---
 
-## 3. 数据模型
+## 3. 数据模型与状态机
 
 ### 3.1 核心类型定义
 
@@ -246,7 +246,7 @@ tracer_provider = metro.tracer_provider()
 
 ---
 
-## 5. 接口与交互
+## 5. 接口、交互与流程
 
 ### 5.1 结构化日志接口
 
@@ -369,9 +369,96 @@ Trace (trace_id)
 
 ---
 
-## 6. 实现细节
+## 6. 边界与契约
 
-### 6.1 日志级别规范
+### 6.1 错误码定义
+
+| 错误码 | 说明 | 触发场景 |
+| ------ | ---- | -------- |
+| `Obs_001` | 追踪初始化失败 | 无法初始化 Phoenix OTel |
+| `Obs_002` | Span 创建失败 | 无法创建新的 Span |
+| `Obs_003` | 上下文传播失败 | Trace ID 无法在调用链中传播 |
+| `Obs_004` | 指标导出失败 | 指标无法导出到后端 |
+| `Obs_005` | 日志写入失败 | 日志无法写入到指定输出 |
+
+### 6.2 API 契约
+
+#### 6.2.1 日志查询
+
+```
+GET /observability/logs
+Query Parameters:
+    - level: DEBUG|INFO|WARN|ERROR|CRITICAL
+    - start_time: ISO8601
+    - end_time: ISO8601
+    - trace_id: string
+    - session_id: string
+    - limit: integer (default 100)
+
+Response:
+{
+    "logs": [
+        {
+            "timestamp": "datetime",
+            "level": "string",
+            "message": "string",
+            "trace_id": "string",
+            "span_id": "string",
+            "module": "string",
+            "function": "string",
+            "metadata": {}
+        }
+    ],
+    "total": 100
+}
+```
+
+#### 6.2.2 链路追踪查询
+
+```
+GET /observability/traces/{trace_id}
+
+Response:
+{
+    "trace_id": "string",
+    "spans": [
+        {
+            "span_id": "string",
+            "parent_span_id": "string",
+            "name": "string",
+            "start_time": "datetime",
+            "end_time": "datetime",
+            "status": "string",
+            "attributes": {},
+            "events": []
+        }
+    ]
+}
+```
+
+#### 6.2.3 指标查询
+
+```
+GET /observability/metrics
+Query Parameters:
+    - name: string (metric name)
+    - labels: string (label filters)
+
+Response:
+{
+    "metrics": [
+        {
+            "name": "string",
+            "type": "counter|gauge|histogram",
+            "labels": {},
+            "value": 0.0,
+            "timestamp": "datetime"
+        }
+    ]
+}
+```
+
+### 6.3 日志级别规范
 
 | 级别 | 使用场景 |
 | ---- | -------- |
@@ -381,7 +468,7 @@ Trace (trace_id)
 | ERROR | 操作失败：工具执行失败、API 错误 |
 | CRITICAL | 系统级错误：认证失败、安全违规 |
 
-### 6.2 指标类型说明
+### 6.4 指标类型说明
 
 | 类型 | 说明 | 使用场景 |
 | ---- | ---- | -------- |
@@ -390,7 +477,7 @@ Trace (trace_id)
 | Histogram | 分布统计 | 请求耗时、文件大小分布 |
 | Timer | 时间测量 | 操作耗时，自动记录 duration_ms |
 
-### 6.3 Trace 上下文传播方式
+### 6.5 Trace 上下文传播方式
 
 | 传播方式 | 说明 | 实现 |
 | -------- | ---- | ---- |
@@ -400,7 +487,88 @@ Trace (trace_id)
 
 ---
 
-## 7. 参考
+## 7. 实现细节
+
+### 7.1 日志级别规范
+
+| 级别 | 使用场景 |
+| ---- | -------- |
+| DEBUG | 详细调试信息，参数值、返回值 |
+| INFO | 正常业务流程：任务开始/结束、工具执行 |
+| WARN | 潜在问题：重试、fallback、配置缺失 |
+| ERROR | 操作失败：工具执行失败、API 错误 |
+| CRITICAL | 系统级错误：认证失败、安全违规 |
+
+### 7.2 指标类型说明
+
+| 类型 | 说明 | 使用场景 |
+| ---- | ---- | -------- |
+| Counter | 递增计数器 | 请求次数、错误次数、任务完成数 |
+| Gauge | 可变数值 | 当前队列深度、活跃连接数 |
+| Histogram | 分布统计 | 请求耗时、文件大小分布 |
+| Timer | 时间测量 | 操作耗时，自动记录 duration_ms |
+
+### 7.3 Trace 上下文传播方式
+
+| 传播方式 | 说明 | 实现 |
+| -------- | ---- | ---- |
+| In-Process | 同一进程内传递 | ThreadLocal/ContextVar |
+| Cross-Process | 进程间传递（如 MCP） | HTTP Header (traceparent) |
+| Event-Driven | 事件总线传递 | Event Payload |
+
+---
+
+## 8. 配置
+
+> **说明**：Observability 模块的配置通过 Phoenix 初始化参数配置，暂不支持外部配置文件。
+
+### 8.1 Phoenix 配置项
+
+| 配置项 | 类型 | 默认值 | 说明 |
+| ------ | ---- | ------ | ---- |
+| `phoenix.endpoint` | string | `http://localhost:6006` | Phoenix server 端点 |
+| `phoenix.project_name` | string | `mozi` | Phoenix 项目名称 |
+| `phoenix.export_strategy` | string | `always` | 导出策略（always/never/batch） |
+| `phoenix.span_batch_size` | integer | `100` | Span 批次大小 |
+| `otel.service_name` | string | `mozi` | OpenTelemetry 服务名 |
+| `otel.exporter` | string | `otlp` | OTLP 导出器类型 |
+
+---
+
+## 9. 度量指标
+
+### 9.1 核心指标
+
+| 指标名称 | 类型 | 标签 | 说明 |
+| -------- | ---- | ---- | ---- |
+| `observability_logs_total` | Counter | level, module | 日志记录总数 |
+| `observability_spans_created_total` | Counter | operation | Span 创建总数 |
+| `observability_traces_exported_total` | Counter | status | Trace 导出总数 |
+| `observability_metrics_export_duration_seconds` | Histogram | - | 指标导出耗时 |
+| `observability_tracer_initialization_duration_seconds` | Histogram | - | 追踪器初始化耗时 |
+
+### 9.2 Phoenix 预定义指标
+
+| 指标名称 | 类型 | 标签 | 说明 |
+| -------- | ---- | ---- | ---- |
+| `mozi_requests_total` | Counter | method, endpoint, status | HTTP 请求总数 |
+| `mozi_tasks_total` | Counter | status | 任务执行总数 |
+| `mozi_tasks_duration_seconds` | Histogram | complexity | 任务耗时分布 |
+| `mozi_tools_invocations_total` | Counter | tool_name, status | 工具调用总数 |
+| `mozi_tools_duration_seconds` | Histogram | tool_name | 工具执行耗时 |
+| `mozi_session_active` | Gauge | - | 当前活跃会话数 |
+| `mozi_context_tokens` | Histogram | - | Token 使用量分布 |
+| `mozi_model_calls_total` | Counter | model, status | 模型调用总数 |
+| `mozi_model_duration_seconds` | Histogram | model | 模型响应耗时 |
+| `mozi_errors_total` | Counter | error_type, module | 错误总数 |
+
+### 9.3 指标采集状态
+
+**状态**：待定义
+
+---
+
+## 10. 参考
 
 - **Phoenix (Arize)**：[GitHub - Arize-ai/phoenix](https://github.com/Arize-ai/phoenix)
 - **OpenTelemetry Python**：[opentelemetry-python](https://opentelemetry.io/docs/instrumentation/python/)
@@ -415,10 +583,11 @@ Trace (trace_id)
 
 | 版本 | 日期 | 变更内容 |
 | ---- | ---- | -------- |
+| 3.0 | 2026-03-31 | 重组为模板 v3.0 结构，新增 §6 边界与契约、§9 度量指标 |
 | 2.1 | 2026-03-30 | 集成 Phoenix (Arize) 作为可观测性后端，添加 OTel 集成和 Evals 评估 |
 | 2.0 | 2026-03-30 | 重构为模板 v2.0 结构，核心问题改为段落描述 |
 | 1.1 | 2026-03-29 | 汇总各模块可观测性内容 |
 | 1.0 | 2026-03-29 | 初始版本 |
 
-_版本: 2.1_
-_更新日期: 2026-03-30_
+_版本: 3.0_
+_更新日期: 2026-03-31_

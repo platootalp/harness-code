@@ -1,0 +1,24 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 2 Sprint 2.4 Integration test_orchestrator_model.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_2", "name": "编排层"},
+  "sprint": {"id": "S2.4", "name": "Sprint 2.4 - 集成文件", "week": 10},
+
+  "group": {
+    "id": "G2.4.4",
+    "name": "Integration - test_orchestrator_model.py",
+    "module": "tests/integration",
+    "file": "tests/integration/test_orchestrator_model.py",
+    "test_file": null
+  },
+
+  "tasks": [
+    {"id": "T2.4.4.1", "name": "LLM 调用集成", "estimate": "4h"},
+    {"id": "T2.4.4.2", "name": "工具调用结果处理", "estimate": "4h"},
+    {"id": "T2.4.4.3", "name": "集成测试用例", "estimate": "4h"}
+  ],
+
+  "dependencies": ["orchestrator/orchestrator.py", "core/model/registry.py"],
+  "criteria": "all integration tests pass"
+}

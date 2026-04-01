@@ -1,9 +1,3 @@
----
-name: testing
-description: 测试命令
-triggers: ["测试", "test", "pytest", "coverage"]
----
-
 # 测试命令
 
 ## 结构

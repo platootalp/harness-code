@@ -1,0 +1,48 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 4 Sprint 4.1 Unit test coverage (tools + ingress)",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_4", "name": "质量与交付"},
+  "sprint": {"id": "S4.1", "name": "Sprint 4.1 - 测试补齐文件", "week": 14},
+
+  "group": {
+    "id": "G4.1.5",
+    "name": "Unit Coverage - tools + ingress",
+    "module": "tests/unit",
+    "files": [
+      "core/tools/framework.py",
+      "core/tools/registry.py",
+      "core/tools/security.py",
+      "core/tools/builtin/read.py",
+      "core/tools/builtin/write.py",
+      "core/tools/builtin/edit.py",
+      "core/tools/builtin/bash.py",
+      "core/tools/builtin/grep.py",
+      "core/tools/builtin/glob.py",
+      "ingress/models.py",
+      "ingress/output.py",
+      "ingress/commands.py",
+      "ingress/main.py"
+    ],
+    "report_file": "tests/unit/core/tools/coverage_report.md"
+  },
+
+  "tasks": [
+    {"id": "T4.1.1.34", "name": "core/tools/framework.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.35", "name": "core/tools/registry.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.36", "name": "core/tools/security.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.37", "name": "core/tools/builtin/read.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.38", "name": "core/tools/builtin/write.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.39", "name": "core/tools/builtin/edit.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.40", "name": "core/tools/builtin/bash.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.41", "name": "core/tools/builtin/grep.py 覆盖率补齐至80%", "estimate": "2h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.42", "name": "core/tools/builtin/glob.py 覆盖率补齐至80%", "estimate": "2h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.43", "name": "ingress/models.py 覆盖率补齐至80%", "estimate": "2h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.44", "name": "ingress/output.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.45", "name": "ingress/commands.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.46", "name": "ingress/main.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"}
+  ],
+
+  "dependencies": [],
+  "criteria": "coverage >= 80% per file"
+}

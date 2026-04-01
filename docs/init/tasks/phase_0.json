@@ -132,7 +132,7 @@
     }
   ],
   "milestones": [
-    {"id": "M0.1", "name": "项目骨架完成", "week": 1, "status": "pending"},
-    {"id": "M0.2", "name": "CI/CD 流水线完成", "week": 2, "status": "pending"}
+    {"id": "M0.1", "name": "项目骨架完成", "week": 1, "status": "completed"},
+    {"id": "M0.2", "name": "CI/CD 流水线完成", "week": 2, "status": "completed"}
   ]
 }

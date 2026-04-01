@@ -1,0 +1,27 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 2 Sprint 2.3 Orchestrator state.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_2", "name": "编排层"},
+  "sprint": {"id": "S2.3", "name": "Sprint 2.3 - Orchestrator 文件", "week": 9},
+
+  "group": {
+    "id": "G2.3.2",
+    "name": "Orchestrator - state.py",
+    "module": "orchestrator",
+    "file": "orchestrator/state.py",
+    "test_file": "tests/unit/orchestrator/test_state.py"
+  },
+
+  "tasks": [
+    {"id": "T2.3.2.1", "name": "TodoItem 数据类", "estimate": "2h"},
+    {"id": "T2.3.2.2", "name": "Decision 数据类", "estimate": "2h"},
+    {"id": "T2.3.2.3", "name": "OrchestratorState 数据类", "estimate": "3h"},
+    {"id": "T2.3.2.4", "name": "StateStore 类框架", "estimate": "3h"},
+    {"id": "T2.3.2.5", "name": "save_state / load_state", "estimate": "3h"},
+    {"id": "T2.3.2.6", "name": "update_todo / complete_todo", "estimate": "3h"}
+  ],
+
+  "dependencies": [],
+  "criteria": "coverage >= 80%"
+}

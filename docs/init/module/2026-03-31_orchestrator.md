@@ -9,76 +9,77 @@
 
 ## 1. 概述
 
-### 1.1 设计目标
+### 1.1 模块名称
 
-参考 oh-my-openagent 的 Sisyphus 架构，重新设计 Mozi 编排层，引入：
-- **Orchestrator-Worker 模式**：编排器是智能大脑，Worker 是无状态执行者
-- **核心 ReAct 循环**：编排器内部持有 Thought → Decide → Delegate → Review 循环
-- **上下文管理**：委托 Context 模块构建，编排器按需分配给 Worker
-- **执行组件**：Worker 池（Explorer/Planner/Coder/Tester）+ Verifier + Reviewer
-- **Coder = ExecutionAgent**：DEEP 任务时 Coder 包含完整的探索→规划→执行→验证流程
+Orchestrator（编排器）
 
-### 1.2 核心原则
+### 1.2 职责
 
-| 原则 | 说明 |
-|------|------|
-| **编排器 = 大脑** | 有状态，做决策，决定给 Worker 分配什么上下文 |
-| **Worker = 手脚** | 无状态，只执行，用完即焚 |
-| **核心循环在编排器** | ReAct: Thought → Decide → Delegate → Review |
-| **上下文爆炸通过 Worker 隔离解决** | 只给必要信息，返回摘要 |
+Orchestrator 是 Mozi AI Coding Agent 的核心编排层，负责：
+- 持有智能决策大脑，实现 Thought → Decide → Delegate → Review 的 ReAct 循环
+- 管理全局状态（TODO 列表、进度、决策历史）
+- 委托 Context 模块构建上下文，按需分配给 Worker
+- 调度执行组件池（Explorer/Planner/Coder/QualityChecker/Reviewer）
+- 管理任务生命周期（COMPLEX 复杂度路由时）
 
----
+### 1.3 核心能力
 
-## 2. 核心架构
-
-### 2.1 Orchestrator-Worker 模式
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    编排器 (Orchestrator)                         │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  核心 ReAct 循环 (Thought → Decide → Delegate → Review)     │  │
-│  │  - 思考：当前状态是什么？下一步需要什么？                    │  │
-│  │  - 决策：调用哪个 Worker？给什么上下文？                     │  │
-│  │  - 委托：发送任务给 Worker，等待结果                         │  │
-│  │  - 审查：Worker 返回的结果是否满意？是否需要重试？          │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  全局状态存储 (State Store)                                │  │
-│  │  - TODO 列表及进度                                         │  │
-│  │  - 已完成任务摘要                                          │  │
-│  │  - 关键决策历史                                            │  │
-│  │  - 上下文引用索引                                          │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  Context 模块（外部依赖）                                   │  │
-│  │  - 负责上下文构建、窗口管理、快照分层                       │  │
-│  │  - Orchestrator 通过接口调用，不直接管理                     │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              │ 委托 (带上下文)
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      执行组件池                                   │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ Worker (无状态)：Explorer / Planner / Coder / Tester    │   │
-│  │ Coder = ExecutionAgent（DEEP 任务时包含完整流程）        │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│  ┌──────────┐  ┌──────────┐                                   │
-│  │ Verifier │  │ Reviewer │                                   │
-│  │ 验证     │  │ 最终审查  │                                   │
-│  └──────────┘  └──────────┘                                   │
-└─────────────────────────────────────────────────────────────────┘
-```
+| 能力 | 说明 |
+| ---- | ---- |
+| Orchestrator-Worker 模式 | 编排器是智能大脑，Worker 是无状态执行者 |
+| 核心 ReAct 循环 | Thought → Decide → Delegate → Review 循环 |
+| 上下文管理 | 委托 Context 模块构建，按需分配给 Worker |
+| 执行组件池 | Explorer/Planner/Coder + QualityChecker + Reviewer |
+| Coder = ExecutionAgent | DEEP 任务时 Coder 包含完整的探索→规划→执行→验证流程 |
+| 状态持久化 | TODO 列表、进度、决策历史支持断点续传 |
 
 ---
 
-## 3. 编排器核心循环
+## 2. 核心问题与解决方案
 
-### 3.1 ReAct 循环
+### 2.1 上下文爆炸问题
 
-编排器内部是一个完整的 **ReAct 循环**：
+**问题描述**：传统架构中，所有上下文信息都传递给单一 Agent，导致上下文膨胀难以控制。
+
+**挑战**：信息泄露风险、Token 消耗不可控、Agent 难以聚焦当前任务。
+
+**解决方案**：Orchestrator-Worker 模式 + 上下文隔离。只给 Worker 必要信息，Worker 返回摘要，用完即焚。
+
+### 2.2 任务规划质量
+
+**问题描述**：复杂任务需要合理的任务分解和执行计划。
+
+**挑战**：LLM 规划的质量和一致性难以保证，粒度太粗或太细都会影响效率。
+
+**解决方案**：Planner Worker 生成 TODO 列表，DecompositionValidator 验证分解有效性（完整性、原子性、独立性、可验证性）。
+
+### 2.3 执行可靠性
+
+**问题描述**：任务执行可能失败，需要有效的失败恢复和降级策略。
+
+**挑战**：重试策略可能雪球效应，回滚机制需要正确清理副作用。
+
+**解决方案**：RecoveryManager 实现多级恢复策略（Retry → Rollback → Degrade），QualityChecker 统一质量门禁。
+
+### 2.4 Worker 复用与调度
+
+**问题描述**：需要灵活的 Worker 调度策略，支持串行和并行执行。
+
+**挑战**：同一 Worker 可能用于不同任务，需要避免状态污染。
+
+**解决方案**：Worker 无状态设计，用完即焚。Orchestrator 根据 Category（QUICK/DEEP/STRATEGIC）决定调度策略。
+
+---
+
+## 3. 数据模型与状态机
+
+### 3.1 核心类型定义
+
+> **说明**：Orchestrator 使用 Task 模块定义的数据模型（Task、TaskResult、TaskStatus 等）。
+
+### 3.2 状态机
+
+#### 3.2.1 ReAct 循环状态机
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -108,43 +109,92 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 编排器职责
+#### 3.2.2 Category 流水线状态
 
-| 职责 | 说明 |
-|------|------|
-| **状态管理** | 维护 TODO 列表、进度、决策历史 |
-| **上下文管理** | 委托 Context 模块，编排器按需分配 |
-| **决策** | 决定下一步调用哪个 Worker |
-| **审查** | 评估 Worker 返回结果，决定重试或继续 |
-| **生命周期** | 会话级，贯穿整个任务 |
-
-### 3.3 执行组件
-
-Orchestrator 可以调用多种执行组件：
-
-| 组件 | 职责 | 特点 |
-|------|------|------|
-| **Explorer** | 探索代码库、搜索信息 | 无状态，只返回搜索结果 |
-| **Planner** | 生成 TODO 列表、任务分解 | 无状态，只生成计划 |
-| **Coder** | 编码执行、代码修改 | 无状态，只返回 diff |
-| **Tester** | 测试执行、验证结果 | 无状态，只返回测试报告 |
-| **Verifier** | 外部验证（如代码质量、安全检查） | 独立于 Tester 的验收验证 |
-| **Reviewer** | 最终交付审查 | 评估任务是否满足要求 |
-
-> **Coder = ExecutionAgent**：Coder 在处理 DEEP 任务时，内部包含完整的探索→规划→执行→验证流程。
-
-**组件选择策略**：
-- **QUICK**：Coder（轻量）+ 可选 Tester
-- **DEEP**：Coder（完整流程）
-- **STRATEGIC**：完整流水线（Explorer → Planner → Coder → Tester → Verifier → Reviewer）
+| Category | 预分析 | 全局规划 | 探索 | 任务规划 | 编码 | 质量检查 | 语义验收 |
+|----------|--------|----------|------|----------|------|----------|-----------|
+| **QUICK** | ✅ | ❌ | ⚠️ 轻量 | ❌ | ✅ | ⚠️ 可选 | ❌ |
+| **DEEP** | ✅ | ❌ | ✅ | ✅ 显式 | ✅ | ✅ 强制 | ⚠️ 复杂 |
+| **STRATEGIC** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
-## 4. 上下文管理
+## 4. 模块结构
 
-### 4.1 上下文分配策略
+### 4.1 目录结构
 
-编排器委托 Context 模块构建上下文，按需分配给 Worker：
+```
+mozi/orchestrator/
+    __init__.py                  # 模块导出
+    orchestrator.py              # Orchestrator 主类
+    state.py                     # 全局状态管理
+    category.py                  # Category 路由
+    worker/                      # Worker 实现
+        __init__.py
+        explorer.py              # Explorer Worker
+        planner.py               # Planner Worker
+        coder.py                 # Coder Worker
+    quality.py                   # QualityChecker
+    reviewer.py                  # Reviewer
+```
+
+### 4.2 关键文件
+
+| 文件 | 职责 |
+| ---- | ---- |
+| `orchestrator.py` | Orchestrator 主类，ReAct 循环实现 |
+| `state.py` | 全局状态存储（TODO、进度、决策历史） |
+| `category.py` | Category 路由（QUICK/DEEP/STRATEGIC） |
+| `worker/explorer.py` | Explorer Worker，探索代码库 |
+| `worker/planner.py` | Planner Worker，任务分解 |
+| `worker/coder.py` | Coder Worker，代码执行 |
+| `quality.py` | QualityChecker，质量门禁 |
+| `reviewer.py` | Reviewer，语义验收 |
+
+---
+
+## 5. 接口、交互与流程
+
+### 5.1 Orchestrator 主接口
+
+```python
+class Orchestrator:
+    """编排器主类"""
+
+    async def run(
+        self,
+        user_input: str,
+        session_id: str,
+    ) -> str:
+        """
+        执行 Orchestrator-Worker ReAct 循环
+
+        Args:
+            user_input: 用户输入
+            session_id: 会话 ID
+
+        Returns:
+            最终响应结果
+        """
+        # 1. Thought: 分析当前状态
+        # 2. Decide: 决定下一步
+        # 3. Delegate: 委托 Worker
+        # 4. Review: 审查结果
+        # 5. Update: 更新状态
+        # 循环直到任务完成
+```
+
+### 5.2 执行组件接口
+
+| 组件 | 职责 | 特点 |
+| ---- | ---- | ---- |
+| **Explorer** | 探索代码库、搜索信息 | 无状态，只返回搜索结果 |
+| **Planner** | 生成 TODO 列表、任务分解 | 无状态，只生成计划 |
+| **Coder** | 编码执行、代码修改 | 无状态，只返回 diff |
+| **QualityChecker** | 合并 Tester + Verifier：运行时测试 + 静态检查 | 统一质量门禁，代码缺陷拦截率 95%+ |
+| **Reviewer** | 语义验收：需求对齐/最终交付评估 | 复杂任务触发，确保交付结果与原始意图对齐 |
+
+### 5.3 上下文分配策略
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -163,17 +213,7 @@ Orchestrator 可以调用多种执行组件：
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 4.2 Worker 上下文隔离
-
-| 原则 | 说明 |
-|------|------|
-| **最小暴露** | Worker 只接收完成当前任务所需的上下文 |
-| **摘要返回** | Worker 返回结果的压缩摘要，而非完整输出 |
-| **用完即焚** | Worker 完成后不保留其上下文 |
-
----
-
-## 5. 执行流程示例
+### 5.4 执行流程示例
 
 以"实现支付宝支付功能"为例：
 
@@ -216,12 +256,12 @@ Orchestrator 可以调用多种执行组件：
     │
     ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  验证阶段                                                        │
-│  Thought: "自测通过，需要外部验证"                                │
-│  Decide:  调用 Verifier                                          │
-│  Delegate: {scope: "代码质量 + 安全检查"}                         │
-│  Receive:  [验证报告]                                            │
-│  Review:  "验证通过，进入最终审查"                                 │
+│  质量检查                                                        │
+│  Thought: "自测通过，需要质量检查"                                │
+│  Decide:  调用 QualityChecker                                    │
+│  Delegate: {scope: "单元测试 + 静态检查 + 安全扫描"}              │
+│  Receive:  [质量报告]                                            │
+│  Review:  "通过，进入最终审查"                                    │
 └─────────────────────────────────────────────────────────────────┘
     │
     ▼
@@ -237,73 +277,163 @@ Orchestrator 可以调用多种执行组件：
 
 ---
 
-## 6. Category 与流水线
+## 6. 边界与契约
 
-### 6.1 三种 Category
+### 6.1 错误码定义
 
-| Category | 触发 | 探索 | 任务规划 | 编码 | 自测 | 用户确认 |
-|----------|------|------|----------|------|------|----------|
-| **QUICK** | 自动 | ⚠️ 轻量 | ❌ | ✅ | ⚠️ 可选 | ❌ |
-| **DEEP** | 自动 | ✅ | ✅ 显式 | ✅ | ✅ 强制 | ❌ |
-| **STRATEGIC** | `/plan` | ✅ | ✅ | ✅ | ✅ | ✅ |
+> **说明**：Orchestrator 模块的错误处理遵循统一异常体系。
 
-### 6.2 执行流水线
+| 错误码 | 错误类型 | 说明 |
+| ------ | -------- | ---- |
+| `ORCH_001` | OrchestratorError | 编排器内部错误 |
+| `ORCH_002` | CategoryRoutingError | Category 路由失败 |
+| `ORCH_003` | WorkerExecutionError | Worker 执行失败 |
+| `ORCH_004` | QualityCheckError | 质量检查未通过 |
+| `ORCH_005` | ReviewError | 语义验收失败 |
+| `ORCH_006` | StateStoreError | 状态存储错误 |
 
-所有任务共享流水线，编排器根据 Category 决定跳过哪些阶段：
+### 6.2 API 契约
 
+#### 6.2.1 Orchestrator.run()
+
+**请求**：
+```python
+async def run(
+    self,
+    user_input: str,
+    session_id: str,
+) -> str
 ```
-预分析 → 全局规划(可选) → 执行循环 → 验证 → Review
+
+**响应**：
+- `str`: 最终响应结果
+
+**错误**：
+- `ORCH_001`: 当编排器内部错误时抛出
+- `ORCH_003`: 当所有 Worker 都执行失败时抛出
+
+### 6.3 约束与限制
+
+| 约束 | 限制值 | 说明 |
+| ---- | ------ | ---- |
+| 最大 ReAct 循环次数 | 100 | 防止无限循环 |
+| Worker 执行超时 | 300 秒 | 可通过配置调整 |
+| 单次委托最大上下文 | 4000 tokens | Worker 上下文限制 |
+| 决策历史最大条数 | 50 | State Store 限制 |
+
+---
+
+## 7. 实现细节
+
+### 7.1 全局状态管理
+
+```python
+@dataclass
+class OrchestratorState:
+    """编排器全局状态"""
+    session_id: str
+    category: Category
+    todo_list: list[TodoItem]
+    completed_steps: list[str]
+    decision_history: list[Decision]
+    context_refs: dict[str, str]  # 上下文引用索引
+
+
+class StateStore:
+    """状态存储"""
+
+    async def save_state(self, state: OrchestratorState) -> None: ...
+
+    async def load_state(self, session_id: str) -> OrchestratorState | None: ...
+
+    async def update_todo(self, session_id: str, todo: TodoItem) -> None: ...
+
+    async def complete_todo(self, session_id: str, todo_id: str) -> None: ...
+```
+
+### 7.2 Category 路由
+
+```python
+class Category(Enum):
+    """任务类别枚举"""
+    QUICK = "quick"      # 快速任务
+    DEEP = "deep"        # 深度任务
+    STRATEGIC = "strategic"  # 战略任务
+
+
+class CategoryRouter:
+    """Category 路由器"""
+
+    def route(self, user_input: str) -> Category:
+        """根据用户输入路由到合适的 Category"""
+        # 分析任务复杂度
+        # QUICK: 简单文件操作、单次工具调用
+        # DEEP: 多步骤任务、需要规划
+        # STRATEGIC: 复杂多模块任务
+```
+
+### 7.3 Worker 执行
+
+```python
+class WorkerPool:
+    """Worker 连接池"""
+
+    def __init__(self) -> None:
+        self._workers: dict[str, Worker] = {}
+
+    async def execute(
+        self,
+        worker_type: str,
+        context: WorkerContext,
+    ) -> WorkerResult:
+        """执行 Worker 任务"""
+        worker = self._workers.get(worker_type)
+        if not worker:
+            raise WorkerExecutionError(f"Unknown worker type: {worker_type}")
+
+        return await worker.execute(context)
 ```
 
 ---
 
-## 7. 架构优势
+## 8. 配置
 
-| 优势 | 说明 |
-|------|------|
-| **上下文可控** | 编排器决定给 Worker 什么上下文，避免信息泄露和爆炸 |
-| **状态持久化** | TODO 列表、进度、决策历史都在编排器，支持断点续传 |
-| **Worker 复用** | 同一个 Worker 可以用于任何任务，无需维护状态 |
-| **灵活调度** | 编排器可以根据情况并行调用多个 Worker |
-| **审计友好** | 所有决策和委托记录都在编排器，便于追溯和调试 |
-| **成本优化** | Worker 用完即焚，不积累上下文，Token 消耗可控 |
+> **说明**：本模块的配置项已汇总到 [Config 模块设计文档](./2026-03-29_config.md)。
 
 ---
 
-## 8. 架构矩阵
+## 9. 度量指标
 
-| 阶段 | 核心组件 | 输出物 | QUICK | DEEP | STRATEGIC |
-|------|----------|--------|-------|------|-----------|
-| **预分析** | PreAnalysis | 任务分类 + 权限 | ✅ | ✅ | ✅ |
-| **全局规划** | Planner Worker (可选) | 📄 设计文档 | ❌ | ❌ | ✅ |
-| **探索** | Explorer Worker | 搜索结果 | ⚠️ 轻量 | ✅ | ✅ |
-| **任务规划** | Planner Worker | ✅ TODO 列表 | ❌ | ✅ | ✅ |
-| **编码** | Coder Worker | Code Diff | ✅ | ✅ | ✅ |
-| **自测** | Tester Worker | 测试报告 | ⚠️ 可选 | ✅ | ✅ |
-| **外部验证** | Verifier | 验收报告 | ✅ | ✅ | ✅ |
-| **Review** | Reviewer | 交付报告 | ✅ | ✅ | ✅ |
-
----
-
-## 9. 与 v2.0 设计对比
-
-| 方面 | v2.0 设计 | v3.0 设计 |
-|------|-----------|-----------|
-| 架构 | 统一工作循环 | Orchestrator-Worker 模式 |
-| 编排器 | 简单路由器 | **智能大脑 + ReAct 循环** |
-| 状态 | 无状态 | **有状态**（TODO、历史、上下文） |
-| 执行 | 单 Agent 执行 | **Worker 池无状态执行** |
-| 上下文 | 全部传递 | **分层管理 + 按需注入** |
+| 指标名称 | 类型 | 说明 |
+| -------- | ---- | ---- |
+| `orchestrator_run_total` | Counter | Orchestrator 运行总次数 |
+| `orchestrator_run_duration_seconds` | Histogram | 运行耗时分布 |
+| `react_loop_iterations` | Histogram | ReAct 循环迭代次数分布 |
+| `worker_execute_total` | Counter | Worker 执行总次数（按类型） |
+| `worker_execute_duration_seconds` | Histogram | Worker 执行耗时分布 |
+| `category_distribution` | Counter | Category 分布统计 |
+| `quality_check_pass_rate` | Gauge | 质量检查通过率 |
+| `task_completion_rate` | Gauge | 任务完成率 |
 
 ---
 
-_版本: 3.2_
-_更新日期: 2026-03-31_
+## 10. 参考
 
-## 10. 变更记录
+- **oh-my-openagent (Sisyphus architecture)**：参考架构
+- **错误处理**：遵循统一异常体系，见 [error_handling.md](./2026-03-29_error_handling.md)
+- **测试策略**：见 [testing.md](./2026-03-29_testing.md)
+- **相关模块**：Context、[Task](./2026-03-29_task.md)、[Model](./2026-03-29_model.md)
+
+---
+
+## 变更记录
 
 | 版本 | 日期 | 变更内容 |
-|------|------|----------|
+| ---- | ---- | -------- |
+| 3.0 | 2026-03-31 | 重构为模板 v3.0 结构：新增 §6 边界与契约、§9 度量指标；调整章节编号 |
 | 3.2 | 2026-03-31 | Manager-Worker 模式更名为 Orchestrator-Worker 模式 |
 | 3.1 | 2026-03-31 | 移除复杂度体系映射，QUICK/DEEP/STRATEGIC 为唯一路由体系 |
 | 3.0 | 2026-03-31 | 初始版本 |
+
+_版本: 3.0_
+_更新日期: 2026-03-31_

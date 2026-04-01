@@ -1,0 +1,26 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 3 Sprint 3.2 Tools external (web_search, web_fetch)",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_3", "name": "接入层与集成"},
+  "sprint": {"id": "S3.2", "name": "Sprint 3.2 - Ingress + 高级工具文件", "week": 12},
+
+  "group": {
+    "id": "G3.2.2",
+    "name": "Tools - external (web_search, web_fetch)",
+    "module": "core/tools/external",
+    "files": ["core/tools/external/web_search.py", "core/tools/external/web_fetch.py"],
+    "test_files": [null, null]
+  },
+
+  "tasks": [
+    {"id": "T3.1.10.5", "name": "WebSearchTool 类框架", "estimate": "3h"},
+    {"id": "T3.1.10.6", "name": "WebSearch execute 方法", "estimate": "5h"},
+    {"id": "T3.1.10.7", "name": "WebFetchTool 类框架", "estimate": "3h"},
+    {"id": "T3.1.10.8", "name": "WebFetch execute 方法", "estimate": "4h"}
+  ],
+
+  "dependencies": ["core/tools/framework.py"],
+  "priority": "P1",
+  "criteria": "coverage >= 80%"
+}

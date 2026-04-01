@@ -1,0 +1,98 @@
+{
+  "providers": {
+    "anthropic": {
+      "name": "Anthropic",
+      "enabled": true,
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "base_url": "https://api.anthropic.com",
+      "models": [
+        {
+          "name": "claude-opus-4-5",
+          "display_name": "Claude Opus 4",
+          "context_window": 200000,
+          "tier": "powerful",
+          "supports_tools": true,
+          "supports_vision": false,
+          "default_temperature": 1.0,
+          "max_tokens": 8192
+        },
+        {
+          "name": "claude-sonnet-4-7",
+          "display_name": "Claude Sonnet 4",
+          "context_window": 200000,
+          "tier": "balanced",
+          "supports_tools": true,
+          "supports_vision": false,
+          "default_temperature": 1.0,
+          "max_tokens": 8192
+        },
+        {
+          "name": "claude-haiku-4-7",
+          "display_name": "Claude Haiku 4",
+          "context_window": 200000,
+          "tier": "fast",
+          "supports_tools": true,
+          "supports_vision": false,
+          "default_temperature": 1.0,
+          "max_tokens": 8192
+        }
+      ]
+    },
+    "openai": {
+      "name": "OpenAI",
+      "enabled": true,
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": "https://api.openai.com/v1",
+      "models": [
+        {
+          "name": "gpt-4o",
+          "display_name": "GPT-4o",
+          "context_window": 128000,
+          "tier": "balanced",
+          "supports_tools": true,
+          "supports_vision": true,
+          "default_temperature": 1.0,
+          "max_tokens": 4096
+        },
+        {
+          "name": "gpt-4o-mini",
+          "display_name": "GPT-4o Mini",
+          "context_window": 128000,
+          "tier": "fast",
+          "supports_tools": true,
+          "supports_vision": true,
+          "default_temperature": 1.0,
+          "max_tokens": 4096
+        },
+        {
+          "name": "gpt-4-turbo",
+          "display_name": "GPT-4 Turbo",
+          "context_window": 128000,
+          "tier": "powerful",
+          "supports_tools": true,
+          "supports_vision": true,
+          "default_temperature": 1.0,
+          "max_tokens": 4096
+        }
+      ]
+    }
+  },
+  "defaults": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-7",
+    "temperature": 1.0,
+    "max_tokens": 4096
+  },
+  "retry": {
+    "max_retries": 3,
+    "base_delay": 1.0,
+    "max_delay": 60.0,
+    "exponential_base": 2.0,
+    "jitter": true
+  },
+  "circuit_breaker": {
+    "failure_threshold": 5,
+    "recovery_timeout": 60.0,
+    "half_open_max_calls": 3
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 1 Sprint 1.2 Session manager.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_1", "name": "核心基础设施"},
+  "sprint": {"id": "S1.2", "name": "Sprint 1.2 - Session 文件", "week": 4},
+
+  "group": {
+    "id": "G1.2.4",
+    "name": "Session - manager.py",
+    "module": "session",
+    "file": "session/manager.py",
+    "test_file": "tests/unit/session/test_manager.py"
+  },
+
+  "tasks": [
+    {"id": "T1.2.4.1", "name": "BaseSessionManager 抽象基类", "estimate": "3h"},
+    {"id": "T1.2.4.2", "name": "SessionManager 类框架", "estimate": "3h"},
+    {"id": "T1.2.4.3", "name": "create / get / update / delete", "estimate": "4h"},
+    {"id": "T1.2.4.4", "name": "list / append_message", "estimate": "3h"},
+    {"id": "T1.2.4.5", "name": "状态机转换逻辑", "estimate": "6h"}
+  ],
+
+  "dependencies": ["session/database.py"],
+  "criteria": "coverage >= 80%"
+}

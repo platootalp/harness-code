@@ -1,9 +1,3 @@
----
-name: workflow
-description: Git 工作流命令
-triggers: ["git", "分支", "PR", "提交"]
----
-
 # Git 工作流命令
 
 ## 分支

@@ -1,9 +1,3 @@
----
-name: coding-style
-description: 代码风格命令
-triggers: ["代码", "style", "lint", "format"]
----
-
 # 代码风格命令
 
 ## Python

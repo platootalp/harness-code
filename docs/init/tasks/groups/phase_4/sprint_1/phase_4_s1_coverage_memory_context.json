@@ -1,0 +1,43 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 4 Sprint 4.1 Unit test coverage (memory + context)",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_4", "name": "质量与交付"},
+  "sprint": {"id": "S4.1", "name": "Sprint 4.1 - 测试补齐文件", "week": 14},
+
+  "group": {
+    "id": "G4.1.3",
+    "name": "Unit Coverage - memory + context",
+    "module": "tests/unit",
+    "files": [
+      "memory/short_term.py",
+      "memory/long_term.py",
+      "memory/retriever.py",
+      "memory/stores/milvus.py",
+      "memory/stores/pgvector.py",
+      "context/models.py",
+      "context/builder.py",
+      "context/window.py",
+      "context/compactor.py",
+      "context/offloader.py",
+      "context/isolator.py"
+    ],
+    "report_file": "tests/unit/memory/coverage_report.md"
+  },
+
+  "tasks": [
+    {"id": "T4.1.1.16", "name": "memory/short_term.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.17", "name": "memory/long_term.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.18", "name": "memory/retriever.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.19", "name": "memory/stores 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.20", "name": "context/models.py 覆盖率补齐至80%", "estimate": "2h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.21", "name": "context/builder.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.22", "name": "context/window.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.23", "name": "context/compactor.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.24", "name": "context/offloader.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
+    {"id": "T4.1.1.25", "name": "context/isolator.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"}
+  ],
+
+  "dependencies": [],
+  "criteria": "coverage >= 80% per file"
+}
