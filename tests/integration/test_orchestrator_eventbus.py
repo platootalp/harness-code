@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import tempfile
-from unittest.mock import AsyncMock, MagicMock, patch
+from collections.abc import Iterator
 
 import pytest
 
@@ -28,7 +28,7 @@ def event_bus() -> EventBus:
 
 
 @pytest.fixture
-def orchestrator() -> Orchestrator:
+def orchestrator() -> Iterator[Orchestrator]:
     """Create an orchestrator instance."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Orchestrator(storage_path=tmpdir)
@@ -146,12 +146,11 @@ class TestEventDeadLetterQueue:
     @pytest.mark.asyncio
     async def test_dead_letter_queue(self, event_bus: EventBus) -> None:
         """Test that failed events go to dead letter queue."""
-        dlq: list[Event] = []
 
         async def failing_handler(evt: Event) -> None:
             raise Exception("Handler failed")
 
-        subscription = await event_bus.subscribe(
+        await event_bus.subscribe(
             "failures.*",
             callback=failing_handler,
             priority=EventPriority.HIGH.value,

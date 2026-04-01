@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import tempfile
-from unittest.mock import AsyncMock, MagicMock, patch
+from collections.abc import Iterator
 
 import pytest
 
@@ -23,7 +23,7 @@ from mozi.orchestrator import Orchestrator
 
 
 @pytest.fixture
-def orchestrator() -> Orchestrator:
+def orchestrator() -> Iterator[Orchestrator]:
     """Create an orchestrator instance."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Orchestrator(storage_path=tmpdir)
