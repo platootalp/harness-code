@@ -425,25 +425,25 @@
               "id": "T2.3.1.1",
               "name": "创建 Category 枚举",
               "file": "orchestrator/category.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.1.2",
               "name": "创建 CategoryRouter 类",
               "file": "orchestrator/category.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.1.3",
               "name": "实现 route 方法",
               "file": "orchestrator/category.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.1.4",
               "name": "编写 category 单元测试",
               "file": "tests/unit/orchestrator/test_category.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -456,55 +456,55 @@
               "id": "T2.3.2.1",
               "name": "创建 TodoItem 数据类",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.2",
               "name": "创建 Decision 数据类",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.3",
               "name": "创建 OrchestratorState 数据类",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.4",
               "name": "创建 StateStore 类",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.5",
               "name": "实现 save_state 方法",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.6",
               "name": "实现 load_state 方法",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.7",
               "name": "实现 update_todo 方法",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.8",
               "name": "实现 complete_todo 方法",
               "file": "orchestrator/state.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.2.9",
               "name": "编写 state 单元测试",
               "file": "tests/unit/orchestrator/test_state.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -517,31 +517,31 @@
               "id": "T2.3.3.1",
               "name": "创建 ExplorerWorker 类",
               "file": "orchestrator/workers/explorer.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.3.2",
               "name": "实现 execute 方法",
               "file": "orchestrator/workers/explorer.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.3.3",
               "name": "实现 search_codebase 方法",
               "file": "orchestrator/workers/explorer.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.3.4",
               "name": "实现 get_file_info 方法",
               "file": "orchestrator/workers/explorer.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.3.5",
               "name": "编写 explorer 单元测试",
               "file": "tests/unit/orchestrator/workers/test_explorer.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -554,31 +554,31 @@
               "id": "T2.3.4.1",
               "name": "创建 PlannerWorker 类",
               "file": "orchestrator/workers/planner.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.4.2",
               "name": "实现 execute 方法",
               "file": "orchestrator/workers/planner.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.4.3",
               "name": "实现 generate_todo_list 方法",
               "file": "orchestrator/workers/planner.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.4.4",
               "name": "实现 decompose_task 方法",
               "file": "orchestrator/workers/planner.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.4.5",
               "name": "编写 planner 单元测试",
               "file": "tests/unit/orchestrator/workers/test_planner.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -591,31 +591,31 @@
               "id": "T2.3.5.1",
               "name": "创建 CoderWorker 类",
               "file": "orchestrator/workers/coder.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.5.2",
               "name": "实现 execute 方法",
               "file": "orchestrator/workers/coder.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.5.3",
               "name": "实现 apply_diff 方法",
               "file": "orchestrator/workers/coder.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.5.4",
               "name": "实现 validate_change 方法",
               "file": "orchestrator/workers/coder.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.5.5",
               "name": "编写 coder 单元测试",
               "file": "tests/unit/orchestrator/workers/test_coder.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -628,37 +628,37 @@
               "id": "T2.3.6.1",
               "name": "创建 QualityChecker 类",
               "file": "orchestrator/quality.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.6.2",
-              "name": "实现 run_tests 方法",
+              "name": "实现 check_syntax 方法 (替代 run_tests)",
               "file": "orchestrator/quality.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.6.3",
-              "name": "实现 static_analysis 方法",
+              "name": "实现 check_style 方法 (替代 static_analysis)",
               "file": "orchestrator/quality.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.6.4",
-              "name": "实现 security_scan 方法",
+              "name": "实现 check_security 方法",
               "file": "orchestrator/quality.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.6.5",
               "name": "实现 check 方法",
               "file": "orchestrator/quality.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.6.6",
               "name": "编写 quality 单元测试",
               "file": "tests/unit/orchestrator/test_quality.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -671,25 +671,25 @@
               "id": "T2.3.7.1",
               "name": "创建 Reviewer 类",
               "file": "orchestrator/reviewer.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.7.2",
               "name": "实现 review 方法",
               "file": "orchestrator/reviewer.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.7.3",
-              "name": "实现 verify_alignment 方法",
+              "name": "实现 approve/request_changes 方法 (替代 verify_alignment)",
               "file": "orchestrator/reviewer.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.7.4",
               "name": "编写 reviewer 单元测试",
               "file": "tests/unit/orchestrator/test_reviewer.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -702,55 +702,55 @@
               "id": "T2.3.8.1",
               "name": "创建 Orchestrator 主类",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.2",
-              "name": "实现 run 方法",
+              "name": "实现 execute 方法 (替代 run)",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.3",
-              "name": "实现 _thought 方法",
+              "name": "实现 _execute_quick/_execute_deep/_execute_strategic 方法",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.4",
-              "name": "实现 _decide 方法",
+              "name": "实现 _check_quality 方法 (替代 _decide)",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.5",
-              "name": "实现 _delegate 方法",
+              "name": "实现 get_state/review 方法",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.6",
-              "name": "实现 _review 方法",
+              "name": "实现 _save_decision 方法",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.7",
-              "name": "实现 _update 方法",
+              "name": "实现 get_current_state 方法",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.8",
-              "name": "实现 _should_continue 方法",
+              "name": "实现 _check_quality 循环逻辑 (替代 _should_continue)",
               "file": "orchestrator/orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.3.8.9",
               "name": "编写 orchestrator 单元测试",
               "file": "tests/unit/orchestrator/test_orchestrator.py",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         }
@@ -770,17 +770,17 @@
             {
               "id": "T2.4.1.1",
               "name": "会话上下文传递",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.1.2",
               "name": "状态持久化到 Session",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.1.3",
               "name": "集成测试通过",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -792,17 +792,17 @@
             {
               "id": "T2.4.2.1",
               "name": "上下文分配给 Worker",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.2.2",
               "name": "Worker 结果摘要归档",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.2.3",
               "name": "集成测试通过",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -814,17 +814,17 @@
             {
               "id": "T2.4.3.1",
               "name": "记忆召回触发",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.3.2",
               "name": "新记忆存储",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.3.3",
               "name": "集成测试通过",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -836,17 +836,17 @@
             {
               "id": "T2.4.4.1",
               "name": "LLM 调用正常",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.4.2",
               "name": "工具调用结果处理",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.4.3",
               "name": "集成测试通过",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -858,17 +858,17 @@
             {
               "id": "T2.4.5.1",
               "name": "状态变更事件发布",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.5.2",
               "name": "Worker 执行事件发布",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.5.3",
               "name": "集成测试通过",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         },
@@ -880,22 +880,22 @@
             {
               "id": "T2.4.6.1",
               "name": "QUICK 任务流程",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.6.2",
               "name": "DEEP 任务流程",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.6.3",
               "name": "STRATEGIC 任务流程",
-              "status": "pending"
+              "status": "completed"
             },
             {
               "id": "T2.4.6.4",
               "name": "崩溃恢复测试",
-              "status": "pending"
+              "status": "completed"
             }
           ]
         }
@@ -925,7 +925,7 @@
       "id": "M2.4",
       "name": "Orchestrator 集成",
       "week": 10,
-      "status": "pending"
+      "status": "completed"
     }
   ]
 }

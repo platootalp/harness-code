@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T2.4.3.1", "name": "记忆召回触发", "estimate": "4h"},
-    {"id": "T2.4.3.2", "name": "新记忆存储", "estimate": "4h"},
-    {"id": "T2.4.3.3", "name": "集成测试用例", "estimate": "4h"}
+    {"id": "T2.4.3.1", "name": "记忆召回触发", "estimate": "4h", "status": "completed"},
+    {"id": "T2.4.3.2", "name": "新记忆存储", "estimate": "4h", "status": "completed"},
+    {"id": "T2.4.3.3", "name": "集成测试用例", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": ["orchestrator/orchestrator.py", "memory/retriever.py"],

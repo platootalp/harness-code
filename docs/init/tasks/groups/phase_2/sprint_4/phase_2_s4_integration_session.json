@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T2.4.1.1", "name": "会话上下文传递", "estimate": "4h"},
-    {"id": "T2.4.1.2", "name": "状态持久化到 Session", "estimate": "4h"},
-    {"id": "T2.4.1.3", "name": "集成测试用例", "estimate": "4h"}
+    {"id": "T2.4.1.1", "name": "会话上下文传递", "estimate": "4h", "status": "completed"},
+    {"id": "T2.4.1.2", "name": "状态持久化到 Session", "estimate": "4h", "status": "completed"},
+    {"id": "T2.4.1.3", "name": "集成测试用例", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": ["orchestrator/orchestrator.py", "session/manager.py"],

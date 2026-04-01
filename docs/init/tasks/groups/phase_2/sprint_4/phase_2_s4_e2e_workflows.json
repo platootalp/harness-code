@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T2.4.6.1", "name": "QUICK 任务流程 E2E", "estimate": "4h"},
-    {"id": "T2.4.6.2", "name": "DEEP 任务流程 E2E", "estimate": "4h"},
-    {"id": "T2.4.6.3", "name": "STRATEGIC 任务流程 E2E", "estimate": "4h"},
-    {"id": "T2.4.6.4", "name": "崩溃恢复 E2E", "estimate": "4h"}
+    {"id": "T2.4.6.1", "name": "QUICK 任务流程 E2E", "estimate": "4h", "status": "completed"},
+    {"id": "T2.4.6.2", "name": "DEEP 任务流程 E2E", "estimate": "4h", "status": "completed"},
+    {"id": "T2.4.6.3", "name": "STRATEGIC 任务流程 E2E", "estimate": "4h", "status": "completed"},
+    {"id": "T2.4.6.4", "name": "崩溃恢复 E2E", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": ["tests/integration/test_orchestrator_*.py"],
