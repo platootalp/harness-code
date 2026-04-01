@@ -410,7 +410,10 @@ class FileVectorStore(VectorStore):
         if os.path.exists(self.storage_path):
             try:
                 with open(self.storage_path) as f:
-                    data = json.load(f)
+                    content = f.read()
+                    if not content:
+                        return
+                    data = json.loads(content)
                     for block_data in data.values():
                         block = MemoryBlock.from_dict(block_data)
                         self._blocks[block.id] = block
