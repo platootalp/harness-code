@@ -1,0 +1,24 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 1 Sprint 1.2 Session storage.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_1", "name": "核心基础设施"},
+  "sprint": {"id": "S1.2", "name": "Sprint 1.2 - Session 文件", "week": 4},
+
+  "group": {
+    "id": "G1.2.2",
+    "name": "Session - storage.py",
+    "module": "session",
+    "file": "session/storage.py",
+    "test_file": "tests/unit/session/test_storage.py"
+  },
+
+  "tasks": [
+    {"id": "T1.2.2.1", "name": "SessionStorage 抽象接口", "estimate": "3h"},
+    {"id": "T1.2.2.2", "name": "save_session / load_session 签名", "estimate": "2h"},
+    {"id": "T1.2.2.3", "name": "save_message / load_messages 签名", "estimate": "2h"}
+  ],
+
+  "dependencies": ["session/models.py"],
+  "criteria": "coverage >= 80%"
+}

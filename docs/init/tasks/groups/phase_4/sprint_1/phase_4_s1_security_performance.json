@@ -16,13 +16,13 @@
   },
 
   "tasks": [
-    {"id": "T4.1.4.1", "name": "bandit 扫描 - 无HIGH风险", "estimate": "2h", "criteria": "无 HIGH 风险"},
-    {"id": "T4.1.4.2", "name": "pip-audit 扫描 - 无高危漏洞", "estimate": "2h", "criteria": "无高危漏洞"},
-    {"id": "T4.1.4.3", "name": "npm audit 扫描 - 无高危漏洞", "estimate": "2h", "criteria": "无高危漏洞"},
-    {"id": "T4.1.4.4", "name": "truffleHog 扫描 - 无硬编码密钥", "estimate": "2h", "criteria": "无硬编码密钥"},
-    {"id": "T4.1.5.1", "name": "响应时间测试 (<2s简单任务)", "estimate": "4h", "criteria": "< 2s (简单任务)"},
-    {"id": "T4.1.5.2", "name": "并发会话测试 (10并发)", "estimate": "4h", "criteria": "10 并发无异常"},
-    {"id": "T4.1.5.3", "name": "内存使用测试 (无泄漏)", "estimate": "4h", "criteria": "无内存泄漏"}
+    {"id": "T4.1.4.1", "name": "bandit 扫描 - 无HIGH风险", "estimate": "2h", "criteria": "无 HIGH 风险", "status": "pending"},
+    {"id": "T4.1.4.2", "name": "pip-audit 扫描 - 无高危漏洞", "estimate": "2h", "criteria": "无高危漏洞", "status": "pending"},
+    {"id": "T4.1.4.3", "name": "npm audit 扫描 - 无高危漏洞", "estimate": "2h", "criteria": "无高危漏洞", "status": "pending"},
+    {"id": "T4.1.4.4", "name": "truffleHog 扫描 - 无硬编码密钥", "estimate": "2h", "criteria": "无硬编码密钥", "status": "pending"},
+    {"id": "T4.1.5.1", "name": "响应时间测试 (<2s简单任务)", "estimate": "4h", "criteria": "< 2s (简单任务)", "status": "pending"},
+    {"id": "T4.1.5.2", "name": "并发会话测试 (10并发)", "estimate": "4h", "criteria": "10 并发无异常", "status": "pending"},
+    {"id": "T4.1.5.3", "name": "内存使用测试 (无泄漏)", "estimate": "4h", "criteria": "无内存泄漏", "status": "pending"}
   ],
 
   "dependencies": [],

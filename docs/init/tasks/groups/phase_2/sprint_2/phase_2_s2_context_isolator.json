@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T2.2.6.1", "name": "Isolator 类框架", "estimate": "3h"},
-    {"id": "T2.2.6.2", "name": "should_isolate 方法", "estimate": "4h"},
-    {"id": "T2.2.6.3", "name": "create_isolated_context 方法", "estimate": "4h"},
-    {"id": "T2.2.6.4", "name": "merge_results 方法", "estimate": "4h"}
+    {"id": "T2.2.6.1", "name": "Isolator 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T2.2.6.2", "name": "should_isolate 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.2.6.3", "name": "create_isolated_context 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.2.6.4", "name": "merge_results 方法", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": ["context/models.py", "context/builder.py"],

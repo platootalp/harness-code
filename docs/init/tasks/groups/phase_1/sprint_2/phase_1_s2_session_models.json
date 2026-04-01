@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T1.2.1.1", "name": "MessageRole / SessionStatus 枚举", "estimate": "2h"},
-    {"id": "T1.2.1.2", "name": "Message 数据类", "estimate": "3h"},
-    {"id": "T1.2.1.3", "name": "Session 数据类", "estimate": "4h"},
-    {"id": "T1.2.1.4", "name": "类型注解完善", "estimate": "2h"}
+    {"id": "T1.2.1.1", "name": "MessageRole / SessionStatus 枚举", "estimate": "2h", "status": "completed"},
+    {"id": "T1.2.1.2", "name": "Message 数据类", "estimate": "3h", "status": "completed"},
+    {"id": "T1.2.1.3", "name": "Session 数据类", "estimate": "4h", "status": "completed"},
+    {"id": "T1.2.1.4", "name": "类型注解完善", "estimate": "2h", "status": "completed"}
   ],
 
   "dependencies": [],

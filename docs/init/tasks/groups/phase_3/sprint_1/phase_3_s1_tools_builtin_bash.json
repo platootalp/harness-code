@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T3.1.7.1", "name": "BashTool 类框架", "estimate": "2h"},
-    {"id": "T3.1.7.2", "name": "execute 方法", "estimate": "3h"},
-    {"id": "T3.1.7.3", "name": "危险命令检测", "estimate": "4h"},
-    {"id": "T3.1.7.4", "name": "超时控制", "estimate": "3h"}
+    {"id": "T3.1.7.1", "name": "BashTool 类框架", "estimate": "2h", "status": "pending"},
+    {"id": "T3.1.7.2", "name": "execute 方法", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.7.3", "name": "危险命令检测", "estimate": "4h", "status": "pending"},
+    {"id": "T3.1.7.4", "name": "超时控制", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": ["core/tools/framework.py", "core/tools/security.py"],

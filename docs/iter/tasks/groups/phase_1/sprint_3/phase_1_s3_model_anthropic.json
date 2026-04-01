@@ -1,0 +1,26 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 1 Sprint 1.3 Model anthropic.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_1", "name": "核心基础设施"},
+  "sprint": {"id": "S1.3", "name": "Sprint 1.3 - Model 文件", "week": 5},
+
+  "group": {
+    "id": "G1.3.5",
+    "name": "Model - anthropic.py",
+    "module": "core/model",
+    "file": "core/model/anthropic.py",
+    "test_file": "tests/unit/core/model/test_anthropic.py"
+  },
+
+  "tasks": [
+    {"id": "T1.3.2.1", "name": "AnthropicAdapter 类框架", "estimate": "3h"},
+    {"id": "T1.3.2.2", "name": "provider / supported_models", "estimate": "2h"},
+    {"id": "T1.3.2.3", "name": "validate_request / parse_response", "estimate": "3h"},
+    {"id": "T1.3.2.4", "name": "invoke 方法", "estimate": "6h"},
+    {"id": "T1.3.2.5", "name": "invoke_stream 方法", "estimate": "6h"}
+  ],
+
+  "dependencies": ["core/model/adapter.py", "core/model/retry.py", "core/model/circuit_breaker.py"],
+  "criteria": "coverage >= 80%"
+}

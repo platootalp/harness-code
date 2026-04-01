@@ -31,13 +31,13 @@
   },
 
   "tasks": [
-    {"id": "T4.1.1.9", "name": "adapter.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.10", "name": "anthropic.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.11", "name": "openai.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.12", "name": "registry.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.13", "name": "template.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.14", "name": "retry.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.15", "name": "circuit_breaker.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"}
+    {"id": "T4.1.1.9", "name": "adapter.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.10", "name": "anthropic.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.11", "name": "openai.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.12", "name": "registry.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.13", "name": "template.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.14", "name": "retry.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.15", "name": "circuit_breaker.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%", "status": "pending"}
   ],
 
   "dependencies": [],

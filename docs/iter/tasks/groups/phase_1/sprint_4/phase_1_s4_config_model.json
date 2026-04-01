@@ -1,0 +1,24 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 1 Sprint 1.4 config/model.json",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_1", "name": "核心基础设施"},
+  "sprint": {"id": "S1.4", "name": "Sprint 1.4 - 配置与集成", "week": 6},
+
+  "group": {
+    "id": "G1.4.1",
+    "name": "Config - model.json",
+    "module": "config",
+    "file": "config/model.json",
+    "test_file": null
+  },
+
+  "tasks": [
+    {"id": "T1.4.1.1", "name": "模型配置定义", "estimate": "2h"},
+    {"id": "T1.4.1.6", "name": "提供商配置", "estimate": "2h"},
+    {"id": "T1.4.1.7", "name": "默认参数配置", "estimate": "2h"}
+  ],
+
+  "dependencies": [],
+  "criteria": "valid JSON, matches schema"
+}

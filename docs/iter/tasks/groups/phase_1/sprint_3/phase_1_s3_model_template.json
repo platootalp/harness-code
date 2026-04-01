@@ -1,0 +1,26 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 1 Sprint 1.3 Model template.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_1", "name": "核心基础设施"},
+  "sprint": {"id": "S1.3", "name": "Sprint 1.3 - Model 文件", "week": 5},
+
+  "group": {
+    "id": "G1.3.8",
+    "name": "Model - template.py",
+    "module": "core/model",
+    "file": "core/model/template.py",
+    "test_file": "tests/unit/core/model/test_template.py"
+  },
+
+  "tasks": [
+    {"id": "T1.3.5.1", "name": "PromptTemplateManager 类", "estimate": "4h"},
+    {"id": "T1.3.5.2", "name": "load_template 方法", "estimate": "3h"},
+    {"id": "T1.3.5.3", "name": "render 方法", "estimate": "3h"},
+    {"id": "T1.3.5.4", "name": "validate_template 方法", "estimate": "3h"},
+    {"id": "T1.3.5.5", "name": "预定义模板创建", "estimate": "4h"}
+  ],
+
+  "dependencies": [],
+  "criteria": "coverage >= 80%"
+}

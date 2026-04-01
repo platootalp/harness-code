@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T3.1.10.9", "name": "TaskCreateTool 类", "estimate": "3h"},
-    {"id": "T3.1.10.10", "name": "TaskCreate execute 方法", "estimate": "3h"},
-    {"id": "T3.1.10.11", "name": "TaskGetTool 类", "estimate": "3h"},
-    {"id": "T3.1.10.12", "name": "TaskGet execute 方法", "estimate": "3h"}
+    {"id": "T3.1.10.9", "name": "TaskCreateTool 类", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.10.10", "name": "TaskCreate execute 方法", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.10.11", "name": "TaskGetTool 类", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.10.12", "name": "TaskGet execute 方法", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": ["core/tools/framework.py"],

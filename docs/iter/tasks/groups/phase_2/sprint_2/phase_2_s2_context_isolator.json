@@ -1,0 +1,25 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 2 Sprint 2.2 Context isolator.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_2", "name": "编排层"},
+  "sprint": {"id": "S2.2", "name": "Sprint 2.2 - Context 文件", "week": 8},
+
+  "group": {
+    "id": "G2.2.6",
+    "name": "Context - isolator.py",
+    "module": "context",
+    "file": "context/isolator.py",
+    "test_file": "tests/unit/context/test_isolator.py"
+  },
+
+  "tasks": [
+    {"id": "T2.2.6.1", "name": "Isolator 类框架", "estimate": "3h"},
+    {"id": "T2.2.6.2", "name": "should_isolate 方法", "estimate": "4h"},
+    {"id": "T2.2.6.3", "name": "create_isolated_context 方法", "estimate": "4h"},
+    {"id": "T2.2.6.4", "name": "merge_results 方法", "estimate": "4h"}
+  ],
+
+  "dependencies": ["context/models.py", "context/builder.py"],
+  "criteria": "coverage >= 80%"
+}

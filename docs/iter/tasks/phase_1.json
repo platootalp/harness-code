@@ -1,0 +1,320 @@
+{
+  "phase": {
+    "id": "phase_1",
+    "name": "核心模块实现",
+    "duration_weeks": 4,
+    "goal": "实现 Session、Model、Tools 模块"
+  },
+  "iterations": [
+    {
+      "id": "iter_1_1",
+      "name": "M1.1 Storage 模块完成",
+      "week": 3,
+      "milestone_id": "M1.1",
+      "tasks": [
+        {
+          "id": "T1.1.1",
+          "name": "infrastructure/database.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.1.1.1", "name": "创建 SQLiteSessionStorage 类", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.2", "name": "实现 init_db 方法", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.3", "name": "实现 save_session 方法", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.4", "name": "实现 load_session 方法", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.5", "name": "实现 delete_session 方法", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.6", "name": "实现 list_sessions 方法", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.7", "name": "实现 save_message 方法", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.8", "name": "实现 load_messages 方法", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.9", "name": "实现大结果文件存储", "file": "infrastructure/database.py", "status": "completed"},
+            {"id": "T1.1.1.10", "name": "编写 database 单元测试", "file": "tests/unit/infrastructure/test_database.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.1.2",
+          "name": "infrastructure/vector_db.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.1.2.1", "name": "创建 VectorStore 抽象基类", "file": "infrastructure/vector_db.py", "status": "completed"},
+            {"id": "T1.1.2.2", "name": "创建 MilvusVectorStore", "file": "infrastructure/vector_db.py", "status": "completed"},
+            {"id": "T1.1.2.3", "name": "创建 PGVectorStore", "file": "infrastructure/vector_db.py", "status": "completed"},
+            {"id": "T1.1.2.4", "name": "实现 upsert 方法", "file": "infrastructure/vector_db.py", "status": "completed"},
+            {"id": "T1.1.2.5", "name": "实现 search 方法", "file": "infrastructure/vector_db.py", "status": "completed"},
+            {"id": "T1.1.2.6", "name": "实现 delete 方法", "file": "infrastructure/vector_db.py", "status": "completed"},
+            {"id": "T1.1.2.7", "name": "实现 hybrid_search 方法", "file": "infrastructure/vector_db.py", "status": "completed"},
+            {"id": "T1.1.2.8", "name": "编写 vector_db 单元测试", "file": "tests/unit/infrastructure/test_vector_db.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.1.3",
+          "name": "infrastructure/event_bus.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.1.3.1", "name": "创建 EventBus 类", "file": "infrastructure/event_bus.py", "status": "completed"},
+            {"id": "T1.1.3.2", "name": "实现 publish 方法（同步）", "file": "infrastructure/event_bus.py", "status": "completed"},
+            {"id": "T1.1.3.3", "name": "实现 publish 方法（异步）", "file": "infrastructure/event_bus.py", "status": "completed"},
+            {"id": "T1.1.3.4", "name": "实现 subscribe 方法", "file": "infrastructure/event_bus.py", "status": "completed"},
+            {"id": "T1.1.3.5", "name": "实现 unsubscribe 方法", "file": "infrastructure/event_bus.py", "status": "completed"},
+            {"id": "T1.1.3.6", "name": "实现事件过滤", "file": "infrastructure/event_bus.py", "status": "completed"},
+            {"id": "T1.1.3.7", "name": "编写 event_bus 单元测试", "file": "tests/unit/infrastructure/test_event_bus.py", "status": "completed"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iter_1_2",
+      "name": "M1.2 Session 模块完成",
+      "week": 4,
+      "milestone_id": "M1.2",
+      "tasks": [
+        {
+          "id": "T1.2.1",
+          "name": "session/models.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.2.1.1", "name": "创建 MessageRole 枚举", "file": "session/models.py", "status": "completed"},
+            {"id": "T1.2.1.2", "name": "创建 SessionStatus 枚举", "file": "session/models.py", "status": "completed"},
+            {"id": "T1.2.1.3", "name": "创建 Message 数据类", "file": "session/models.py", "status": "completed"},
+            {"id": "T1.2.1.4", "name": "创建 Session 数据类", "file": "session/models.py", "status": "completed"},
+            {"id": "T1.2.1.5", "name": "添加类型注解", "file": "session/models.py", "status": "completed"},
+            {"id": "T1.2.1.6", "name": "编写 models 单元测试", "file": "tests/unit/session/test_models.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.2.2",
+          "name": "session/storage.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.2.2.1", "name": "创建 SessionStorage 抽象接口", "file": "session/storage.py", "status": "completed"},
+            {"id": "T1.2.2.2", "name": "定义 save_session 签名", "file": "session/storage.py", "status": "completed"},
+            {"id": "T1.2.2.3", "name": "定义 load_session 签名", "file": "session/storage.py", "status": "completed"},
+            {"id": "T1.2.2.4", "name": "定义 save_message 签名", "file": "session/storage.py", "status": "completed"},
+            {"id": "T1.2.2.5", "name": "编写 storage 接口测试", "file": "tests/unit/session/test_storage.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.2.3",
+          "name": "session/database.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.2.3.1", "name": "创建 SQLiteSessionStorage 实现", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.2", "name": "实现 init 方法（建表）", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.3", "name": "实现 save_session", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.4", "name": "实现 load_session", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.5", "name": "实现 update_session", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.6", "name": "实现 delete_session", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.7", "name": "实现 list_sessions", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.8", "name": "实现 save_message", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.9", "name": "实现 load_messages", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.10", "name": "实现 update_message", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.11", "name": "实现流式输出持久化", "file": "session/database.py", "status": "completed"},
+            {"id": "T1.2.3.12", "name": "编写 database 单元测试", "file": "tests/unit/session/test_database.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.2.4",
+          "name": "session/manager.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.2.4.1", "name": "创建 BaseSessionManager 抽象基类", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.2", "name": "创建 SessionManager 实现", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.3", "name": "实现 create 方法", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.4", "name": "实现 get 方法", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.5", "name": "实现 update 方法", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.6", "name": "实现 delete 方法", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.7", "name": "实现 list 方法", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.8", "name": "实现 append_message 方法", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.9", "name": "实现状态机转换逻辑", "file": "session/manager.py", "status": "completed"},
+            {"id": "T1.2.4.10", "name": "编写 manager 单元测试", "file": "tests/unit/session/test_manager.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.2.5",
+          "name": "Session 模块集成",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.2.5.1", "name": "resume 命令功能", "file": "tests/unit/session/test_session_integration.py", "status": "completed"},
+            {"id": "T1.2.5.2", "name": "多会话并发测试", "file": "tests/unit/session/test_session_integration.py", "status": "completed"},
+            {"id": "T1.2.5.3", "name": "流式输出恢复测试", "file": "tests/unit/session/test_session_integration.py", "status": "completed"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iter_1_3",
+      "name": "M1.3 Model 模块核心完成",
+      "week": 5,
+      "milestone_id": "M1.3",
+      "tasks": [
+        {
+          "id": "T1.3.1",
+          "name": "core/model/adapter.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.1.1", "name": "创建 ModelProvider 枚举", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.2", "name": "创建 MessageRole 枚举", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.3", "name": "创建 Message 数据类", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.4", "name": "创建 ToolCall 数据类", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.5", "name": "创建 ModelRequest 数据类", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.6", "name": "创建 ModelResponse 数据类", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.7", "name": "创建 ModelUsage 数据类", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.8", "name": "创建 ModelInfo 数据类", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.9", "name": "创建 ModelAdapter 抽象基类", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.10", "name": "定义 invoke 抽象方法", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.11", "name": "定义 invoke_stream 抽象方法", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.12", "name": "定义 get_model_info 抽象方法", "file": "core/model/adapter.py", "status": "completed"},
+            {"id": "T1.3.1.13", "name": "定义 validate_request 抽象方法", "file": "core/model/adapter.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.3.2",
+          "name": "core/model/anthropic.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.2.1", "name": "创建 AnthropicAdapter 类", "file": "core/model/anthropic.py", "status": "completed"},
+            {"id": "T1.3.2.2", "name": "实现 provider 属性", "file": "core/model/anthropic.py", "status": "completed"},
+            {"id": "T1.3.2.3", "name": "实现 supported_models 属性", "file": "core/model/anthropic.py", "status": "completed"},
+            {"id": "T1.3.2.4", "name": "实现 validate_request 方法", "file": "core/model/anthropic.py", "status": "completed"},
+            {"id": "T1.3.2.5", "name": "实现 get_model_info 方法", "file": "core/model/anthropic.py", "status": "completed"},
+            {"id": "T1.3.2.6", "name": "实现 parse_response 方法", "file": "core/model/anthropic.py", "status": "completed"},
+            {"id": "T1.3.2.7", "name": "实现 invoke 方法", "file": "core/model/anthropic.py", "status": "completed"},
+            {"id": "T1.3.2.8", "name": "实现 invoke_stream 方法", "file": "core/model/anthropic.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.3.3",
+          "name": "core/model/openai.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.3.1", "name": "创建 OpenAIAdapter 类", "file": "core/model/openai.py", "status": "completed"},
+            {"id": "T1.3.3.2", "name": "实现 provider 属性", "file": "core/model/openai.py", "status": "completed"},
+            {"id": "T1.3.3.3", "name": "实现 supported_models 属性", "file": "core/model/openai.py", "status": "completed"},
+            {"id": "T1.3.3.4", "name": "实现 validate_request 方法", "file": "core/model/openai.py", "status": "completed"},
+            {"id": "T1.3.3.5", "name": "实现 get_model_info 方法", "file": "core/model/openai.py", "status": "completed"},
+            {"id": "T1.3.3.6", "name": "实现 parse_response 方法", "file": "core/model/openai.py", "status": "completed"},
+            {"id": "T1.3.3.7", "name": "实现 invoke 方法", "file": "core/model/openai.py", "status": "completed"},
+            {"id": "T1.3.3.8", "name": "实现 invoke_stream 方法", "file": "core/model/openai.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.3.4",
+          "name": "core/model/registry.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.4.1", "name": "创建 ModelRegistry 类", "file": "core/model/registry.py", "status": "completed"},
+            {"id": "T1.3.4.2", "name": "实现 register_adapter 方法", "file": "core/model/registry.py", "status": "completed"},
+            {"id": "T1.3.4.3", "name": "实现 get_adapter 方法", "file": "core/model/registry.py", "status": "completed"},
+            {"id": "T1.3.4.4", "name": "实现 get_adapter_by_model 方法", "file": "core/model/registry.py", "status": "completed"},
+            {"id": "T1.3.4.5", "name": "实现 list_providers 方法", "file": "core/model/registry.py", "status": "completed"},
+            {"id": "T1.3.4.6", "name": "实现 list_models 方法", "file": "core/model/registry.py", "status": "completed"},
+            {"id": "T1.3.4.7", "name": "实现 is_model_available 方法", "file": "core/model/registry.py", "status": "completed"},
+            {"id": "T1.3.4.8", "name": "编写 registry 单元测试", "file": "tests/unit/core/model/test_registry.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.3.5",
+          "name": "core/model/template.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.5.1", "name": "创建 PromptTemplateManager 类", "file": "core/model/template.py", "status": "completed"},
+            {"id": "T1.3.5.2", "name": "实现 register_template 方法", "file": "core/model/template.py", "status": "completed"},
+            {"id": "T1.3.5.3", "name": "实现 load_template 方法", "file": "core/model/template.py", "status": "completed"},
+            {"id": "T1.3.5.4", "name": "实现 render 方法", "file": "core/model/template.py", "status": "completed"},
+            {"id": "T1.3.5.5", "name": "实现 render_template 方法", "file": "core/model/template.py", "status": "completed"},
+            {"id": "T1.3.5.6", "name": "实现 validate_template 方法", "file": "core/model/template.py", "status": "completed"},
+            {"id": "T1.3.5.7", "name": "预定义模板创建", "file": "core/model/template.py", "status": "completed"},
+            {"id": "T1.3.5.8", "name": "编写 template 单元测试", "file": "tests/unit/core/model/test_template.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.3.6",
+          "name": "core/model/errors.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.6.1", "name": "创建 ModelInvocationError", "file": "core/model/errors.py", "status": "completed"},
+            {"id": "T1.3.6.2", "name": "创建 ModelNotFoundError", "file": "core/model/errors.py", "status": "completed"},
+            {"id": "T1.3.6.3", "name": "创建 InvalidRequestError", "file": "core/model/errors.py", "status": "completed"},
+            {"id": "T1.3.6.4", "name": "创建 ResponseParseError", "file": "core/model/errors.py", "status": "completed"},
+            {"id": "T1.3.6.5", "name": "创建 RateLimitError", "file": "core/model/errors.py", "status": "completed"},
+            {"id": "T1.3.6.6", "name": "创建 AuthenticationError", "file": "core/model/errors.py", "status": "completed"},
+            {"id": "T1.3.6.7", "name": "创建 CircuitBreakerOpenError", "file": "core/model/errors.py", "status": "completed"},
+            {"id": "T1.3.6.8", "name": "编写 errors 单元测试", "file": "tests/unit/core/model/test_errors.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.3.7",
+          "name": "core/model/retry.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.7.1", "name": "创建 RetryStrategy 类", "file": "core/model/retry.py", "status": "completed"},
+            {"id": "T1.3.7.2", "name": "实现 should_retry 方法", "file": "core/model/retry.py", "status": "completed"},
+            {"id": "T1.3.7.3", "name": "实现 calculate_delay 方法", "file": "core/model/retry.py", "status": "completed"},
+            {"id": "T1.3.7.4", "name": "实现 execute_with_retry 方法", "file": "core/model/retry.py", "status": "completed"},
+            {"id": "T1.3.7.5", "name": "编写 retry 单元测试", "file": "tests/unit/core/model/test_retry.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.3.8",
+          "name": "core/model/circuit_breaker.py",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.3.8.1", "name": "创建 CircuitState 枚举", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.2", "name": "创建 CircuitBreakerConfig 类", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.3", "name": "创建 CircuitBreaker 类", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.4", "name": "实现 state 属性", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.5", "name": "实现 call 方法", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.6", "name": "实现 _check_state_transition 方法", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.7", "name": "实现 _on_success 方法", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.8", "name": "实现 _on_failure 方法", "file": "core/model/circuit_breaker.py", "status": "completed"},
+            {"id": "T1.3.8.9", "name": "编写 circuit_breaker 单元测试", "file": "tests/unit/core/model/test_circuit_breaker.py", "status": "completed"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iter_1_4",
+      "name": "M1.4 Model 模块集成",
+      "week": 6,
+      "milestone_id": "M1.4",
+      "tasks": [
+        {
+          "id": "T1.4.1",
+          "name": "Model 配置管理",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.4.1.1", "name": "创建 config/model.json", "file": "config/model.json", "status": "completed"},
+            {"id": "T1.4.1.2", "name": "实现 ConfigLoader", "file": "infrastructure/config.py", "status": "completed"},
+            {"id": "T1.4.1.3", "name": "实现环境变量覆盖", "file": "infrastructure/config.py", "status": "completed"},
+            {"id": "T1.4.1.4", "name": "实现密钥安全读取", "file": "infrastructure/config.py", "status": "completed"},
+            {"id": "T1.4.1.5", "name": "编写 config 单元测试", "file": "tests/unit/infrastructure/test_config.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.4.2",
+          "name": "Model 与 EventBus 集成",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.4.2.1", "name": "model_invoked 事件发布", "file": "mozi/core/model/service.py", "status": "completed"},
+            {"id": "T1.4.2.2", "name": "model_error 事件发布", "file": "mozi/core/model/service.py", "status": "completed"},
+            {"id": "T1.4.2.3", "name": "事件 payload 正确", "file": "mozi/core/model/service.py", "status": "completed"}
+          ]
+        },
+        {
+          "id": "T1.4.3",
+          "name": "Model 与 Session 集成",
+          "priority": "P0",
+          "children": [
+            {"id": "T1.4.3.1", "name": "模型响应追加到会话", "file": "mozi/core/model/service.py", "status": "completed"},
+            {"id": "T1.4.3.2", "name": "工具调用结果追加到会话", "file": "mozi/core/model/service.py", "status": "completed"},
+            {"id": "T1.4.3.3", "name": "集成测试通过", "file": "mozi/core/model/service.py", "status": "completed"}
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {"id": "M1.1", "name": "Storage 模块完成", "week": 3, "status": "completed"},
+    {"id": "M1.2", "name": "Session 模块完成", "week": 4, "status": "completed"},
+    {"id": "M1.3", "name": "Model 模块核心完成", "week": 5, "status": "completed"},
+    {"id": "M1.4", "name": "Model 模块集成", "week": 6, "status": "completed"}
+  ]
+}

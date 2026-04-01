@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T1.3.6.1", "name": "ModelInvocationError / ModelNotFoundError", "estimate": "2h"},
-    {"id": "T1.3.6.2", "name": "InvalidRequestError / ResponseParseError", "estimate": "2h"},
-    {"id": "T1.3.6.3", "name": "RateLimitError / AuthenticationError", "estimate": "2h"},
-    {"id": "T1.3.6.4", "name": "CircuitBreakerOpenError", "estimate": "1h"}
+    {"id": "T1.3.6.1", "name": "ModelInvocationError / ModelNotFoundError", "estimate": "2h", "status": "completed"},
+    {"id": "T1.3.6.2", "name": "InvalidRequestError / ResponseParseError", "estimate": "2h", "status": "completed"},
+    {"id": "T1.3.6.3", "name": "RateLimitError / AuthenticationError", "estimate": "2h", "status": "completed"},
+    {"id": "T1.3.6.4", "name": "CircuitBreakerOpenError", "estimate": "1h", "status": "completed"}
   ],
 
   "dependencies": [],

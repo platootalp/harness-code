@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T3.2.1.1", "name": "CliMode 枚举", "estimate": "1h"},
-    {"id": "T3.2.1.2", "name": "SessionAction 枚举", "estimate": "1h"},
-    {"id": "T3.2.1.3", "name": "UserInput 数据类", "estimate": "3h"},
-    {"id": "T3.2.1.4", "name": "CliResult 数据类", "estimate": "3h"}
+    {"id": "T3.2.1.1", "name": "CliMode 枚举", "estimate": "1h", "status": "pending"},
+    {"id": "T3.2.1.2", "name": "SessionAction 枚举", "estimate": "1h", "status": "pending"},
+    {"id": "T3.2.1.3", "name": "UserInput 数据类", "estimate": "3h", "status": "pending"},
+    {"id": "T3.2.1.4", "name": "CliResult 数据类", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": [],

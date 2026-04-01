@@ -14,11 +14,11 @@
   },
 
   "tasks": [
-    {"id": "T3.1.3.1", "name": "PermissionLevel 枚举", "estimate": "1h"},
-    {"id": "T3.1.3.2", "name": "ViolationSeverity 枚举", "estimate": "1h"},
-    {"id": "T3.1.3.3", "name": "SecurityViolation 数据类", "estimate": "2h"},
-    {"id": "T3.1.3.4", "name": "DangerousFunctionDetector 类", "estimate": "5h"},
-    {"id": "T3.1.3.5", "name": "path_whitelist_validation 方法", "estimate": "4h"}
+    {"id": "T3.1.3.1", "name": "PermissionLevel 枚举", "estimate": "1h", "status": "pending"},
+    {"id": "T3.1.3.2", "name": "ViolationSeverity 枚举", "estimate": "1h", "status": "pending"},
+    {"id": "T3.1.3.3", "name": "SecurityViolation 数据类", "estimate": "2h", "status": "pending"},
+    {"id": "T3.1.3.4", "name": "DangerousFunctionDetector 类", "estimate": "5h", "status": "pending"},
+    {"id": "T3.1.3.5", "name": "path_whitelist_validation 方法", "estimate": "4h", "status": "pending"}
   ],
 
   "dependencies": [],

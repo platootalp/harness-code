@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T2.2.3.1", "name": "WindowManager 类框架", "estimate": "3h"},
-    {"id": "T2.2.3.2", "name": "check_threshold 方法", "estimate": "4h"},
-    {"id": "T2.2.3.3", "name": "should_compress 方法", "estimate": "4h"},
-    {"id": "T2.2.3.4", "name": "get_snapshot 方法", "estimate": "4h"}
+    {"id": "T2.2.3.1", "name": "WindowManager 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T2.2.3.2", "name": "check_threshold 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.2.3.3", "name": "should_compress 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.2.3.4", "name": "get_snapshot 方法", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": ["context/models.py"],

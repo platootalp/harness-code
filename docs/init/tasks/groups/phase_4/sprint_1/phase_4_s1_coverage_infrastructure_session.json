@@ -33,14 +33,14 @@
   },
 
   "tasks": [
-    {"id": "T4.1.1.1", "name": "database.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.2", "name": "vector_db.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.3", "name": "event_bus.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.4", "name": "config.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.5", "name": "session/models.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.6", "name": "session/storage.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.7", "name": "session/database.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.8", "name": "session/manager.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"}
+    {"id": "T4.1.1.1", "name": "database.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.2", "name": "vector_db.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.3", "name": "event_bus.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.4", "name": "config.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.5", "name": "session/models.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.6", "name": "session/storage.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.7", "name": "session/database.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.8", "name": "session/manager.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"}
   ],
 
   "dependencies": [],

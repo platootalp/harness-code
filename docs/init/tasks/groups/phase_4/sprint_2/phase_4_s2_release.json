@@ -13,13 +13,13 @@
   },
 
   "tasks": [
-    {"id": "T4.2.3.1", "name": "文档最终更新检查", "estimate": "2h"},
-    {"id": "T4.2.3.2", "name": "Git Tag v1.0.0 创建", "estimate": "1h"},
-    {"id": "T4.2.3.3", "name": "Release Notes 编写", "estimate": "3h"},
-    {"id": "T4.2.3.4", "name": "版本对齐检查", "estimate": "2h"},
-    {"id": "T4.2.3.5", "name": "CI/CD 全绿验证", "estimate": "2h"},
-    {"id": "T4.2.3.6", "name": "安装包测试", "estimate": "2h"},
-    {"id": "T4.2.3.7", "name": "冒烟测试", "estimate": "2h"}
+    {"id": "T4.2.3.1", "name": "文档最终更新检查", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.3.2", "name": "Git Tag v1.0.0 创建", "estimate": "1h", "status": "pending"},
+    {"id": "T4.2.3.3", "name": "Release Notes 编写", "estimate": "3h", "status": "pending"},
+    {"id": "T4.2.3.4", "name": "版本对齐检查", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.3.5", "name": "CI/CD 全绿验证", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.3.6", "name": "安装包测试", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.3.7", "name": "冒烟测试", "estimate": "2h", "status": "pending"}
   ],
 
   "dependencies": [

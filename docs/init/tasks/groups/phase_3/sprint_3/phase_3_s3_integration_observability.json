@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T3.3.5.1", "name": "Tracing 集成测试", "estimate": "4h"},
-    {"id": "T3.3.5.2", "name": "Metrics 集成测试", "estimate": "4h"},
-    {"id": "T3.3.5.3", "name": "日志集成测试", "estimate": "3h"}
+    {"id": "T3.3.5.1", "name": "Tracing 集成测试", "estimate": "4h", "status": "pending"},
+    {"id": "T3.3.5.2", "name": "Metrics 集成测试", "estimate": "4h", "status": "pending"},
+    {"id": "T3.3.5.3", "name": "日志集成测试", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": [],

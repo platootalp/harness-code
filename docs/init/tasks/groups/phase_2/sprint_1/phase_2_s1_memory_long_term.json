@@ -14,11 +14,11 @@
   },
 
   "tasks": [
-    {"id": "T2.1.2.1", "name": "MemoryType 枚举", "estimate": "1h"},
-    {"id": "T2.1.2.2", "name": "MemoryBlock 数据类", "estimate": "3h"},
-    {"id": "T2.1.2.3", "name": "LongTermMemory 类框架", "estimate": "3h"},
-    {"id": "T2.1.2.4", "name": "add / search / delete", "estimate": "5h"},
-    {"id": "T2.1.2.5", "name": "update_importance 方法", "estimate": "3h"}
+    {"id": "T2.1.2.1", "name": "MemoryType 枚举", "estimate": "1h", "status": "completed"},
+    {"id": "T2.1.2.2", "name": "MemoryBlock 数据类", "estimate": "3h", "status": "completed"},
+    {"id": "T2.1.2.3", "name": "LongTermMemory 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T2.1.2.4", "name": "add / search / delete", "estimate": "5h", "status": "completed"},
+    {"id": "T2.1.2.5", "name": "update_importance 方法", "estimate": "3h", "status": "completed"}
   ],
 
   "dependencies": [],

@@ -14,11 +14,11 @@
   },
 
   "tasks": [
-    {"id": "T3.3.2.1", "name": "user_message 事件测试", "estimate": "3h"},
-    {"id": "T3.3.2.2", "name": "agent_response 事件测试", "estimate": "3h"},
-    {"id": "T3.3.2.3", "name": "tool_execution 事件测试", "estimate": "3h"},
-    {"id": "T3.3.2.4", "name": "session_created 事件测试", "estimate": "3h"},
-    {"id": "T3.3.2.5", "name": "error 事件测试", "estimate": "3h"}
+    {"id": "T3.3.2.1", "name": "user_message 事件测试", "estimate": "3h", "status": "pending"},
+    {"id": "T3.3.2.2", "name": "agent_response 事件测试", "estimate": "3h", "status": "pending"},
+    {"id": "T3.3.2.3", "name": "tool_execution 事件测试", "estimate": "3h", "status": "pending"},
+    {"id": "T3.3.2.4", "name": "session_created 事件测试", "estimate": "3h", "status": "pending"},
+    {"id": "T3.3.2.5", "name": "error 事件测试", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": ["infrastructure/event_bus.py", "orchestrator/orchestrator.py"],

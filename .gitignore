@@ -20,5 +20,6 @@ htmlcov/
 .idea/
 
 # OS
+.env
 .DS_Store
 cs/

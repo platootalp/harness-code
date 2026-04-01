@@ -18,15 +18,15 @@
   },
 
   "tasks": [
-    {"id": "T3.1.4.1", "name": "ReadFileTool 类框架", "estimate": "2h"},
-    {"id": "T3.1.4.2", "name": "Read execute 方法", "estimate": "3h"},
-    {"id": "T3.1.4.3", "name": "Read 路径验证逻辑", "estimate": "3h"},
-    {"id": "T3.1.5.1", "name": "WriteFileTool 类框架", "estimate": "2h"},
-    {"id": "T3.1.5.2", "name": "Write execute 方法", "estimate": "3h"},
-    {"id": "T3.1.5.3", "name": "Write 原子写入实现", "estimate": "4h"},
-    {"id": "T3.1.6.1", "name": "EditFileTool 类框架", "estimate": "2h"},
-    {"id": "T3.1.6.2", "name": "Edit execute 方法", "estimate": "3h"},
-    {"id": "T3.1.6.3", "name": "Edit 字符串替换逻辑", "estimate": "4h"}
+    {"id": "T3.1.4.1", "name": "ReadFileTool 类框架", "estimate": "2h", "status": "pending"},
+    {"id": "T3.1.4.2", "name": "Read execute 方法", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.4.3", "name": "Read 路径验证逻辑", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.5.1", "name": "WriteFileTool 类框架", "estimate": "2h", "status": "pending"},
+    {"id": "T3.1.5.2", "name": "Write execute 方法", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.5.3", "name": "Write 原子写入实现", "estimate": "4h", "status": "pending"},
+    {"id": "T3.1.6.1", "name": "EditFileTool 类框架", "estimate": "2h", "status": "pending"},
+    {"id": "T3.1.6.2", "name": "Edit execute 方法", "estimate": "3h", "status": "pending"},
+    {"id": "T3.1.6.3", "name": "Edit 字符串替换逻辑", "estimate": "4h", "status": "pending"}
   ],
 
   "dependencies": ["core/tools/framework.py", "core/tools/security.py"],

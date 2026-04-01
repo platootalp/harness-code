@@ -1,0 +1,26 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 2 Sprint 2.3 Orchestrator quality.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_2", "name": "编排层"},
+  "sprint": {"id": "S2.3", "name": "Sprint 2.3 - Orchestrator 文件", "week": 9},
+
+  "group": {
+    "id": "G2.3.6",
+    "name": "Orchestrator - quality.py",
+    "module": "orchestrator",
+    "file": "orchestrator/quality.py",
+    "test_file": "tests/unit/orchestrator/test_quality.py"
+  },
+
+  "tasks": [
+    {"id": "T2.3.6.1", "name": "QualityChecker 类框架", "estimate": "3h"},
+    {"id": "T2.3.6.2", "name": "run_tests 方法", "estimate": "4h"},
+    {"id": "T2.3.6.3", "name": "static_analysis 方法", "estimate": "4h"},
+    {"id": "T2.3.6.4", "name": "security_scan 方法", "estimate": "4h"},
+    {"id": "T2.3.6.5", "name": "check 方法", "estimate": "3h"}
+  ],
+
+  "dependencies": [],
+  "criteria": "coverage >= 80%"
+}

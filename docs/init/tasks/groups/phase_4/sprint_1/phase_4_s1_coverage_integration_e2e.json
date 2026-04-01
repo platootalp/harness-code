@@ -17,16 +17,16 @@
   },
 
   "tasks": [
-    {"id": "T4.1.2.1", "name": "Session+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.2.2", "name": "Context+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.2.3", "name": "Memory+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.2.4", "name": "Model+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.2.5", "name": "Tools+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.2.6", "name": "整体集成测试覆盖率≥80%", "estimate": "6h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.3.1", "name": "CLI REPL 模式 E2E 测试", "estimate": "4h"},
-    {"id": "T4.1.3.2", "name": "CLI 命令模式 E2E 测试", "estimate": "4h"},
-    {"id": "T4.1.3.3", "name": "会话管理 E2E 测试", "estimate": "4h"},
-    {"id": "T4.1.3.4", "name": "完整任务执行 E2E 测试", "estimate": "6h"}
+    {"id": "T4.1.2.1", "name": "Session+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.2.2", "name": "Context+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.2.3", "name": "Memory+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.2.4", "name": "Model+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.2.5", "name": "Tools+Orchestrator 集成覆盖率≥80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.2.6", "name": "整体集成测试覆盖率≥80%", "estimate": "6h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.3.1", "name": "CLI REPL 模式 E2E 测试", "estimate": "4h", "status": "pending"},
+    {"id": "T4.1.3.2", "name": "CLI 命令模式 E2E 测试", "estimate": "4h", "status": "pending"},
+    {"id": "T4.1.3.3", "name": "会话管理 E2E 测试", "estimate": "4h", "status": "pending"},
+    {"id": "T4.1.3.4", "name": "完整任务执行 E2E 测试", "estimate": "6h", "status": "pending"}
   ],
 
   "dependencies": [],

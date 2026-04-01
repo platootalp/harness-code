@@ -14,11 +14,11 @@
   },
 
   "tasks": [
-    {"id": "T2.2.2.1", "name": "ContextBuilder 类框架", "estimate": "3h"},
-    {"id": "T2.2.2.2", "name": "build 方法", "estimate": "5h"},
-    {"id": "T2.2.2.3", "name": "_build_system_prompt 方法", "estimate": "4h"},
-    {"id": "T2.2.2.4", "name": "_gather_history 方法", "estimate": "4h"},
-    {"id": "T2.2.2.5", "name": "_gather_memory 方法", "estimate": "4h"}
+    {"id": "T2.2.2.1", "name": "ContextBuilder 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T2.2.2.2", "name": "build 方法", "estimate": "5h", "status": "completed"},
+    {"id": "T2.2.2.3", "name": "_build_system_prompt 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.2.2.4", "name": "_gather_history 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.2.2.5", "name": "_gather_memory 方法", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": ["context/models.py", "memory/short_term.py", "memory/retriever.py"],

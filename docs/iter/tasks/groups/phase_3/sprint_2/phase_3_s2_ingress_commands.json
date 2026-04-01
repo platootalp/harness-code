@@ -1,0 +1,24 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 3 Sprint 3.2 Ingress commands.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_3", "name": "接入层与集成"},
+  "sprint": {"id": "S3.2", "name": "Sprint 3.2 - Ingress + 高级工具文件", "week": 12},
+
+  "group": {
+    "id": "G3.2.6",
+    "name": "Ingress - commands.py",
+    "module": "ingress",
+    "file": "ingress/commands.py",
+    "test_file": "tests/unit/ingress/test_commands.py"
+  },
+
+  "tasks": [
+    {"id": "T3.2.3.1", "name": "parse_command 函数框架", "estimate": "3h"},
+    {"id": "T3.2.3.2", "name": "do 命令解析", "estimate": "3h"},
+    {"id": "T3.2.3.3", "name": "session 命令解析", "estimate": "3h"}
+  ],
+
+  "dependencies": ["ingress/models.py"],
+  "criteria": "coverage >= 80%"
+}

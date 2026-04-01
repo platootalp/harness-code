@@ -23,14 +23,14 @@
   },
 
   "tasks": [
-    {"id": "T4.1.1.26", "name": "orchestrator/category.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.27", "name": "orchestrator/state.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.28", "name": "orchestrator/quality.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.29", "name": "orchestrator/reviewer.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.30", "name": "orchestrator/orchestrator.py 覆盖率补齐至80%", "estimate": "6h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.31", "name": "orchestrator/workers/explorer.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.32", "name": "orchestrator/workers/planner.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"},
-    {"id": "T4.1.1.33", "name": "orchestrator/workers/coder.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%"}
+    {"id": "T4.1.1.26", "name": "orchestrator/category.py 覆盖率补齐至80%", "estimate": "3h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.27", "name": "orchestrator/state.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.28", "name": "orchestrator/quality.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.29", "name": "orchestrator/reviewer.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.30", "name": "orchestrator/orchestrator.py 覆盖率补齐至80%", "estimate": "6h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.31", "name": "orchestrator/workers/explorer.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.32", "name": "orchestrator/workers/planner.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"},
+    {"id": "T4.1.1.33", "name": "orchestrator/workers/coder.py 覆盖率补齐至80%", "estimate": "4h", "criteria": "coverage >= 80%", "status": "pending"}
   ],
 
   "dependencies": [],

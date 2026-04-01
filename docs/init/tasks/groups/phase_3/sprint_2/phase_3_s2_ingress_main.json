@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T3.2.4.1", "name": "BaseCLI 抽象基类", "estimate": "3h"},
-    {"id": "T3.2.4.2", "name": "ReplCLI 类", "estimate": "5h"},
-    {"id": "T3.2.4.3", "name": "CommandCLI 类", "estimate": "5h"},
-    {"id": "T3.2.4.4", "name": "run / 参数解析 / 命令路由", "estimate": "5h"}
+    {"id": "T3.2.4.1", "name": "BaseCLI 抽象基类", "estimate": "3h", "status": "pending"},
+    {"id": "T3.2.4.2", "name": "ReplCLI 类", "estimate": "5h", "status": "pending"},
+    {"id": "T3.2.4.3", "name": "CommandCLI 类", "estimate": "5h", "status": "pending"},
+    {"id": "T3.2.4.4", "name": "run / 参数解析 / 命令路由", "estimate": "5h", "status": "pending"}
   ],
 
   "dependencies": ["ingress/models.py", "ingress/commands.py", "ingress/output.py"],

@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T1.4.1.1", "name": "模型配置定义", "estimate": "2h"},
-    {"id": "T1.4.1.6", "name": "提供商配置", "estimate": "2h"},
-    {"id": "T1.4.1.7", "name": "默认参数配置", "estimate": "2h"}
+    {"id": "T1.4.1.1", "name": "模型配置定义", "estimate": "2h", "status": "completed"},
+    {"id": "T1.4.1.6", "name": "提供商配置", "estimate": "2h", "status": "completed"},
+    {"id": "T1.4.1.7", "name": "默认参数配置", "estimate": "2h", "status": "completed"}
   ],
 
   "dependencies": [],

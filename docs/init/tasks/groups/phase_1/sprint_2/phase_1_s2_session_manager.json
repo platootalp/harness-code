@@ -14,11 +14,11 @@
   },
 
   "tasks": [
-    {"id": "T1.2.4.1", "name": "BaseSessionManager 抽象基类", "estimate": "3h"},
-    {"id": "T1.2.4.2", "name": "SessionManager 类框架", "estimate": "3h"},
-    {"id": "T1.2.4.3", "name": "create / get / update / delete", "estimate": "4h"},
-    {"id": "T1.2.4.4", "name": "list / append_message", "estimate": "3h"},
-    {"id": "T1.2.4.5", "name": "状态机转换逻辑", "estimate": "6h"}
+    {"id": "T1.2.4.1", "name": "BaseSessionManager 抽象基类", "estimate": "3h", "status": "completed"},
+    {"id": "T1.2.4.2", "name": "SessionManager 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T1.2.4.3", "name": "create / get / update / delete", "estimate": "4h", "status": "completed"},
+    {"id": "T1.2.4.4", "name": "list / append_message", "estimate": "3h", "status": "completed"},
+    {"id": "T1.2.4.5", "name": "状态机转换逻辑", "estimate": "6h", "status": "completed"}
   ],
 
   "dependencies": ["session/database.py"],

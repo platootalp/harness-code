@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T1.3.4.1", "name": "ModelRegistry 类框架", "estimate": "3h"},
-    {"id": "T1.3.4.2", "name": "register_adapter", "estimate": "2h"},
-    {"id": "T1.3.4.3", "name": "get_adapter / get_adapter_by_model", "estimate": "3h"}
+    {"id": "T1.3.4.1", "name": "ModelRegistry 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T1.3.4.2", "name": "register_adapter", "estimate": "2h", "status": "completed"},
+    {"id": "T1.3.4.3", "name": "get_adapter / get_adapter_by_model", "estimate": "3h", "status": "completed"}
   ],
 
   "dependencies": ["core/model/adapter.py", "core/model/anthropic.py", "core/model/openai.py"],

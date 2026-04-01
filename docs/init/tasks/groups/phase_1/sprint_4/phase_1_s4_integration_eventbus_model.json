@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T1.4.2.1", "name": "model_invoked 事件发布", "estimate": "4h"},
-    {"id": "T1.4.2.2", "name": "model_error 事件发布", "estimate": "4h"},
-    {"id": "T1.4.2.3", "name": "事件 payload 正确性验证", "estimate": "4h"}
+    {"id": "T1.4.2.1", "name": "model_invoked 事件发布", "estimate": "4h", "status": "completed"},
+    {"id": "T1.4.2.2", "name": "model_error 事件发布", "estimate": "4h", "status": "completed"},
+    {"id": "T1.4.2.3", "name": "事件 payload 正确性验证", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": ["core/model/registry.py", "infrastructure/event_bus.py"],

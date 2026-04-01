@@ -17,14 +17,14 @@
   },
 
   "tasks": [
-    {"id": "T4.2.2.1", "name": "README.md - 项目概述", "estimate": "2h"},
-    {"id": "T4.2.2.2", "name": "README.md - 安装说明", "estimate": "2h"},
-    {"id": "T4.2.2.3", "name": "README.md - 使用指南", "estimate": "4h"},
-    {"id": "T4.2.2.4", "name": "README.md - 架构简介", "estimate": "2h"},
-    {"id": "T4.2.2.5", "name": "CONTRIBUTING.md - 贡献指南", "estimate": "4h"},
-    {"id": "T4.2.2.6", "name": "CONTRIBUTING.md - 开发流程", "estimate": "3h"},
-    {"id": "T4.2.2.7", "name": "CONTRIBUTING.md - 代码规范", "estimate": "2h"},
-    {"id": "T4.2.2.8", "name": "CHANGELOG.md - v1.0.0 变更记录", "estimate": "3h"}
+    {"id": "T4.2.2.1", "name": "README.md - 项目概述", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.2.2", "name": "README.md - 安装说明", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.2.3", "name": "README.md - 使用指南", "estimate": "4h", "status": "pending"},
+    {"id": "T4.2.2.4", "name": "README.md - 架构简介", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.2.5", "name": "CONTRIBUTING.md - 贡献指南", "estimate": "4h", "status": "pending"},
+    {"id": "T4.2.2.6", "name": "CONTRIBUTING.md - 开发流程", "estimate": "3h", "status": "pending"},
+    {"id": "T4.2.2.7", "name": "CONTRIBUTING.md - 代码规范", "estimate": "2h", "status": "pending"},
+    {"id": "T4.2.2.8", "name": "CHANGELOG.md - v1.0.0 变更记录", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": [],

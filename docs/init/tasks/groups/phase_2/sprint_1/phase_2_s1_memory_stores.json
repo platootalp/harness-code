@@ -14,14 +14,14 @@
   },
 
   "tasks": [
-    {"id": "T2.1.4.1", "name": "MilvusVectorStore 类框架", "estimate": "3h"},
-    {"id": "T2.1.4.2", "name": "Milvus upsert 方法", "estimate": "4h"},
-    {"id": "T2.1.4.3", "name": "Milvus search 方法", "estimate": "4h"},
-    {"id": "T2.1.4.4", "name": "Milvus delete 方法", "estimate": "3h"},
-    {"id": "T2.1.4.5", "name": "PGVectorStore 类框架", "estimate": "3h"},
-    {"id": "T2.1.4.6", "name": "PGVector upsert 方法", "estimate": "4h"},
-    {"id": "T2.1.4.7", "name": "PGVector search 方法", "estimate": "4h"},
-    {"id": "T2.1.4.8", "name": "PGVector delete 方法", "estimate": "3h"}
+    {"id": "T2.1.4.1", "name": "MilvusVectorStore 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T2.1.4.2", "name": "Milvus upsert 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.1.4.3", "name": "Milvus search 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.1.4.4", "name": "Milvus delete 方法", "estimate": "3h", "status": "completed"},
+    {"id": "T2.1.4.5", "name": "PGVectorStore 类框架", "estimate": "3h", "status": "completed"},
+    {"id": "T2.1.4.6", "name": "PGVector upsert 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.1.4.7", "name": "PGVector search 方法", "estimate": "4h", "status": "completed"},
+    {"id": "T2.1.4.8", "name": "PGVector delete 方法", "estimate": "3h", "status": "completed"}
   ],
 
   "dependencies": ["infrastructure/vector_db.py"],

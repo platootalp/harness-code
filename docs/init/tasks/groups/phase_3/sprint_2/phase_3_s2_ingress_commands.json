@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T3.2.3.1", "name": "parse_command 函数框架", "estimate": "3h"},
-    {"id": "T3.2.3.2", "name": "do 命令解析", "estimate": "3h"},
-    {"id": "T3.2.3.3", "name": "session 命令解析", "estimate": "3h"}
+    {"id": "T3.2.3.1", "name": "parse_command 函数框架", "estimate": "3h", "status": "pending"},
+    {"id": "T3.2.3.2", "name": "do 命令解析", "estimate": "3h", "status": "pending"},
+    {"id": "T3.2.3.3", "name": "session 命令解析", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": ["ingress/models.py"],

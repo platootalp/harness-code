@@ -17,10 +17,10 @@
   },
 
   "tasks": [
-    {"id": "T3.1.8.1", "name": "GrepTool 类框架", "estimate": "2h"},
-    {"id": "T3.1.8.2", "name": "Grep execute 方法", "estimate": "4h"},
-    {"id": "T3.1.9.1", "name": "GlobTool 类框架", "estimate": "2h"},
-    {"id": "T3.1.9.2", "name": "Glob execute 方法", "estimate": "4h"}
+    {"id": "T3.1.8.1", "name": "GrepTool 类框架", "estimate": "2h", "status": "pending"},
+    {"id": "T3.1.8.2", "name": "Grep execute 方法", "estimate": "4h", "status": "pending"},
+    {"id": "T3.1.9.1", "name": "GlobTool 类框架", "estimate": "2h", "status": "pending"},
+    {"id": "T3.1.9.2", "name": "Glob execute 方法", "estimate": "4h", "status": "pending"}
   ],
 
   "dependencies": ["core/tools/framework.py"],

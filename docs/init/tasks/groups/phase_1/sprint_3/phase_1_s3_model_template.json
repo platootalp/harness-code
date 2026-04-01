@@ -14,11 +14,11 @@
   },
 
   "tasks": [
-    {"id": "T1.3.5.1", "name": "PromptTemplateManager 类", "estimate": "4h"},
-    {"id": "T1.3.5.2", "name": "load_template 方法", "estimate": "3h"},
-    {"id": "T1.3.5.3", "name": "render 方法", "estimate": "3h"},
-    {"id": "T1.3.5.4", "name": "validate_template 方法", "estimate": "3h"},
-    {"id": "T1.3.5.5", "name": "预定义模板创建", "estimate": "4h"}
+    {"id": "T1.3.5.1", "name": "PromptTemplateManager 类", "estimate": "4h", "status": "completed"},
+    {"id": "T1.3.5.2", "name": "load_template 方法", "estimate": "3h", "status": "completed"},
+    {"id": "T1.3.5.3", "name": "render 方法", "estimate": "3h", "status": "completed"},
+    {"id": "T1.3.5.4", "name": "validate_template 方法", "estimate": "3h", "status": "completed"},
+    {"id": "T1.3.5.5", "name": "预定义模板创建", "estimate": "4h", "status": "completed"}
   ],
 
   "dependencies": [],

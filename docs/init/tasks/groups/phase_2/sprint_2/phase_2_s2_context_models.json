@@ -14,9 +14,9 @@
   },
 
   "tasks": [
-    {"id": "T2.2.1.1", "name": "BuiltContext 数据类", "estimate": "3h"},
-    {"id": "T2.2.1.2", "name": "ContextConfig 数据类", "estimate": "3h"},
-    {"id": "T2.2.1.3", "name": "CompressionResult 数据类", "estimate": "3h"}
+    {"id": "T2.2.1.1", "name": "BuiltContext 数据类", "estimate": "3h", "status": "completed"},
+    {"id": "T2.2.1.2", "name": "ContextConfig 数据类", "estimate": "3h", "status": "completed"},
+    {"id": "T2.2.1.3", "name": "CompressionResult 数据类", "estimate": "3h", "status": "completed"}
   ],
 
   "dependencies": [],

@@ -14,10 +14,10 @@
   },
 
   "tasks": [
-    {"id": "T3.3.3.1", "name": "工具不存在错误测试", "estimate": "3h"},
-    {"id": "T3.3.3.2", "name": "工具执行超时错误测试", "estimate": "3h"},
-    {"id": "T3.3.3.3", "name": "路径权限错误测试", "estimate": "3h"},
-    {"id": "T3.3.3.4", "name": "模型调用错误测试", "estimate": "3h"}
+    {"id": "T3.3.3.1", "name": "工具不存在错误测试", "estimate": "3h", "status": "pending"},
+    {"id": "T3.3.3.2", "name": "工具执行超时错误测试", "estimate": "3h", "status": "pending"},
+    {"id": "T3.3.3.3", "name": "路径权限错误测试", "estimate": "3h", "status": "pending"},
+    {"id": "T3.3.3.4", "name": "模型调用错误测试", "estimate": "3h", "status": "pending"}
   ],
 
   "dependencies": ["core/tools/registry.py", "core/model/registry.py"],

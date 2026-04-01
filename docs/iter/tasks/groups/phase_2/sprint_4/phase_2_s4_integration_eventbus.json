@@ -1,0 +1,24 @@
+{
+  "version": "3.0",
+  "description": "任务组 - Phase 2 Sprint 2.4 Integration test_orchestrator_eventbus.py",
+  "parallel_unit": "file",
+  "phase": {"id": "phase_2", "name": "编排层"},
+  "sprint": {"id": "S2.4", "name": "Sprint 2.4 - 集成文件", "week": 10},
+
+  "group": {
+    "id": "G2.4.5",
+    "name": "Integration - test_orchestrator_eventbus.py",
+    "module": "tests/integration",
+    "file": "tests/integration/test_orchestrator_eventbus.py",
+    "test_file": null
+  },
+
+  "tasks": [
+    {"id": "T2.4.5.1", "name": "状态变更事件发布", "estimate": "4h"},
+    {"id": "T2.4.5.2", "name": "Worker 执行事件发布", "estimate": "4h"},
+    {"id": "T2.4.5.3", "name": "集成测试用例", "estimate": "4h"}
+  ],
+
+  "dependencies": ["orchestrator/orchestrator.py", "infrastructure/event_bus.py"],
+  "criteria": "all integration tests pass"
+}
