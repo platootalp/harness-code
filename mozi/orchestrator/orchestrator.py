@@ -25,12 +25,6 @@ from mozi.orchestrator.workers.explorer import ExplorerWorker
 from mozi.orchestrator.workers.planner import PlannerWorker
 
 
-class OrchestratorError(Exception):
-    """Base exception for orchestrator errors."""
-
-    pass
-
-
 class Orchestrator:
     """Main orchestrator for task execution.
 
@@ -371,7 +365,7 @@ class Orchestrator:
         )
         try:
             self._state_store.add_decision(session_id, decision)
-        except Exception:
+        except FileNotFoundError:
             pass
 
     async def review(

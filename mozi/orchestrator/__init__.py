@@ -9,8 +9,9 @@ Provides task orchestration capabilities including:
 
 from __future__ import annotations
 
+from mozi.exceptions import OrchestratorError
 from mozi.orchestrator.category import Category, CategoryRouter, ComplexityScore
-from mozi.orchestrator.orchestrator import Orchestrator, OrchestratorError
+from mozi.orchestrator.orchestrator import Orchestrator
 from mozi.orchestrator.quality import (
     CheckType,
     QualityChecker,

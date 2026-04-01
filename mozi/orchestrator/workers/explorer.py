@@ -162,7 +162,7 @@ class ExplorerWorker:
                 content = f.read()
             line_count = len(content.splitlines())
             char_count = len(content)
-        except Exception:
+        except OSError:
             content = ""
             line_count = 0
             char_count = 0
