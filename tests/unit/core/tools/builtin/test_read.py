@@ -83,3 +83,66 @@ class TestReadFileTool:
         result = await tool.execute(context)
         assert result.status == ToolStatus.FAILURE
         assert "not found" in result.error.lower()
+
+    @pytest.mark.asyncio
+    async def test_read_tool_with_offset(self) -> None:
+        """Test read tool reads file from offset."""
+        tool = ReadFileTool()
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            f.write("line1\nline2\nline3\nline4\n")
+            temp_path = f.name
+
+        try:
+            context = ToolContext(
+                tool_name="read",
+                parameters={"path": temp_path, "offset": 2},
+                permission_level=1,
+            )
+            result = await tool.execute(context)
+            assert result.status == ToolStatus.SUCCESS
+            assert "line3" in result.output
+            assert "line1" not in result.output
+        finally:
+            os.unlink(temp_path)
+
+    @pytest.mark.asyncio
+    async def test_read_tool_with_limit(self) -> None:
+        """Test read tool limits number of lines."""
+        tool = ReadFileTool()
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            f.write("line1\nline2\nline3\nline4\nline5\n")
+            temp_path = f.name
+
+        try:
+            context = ToolContext(
+                tool_name="read",
+                parameters={"path": temp_path, "limit": 2},
+                permission_level=1,
+            )
+            result = await tool.execute(context)
+            assert result.status == ToolStatus.SUCCESS
+            assert "line1" in result.output
+            assert "line3" not in result.output
+        finally:
+            os.unlink(temp_path)
+
+    @pytest.mark.asyncio
+    async def test_read_tool_with_offset_and_limit(self) -> None:
+        """Test read tool reads file with both offset and limit."""
+        tool = ReadFileTool()
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            f.write("line1\nline2\nline3\nline4\nline5\n")
+            temp_path = f.name
+
+        try:
+            context = ToolContext(
+                tool_name="read",
+                parameters={"path": temp_path, "offset": 1, "limit": 2},
+                permission_level=1,
+            )
+            result = await tool.execute(context)
+            assert result.status == ToolStatus.SUCCESS
+            assert "line2" in result.output
+            assert "line4" not in result.output
+        finally:
+            os.unlink(temp_path)
