@@ -1,0 +1,298 @@
+{
+  "meta": {
+    "name": "Phase 5: 桥接系统设计",
+    "description": "协议层、传输层、桥接核心、会话管理、IDE集成",
+    "source": "docs/migration/2026-04-05-phase-5-bridge-system-design.md",
+    "order": 6
+  },
+  "tasks": [
+    {
+      "id": "P5-1",
+      "subject": "实现 bridge/protocol.py - BridgeProtocol",
+      "description": "实现桥接协议，包含 BridgeMessageType, BridgeMessage, SDKControlRequest, SDKControlResponse，消息序列化/反序列化",
+      "phase": "5.1",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/types.ts, src/bridge/bridgeMain.ts",
+        "python_original": "mozi/src/claude_code/bridge/protocol.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/protocol.py",
+        "mozi/tests/test_bridge_protocol.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/protocol.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/protocol.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_protocol.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/types.ts, bridgeMain.ts 协议定义"
+        ]
+      }
+    },
+    {
+      "id": "P5-2",
+      "subject": "实现 bridge/transport.py - Transport 基类",
+      "description": "实现传输层抽象基类",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/transport.ts",
+        "python_original": "mozi/src/claude_code/bridge/transport.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/transport.py",
+        "mozi/tests/test_bridge_transport.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/transport.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/transport.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_transport.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/transport.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-3",
+      "subject": "实现 bridge/transports/hybrid.py - HybridTransport (v1)",
+      "description": "实现混合传输(WebSocket读+HTTP写)",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/transports/hybridTransport.ts",
+        "python_original": "mozi/src/claude_code/bridge/transports/hybrid.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/transports/hybrid.py",
+        "mozi/tests/test_bridge_hybrid_transport.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/transports/hybrid.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/transports/hybrid.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_hybrid_transport.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/transports/hybridTransport.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-4",
+      "subject": "实现 bridge/transports/sse.py - SSETransport (v2)",
+      "description": "实现SSE传输(用于Env-Less Bridge)",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/transports/sseTransport.ts",
+        "python_original": "mozi/src/claude_code/bridge/transports/sse.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/transports/sse.py",
+        "mozi/tests/test_bridge_sse_transport.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/transports/sse.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/transports/sse.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_sse_transport.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/transports/sseTransport.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-5",
+      "subject": "实现 bridge/handle.py - ReplBridgeHandle",
+      "description": "实现桥接核心句柄，包含消息队列、控制请求/响应、生命周期管理",
+      "phase": "5.3",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/replBridge.ts",
+        "python_original": "mozi/src/claude_code/bridge/handle.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/handle.py",
+        "mozi/tests/test_bridge_handle.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/handle.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/handle.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_handle.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/replBridge.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-6",
+      "subject": "实现 bridge/session.py - SessionManager",
+      "description": "实现会话管理，包含创建/重连/归档、bridge pointer 文件",
+      "phase": "5.4",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/session.ts",
+        "python_original": "mozi/src/claude_code/bridge/session.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/session.py",
+        "mozi/tests/test_bridge_session.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/session.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/session.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_session.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/session.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-7",
+      "subject": "实现 bridge/handler.py - IngressMessageHandler",
+      "description": "实现消息处理器，包含 UUID 去重、类型路由",
+      "phase": "5.5",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/messageHandler.ts",
+        "python_original": "mozi/src/claude_code/bridge/handler.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/handler.py",
+        "mozi/tests/test_bridge_handler.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/handler.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/handler.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_handler.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/messageHandler.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-8",
+      "subject": "实现 bridge/recovery.py - BridgeErrorRecovery",
+      "description": "实现错误恢复，包含重连逻辑、指数退避策略",
+      "phase": "5.6",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/reconnect.ts",
+        "python_original": "mozi/src/claude_code/bridge/recovery.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/recovery.py",
+        "mozi/tests/test_bridge_recovery.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/recovery.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/recovery.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_recovery.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/reconnect.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-9",
+      "subject": "实现 bridge/ide.py - IDEDetector",
+      "description": "实现 IDE 检测，支持 VS Code, Cursor, Windsurf, IntelliJ 等 IDE 的 lockfile 读取",
+      "phase": "5.7",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/ide.ts",
+        "python_original": "mozi/src/claude_code/bridge/ide.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/ide.py",
+        "mozi/tests/test_bridge_ide.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/ide.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/ide.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_ide.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/bridge/ide.ts"
+        ]
+      }
+    }
+  ]
+}

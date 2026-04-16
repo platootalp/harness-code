@@ -1,0 +1,266 @@
+{
+  "meta": {
+    "name": "Phase 1: 查询引擎设计",
+    "description": "QueryEngine核心、上下文管理、工具编排、错误处理",
+    "source": "docs/migration/2026-04-05-phase-1-query-engine-design.md",
+    "order": 2
+  },
+  "tasks": [
+    {
+      "id": "P1-1",
+      "subject": "实现 engine/engine.py - QueryEngine",
+      "description": "实现核心查询引擎 QueryEngine，包含 submit_message, _build_system_prompt, _query_loop, _call_model, _execute_tools 方法",
+      "phase": "1.1",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/QueryEngine.ts",
+        "python_original": "mozi/src/claude_code/engine/engine.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/engine.py",
+        "mozi/tests/test_engine.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/engine.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/engine.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_engine.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/QueryEngine.ts 与 src_py 实现的接口一致性"
+        ]
+      }
+    },
+    {
+      "id": "P1-2",
+      "subject": "实现 engine/pipeline.py",
+      "description": "实现 QueryState, QueryParams, QueryResult 数据结构",
+      "phase": "1.1",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/query.ts (QueryParams, State 类型)",
+        "python_original": "mozi/src/claude_code/engine/pipeline.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/pipeline.py",
+        "mozi/tests/test_engine_pipeline.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/pipeline.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/pipeline.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_engine_pipeline.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/query.ts QueryParams 与 Python QueryParams"
+        ]
+      }
+    },
+    {
+      "id": "P1-3",
+      "subject": "实现 engine/context.py - ContextManager",
+      "description": "实现上下文管理器，包含 compress 自动压缩、snip 历史裁剪、token 估算，支持 AutoCompact/HISTORY_SNIP/Microcompact/ContextCollapse",
+      "phase": "1.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/context.ts (getSystemContext, getUserContext)",
+        "python_original": "mozi/src/claude_code/engine/context.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/context.py",
+        "mozi/tests/test_engine_context.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/context.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/context.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_engine_context.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/context.ts 上下文获取逻辑"
+        ]
+      }
+    },
+    {
+      "id": "P1-4",
+      "subject": "实现 engine/tools/orchestration.py - ToolOrchestrator",
+      "description": "实现工具编排器，包含 partition_tool_calls 批次划分、execute_parallel/execute_serial 执行方法",
+      "phase": "1.3",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/services/tools/toolOrchestration.ts (runTools)",
+        "python_original": "mozi/src/claude_code/engine/tools/orchestration.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/tools/orchestration.py",
+        "mozi/tests/test_tools_orchestration.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/tools/orchestration.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/tools/orchestration.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_orchestration.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/services/tools/toolOrchestration.ts"
+        ]
+      }
+    },
+    {
+      "id": "P1-5",
+      "subject": "实现 engine/tools/registry.py - ToolRegistry",
+      "description": "实现工具注册表，包含 register, get, list_tools, filter_tools, assemble_tool_pool 方法",
+      "phase": "1.3",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/tools.ts",
+        "python_original": "mozi/src/claude_code/engine/tools/registry.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/tools/registry.py",
+        "mozi/tests/test_tools_registry.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/tools/registry.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/tools/registry.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_registry.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools.ts 工具注册逻辑"
+        ]
+      }
+    },
+    {
+      "id": "P1-6",
+      "subject": "实现错误恢复配置",
+      "description": "实现 ErrorRecoveryConfig, ErrorAction 枚举配置",
+      "phase": "1.4",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/query.ts (错误恢复相关逻辑)",
+        "python_original": "mozi/src/claude_code/engine/error_recovery.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/error_recovery.py",
+        "mozi/tests/test_error_recovery.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/error_recovery.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/error_recovery.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_error_recovery.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/query.ts 错误处理逻辑"
+        ]
+      }
+    },
+    {
+      "id": "P1-7",
+      "subject": "实现 QueryErrorHandler",
+      "description": "实现错误处理器，支持 RETRY, RETRY_WITH_BACKOFF, FALLBACK_MODEL, RECOVER_OUTPUT, MARK_FAILED, ASK_USER 策略",
+      "phase": "1.4",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/query.ts (错误处理策略)",
+        "python_original": "mozi/src/claude_code/engine/error_handler.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/error_handler.py",
+        "mozi/tests/test_error_handler.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/error_handler.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/error_handler.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_error_handler.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/query.ts 错误恢复策略"
+        ]
+      }
+    },
+    {
+      "id": "P1-8",
+      "subject": "实现 SSE 数据解析",
+      "description": "实现 _parse_sse_data 和 _convert_to_event 方法，处理 NDJSON 格式流式响应",
+      "phase": "1.4",
+      "status": "completed",
+      "blockedBy": [
+        "P0-15"
+      ],
+      "source": {
+        "typescript": "src/query.ts (流式响应解析)",
+        "python_original": "mozi/src/claude_code/engine/sse_parser.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/engine/sse_parser.py",
+        "mozi/tests/test_sse_parser.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/engine/sse_parser.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/engine/sse_parser.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_sse_parser.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/query.ts 流式事件解析"
+        ]
+      }
+    }
+  ]
+}

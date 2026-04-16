@@ -1,0 +1,363 @@
+{
+  "meta": {
+    "name": "Phase 2: 工具系统设计",
+    "description": "基础框架、工具注册表 (粗粒度任务 - 已拆分，保留用于整体追踪)",
+    "source": "docs/migration/2026-04-05-phase-2-tools-system-design.md",
+    "order": 3,
+    "note": "此文件保留粗粒度任务用于整体追踪。独立实现请使用 batch-15 (P2-12) 和 batch-16 (P2-13 to P2-19)"
+  },
+  "tasks": [
+    {
+      "id": "P2-1",
+      "subject": "实现 tools/base.py - BaseTool",
+      "description": "实现工具基类，包含 execute 抽象方法、isConcurrencySafe/isReadOnly/isDestructive/isEnabled 方法、getPath/validate_input 辅助方法",
+      "phase": "2.1",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/Tool.ts (buildTool, ToolDef, BaseTool interface)",
+        "python_original": "mozi/src/claude_code/tools/base.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/base.py",
+        "mozi/tests/test_tools_base.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/base.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/base.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_base.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/Tool.ts buildTool 与 Python BaseTool"
+        ]
+      }
+    },
+    {
+      "id": "P2-2",
+      "subject": "实现 tools/context.py - ToolExecuteContext",
+      "description": "实现工具执行上下文，包含 working_directory, can_use_tool, parent_message_id, abort_signal, on_progress",
+      "phase": "2.1",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/Tool.ts (ToolUseContext interface)",
+        "python_original": "mozi/src/claude_code/tools/context.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/context.py",
+        "mozi/tests/test_tools_context.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/context.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/context.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_context.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/Tool.ts ToolUseContext"
+        ]
+      }
+    },
+    {
+      "id": "P2-3",
+      "subject": "实现 FileReadTool",
+      "description": "实现文件读取工具，支持 file_path, limit, offset, line_numbers 参数，包含路径安全检查",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/FileReadTool/",
+        "python_original": "mozi/src/claude_code/tools/file_read.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/file_read.py",
+        "mozi/tests/test_tools_file_read.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/file_read.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/file_read.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_file_read.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/FileReadTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-4",
+      "subject": "实现 FileEditTool",
+      "description": "实现文件编辑工具(sed风格)，支持 old_string/new_string 替换，replace_all 选项",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/FileEditTool/",
+        "python_original": "mozi/src/claude_code/tools/file_edit.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/file_edit.py",
+        "mozi/tests/test_tools_file_edit.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/file_edit.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/file_edit.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_file_edit.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/FileEditTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-5",
+      "subject": "实现 FileWriteTool",
+      "description": "实现文件写入工具，支持创建/覆盖文件，自动创建父目录",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/FileWriteTool/",
+        "python_original": "mozi/src/claude_code/tools/file_write.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/file_write.py",
+        "mozi/tests/test_tools_file_write.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/file_write.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/file_write.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_file_write.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/FileWriteTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-6",
+      "subject": "实现 GlobTool",
+      "description": "实现文件搜索工具，支持 glob 模式匹配，递归搜索",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/GlobTool/",
+        "python_original": "mozi/src/claude_code/tools/glob.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/glob.py",
+        "mozi/tests/test_tools_glob.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/glob.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/glob.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_glob.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/GlobTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-7",
+      "subject": "实现 GrepTool",
+      "description": "实现内容搜索工具，支持正则表达式、glob过滤、output_mode(content/files/count)、上下文行",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/GrepTool/",
+        "python_original": "mozi/src/claude_code/tools/grep.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/grep.py",
+        "mozi/tests/test_tools_grep.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/grep.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/grep.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_grep.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/GrepTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-8",
+      "subject": "实现 BashTool",
+      "description": "实现 Shell 执行工具，支持命令执行、超时控制，工作目录限制、subprocess 封装",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/BashTool/",
+        "python_original": "mozi/src/claude_code/tools/bash.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/bash.py",
+        "mozi/tests/test_tools_bash.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/bash.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/bash.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_bash.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/BashTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-9",
+      "subject": "实现 WebSearchTool",
+      "description": "实现网页搜索工具",
+      "phase": "2.4",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/WebSearchTool/",
+        "python_original": "mozi/src/claude_code/tools/web_search.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/web_search.py",
+        "mozi/tests/test_tools_web_search.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/web_search.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/web_search.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_web_search.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/WebSearchTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-10",
+      "subject": "实现 WebFetchTool",
+      "description": "实现网页获取工具，支持 URL 内容获取，allowed hosts 检查",
+      "phase": "2.4",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/WebFetchTool/",
+        "python_original": "mozi/src/claude_code/tools/web_fetch.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/web_fetch.py",
+        "mozi/tests/test_tools_web_fetch.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/web_fetch.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/web_fetch.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_web_fetch.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/WebFetchTool/ 工具实现"
+        ]
+      }
+    },
+    {
+      "id": "P2-11",
+      "subject": "实现 TaskCreateTool",
+      "description": "实现任务创建工具",
+      "phase": "2.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TaskCreateTool/",
+        "python_original": "mozi/src/claude_code/tools/task_create.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/task_create.py",
+        "mozi/tests/test_tools_task_create.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/task_create.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/task_create.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_task_create.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TaskCreateTool/ 工具实现"
+        ]
+      }
+    }
+  ]
+}

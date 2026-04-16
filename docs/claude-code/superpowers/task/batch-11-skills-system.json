@@ -1,0 +1,271 @@
+{
+  "meta": {
+    "name": "Phase 10: Skills系统设计",
+    "description": "Skill注册、SKILL.md解析、Skill执行器、工具边界检查",
+    "source": "docs/migration/2026-04-06-phase-10-skills-system-design.md",
+    "order": 11
+  },
+  "tasks": [
+    {
+      "id": "P10-1",
+      "subject": "实现 skills/parser.py",
+      "description": "实现 SKILL.md 解析器: parse_frontmatter, parse_allowed_tools",
+      "phase": "10.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/parser.ts",
+        "python_original": "mozi/src/claude_code/skills/parser.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/parser.py",
+        "mozi/tests/test_skills_parser.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/parser.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/parser.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_parser.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/parser.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-2",
+      "subject": "实现 SkillDefinition 数据类",
+      "description": "实现技能定义，包含渐进加载、allowed_tools、parameters",
+      "phase": "10.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/types.ts",
+        "python_original": "mozi/src/claude_code/skills/definition.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/definition.py",
+        "mozi/tests/test_skills_definition.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/definition.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/definition.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_definition.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/types.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-3",
+      "subject": "实现 skills/registry.py - SkillRegistry",
+      "description": "实现技能注册表，支持 discover/register/get/list/activate/execute",
+      "phase": "10.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/registry.ts",
+        "python_original": "mozi/src/claude_code/skills/registry.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/registry.py",
+        "mozi/tests/test_skills_registry.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/registry.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/registry.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_registry.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/registry.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-4",
+      "subject": "实现 SkillExecutor",
+      "description": "实现技能执行器，支持 allowed-tools 边界检查",
+      "phase": "10.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/executor.ts",
+        "python_original": "mozi/src/claude_code/skills/executor.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/executor.py",
+        "mozi/tests/test_skills_executor.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/executor.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/executor.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_executor.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/executor.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-5",
+      "subject": "实现 SkillTool",
+      "description": "实现技能包装为 Tool，支持 LLM 直接调用",
+      "phase": "10.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/SkillTool.ts",
+        "python_original": "mozi/src/claude_code/skills/tool.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/tool.py",
+        "mozi/tests/test_skills_tool.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/tool.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/tool.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_tool.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/SkillTool.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-6",
+      "subject": "实现内置技能注册",
+      "description": "实现 Python 版 registerBundledSkill 注册内置技能",
+      "phase": "10.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/registerBundled.ts",
+        "python_original": "mozi/src/claude_code/skills/builtin.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/builtin.py",
+        "mozi/tests/test_skills_builtin.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/builtin.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/builtin.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_builtin.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/registerBundled.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-7",
+      "subject": "实现动态技能发现",
+      "description": "实现文件操作时的动态技能发现",
+      "phase": "10.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/discovery.ts",
+        "python_original": "mozi/src/claude_code/skills/discovery.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/discovery.py",
+        "mozi/tests/test_skills_discovery.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/discovery.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/discovery.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_discovery.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/discovery.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-8",
+      "subject": "实现条件技能(路径激活)",
+      "description": "实现基于 paths 前置条件的技能激活",
+      "phase": "10.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/condition.ts",
+        "python_original": "mozi/src/claude_code/skills/condition.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/condition.py",
+        "mozi/tests/test_skills_condition.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/condition.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/condition.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_condition.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/condition.ts"
+        ]
+      }
+    },
+    {
+      "id": "P10-9",
+      "subject": "实现 Forked 执行支持",
+      "description": "实现子代理执行上下文",
+      "phase": "10.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/skills/forkedAgent.ts",
+        "python_original": "mozi/src/claude_code/skills/forked.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/skills/forked.py",
+        "mozi/tests/test_skills_forked.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/skills/forked.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/skills/forked.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_skills_forked.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/skills/forkedAgent.ts"
+        ]
+      }
+    }
+  ]
+}

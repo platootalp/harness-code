@@ -1,0 +1,531 @@
+{
+  "meta": {
+    "name": "Phase 8: 工具库设计",
+    "description": "Hooks系统、消息、会话存储、附件、Bash解析、认证",
+    "source": "docs/migration/2026-04-06-phase-8-utils-library-design.md",
+    "order": 9
+  },
+  "tasks": [
+    {
+      "id": "P8-1",
+      "subject": "实现 types/message.py",
+      "description": "实现消息类型定义: UserMessage, AssistantMessage, MessageType",
+      "phase": "8.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/types/message.ts",
+        "python_original": "mozi/src/claude_code/utils/types/message.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/types/message.py",
+        "mozi/tests/test_utils_types_message.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/types/message.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/types/message.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_types_message.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/types/message.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-2",
+      "subject": "实现 types/attachment.py",
+      "description": "实现附件类型定义: FileAttachment, CompactFileReferenceAttachment, PDFReferenceAttachment等",
+      "phase": "8.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/types/attachment.ts",
+        "python_original": "mozi/src/claude_code/utils/types/attachment.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/types/attachment.py",
+        "mozi/tests/test_utils_types_attachment.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/types/attachment.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/types/attachment.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_types_attachment.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/types/attachment.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-3",
+      "subject": "实现 utils/env.py",
+      "description": "实现环境变量工具函数",
+      "phase": "8.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/envUtils.ts",
+        "python_original": "mozi/src/claude_code/utils/env.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/env.py",
+        "mozi/tests/test_utils_env.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/env.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/env.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_env.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/envUtils.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-4",
+      "subject": "实现 utils/json.py",
+      "description": "实现 JSON 工具函数",
+      "phase": "8.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/json.ts",
+        "python_original": "mozi/src/claude_code/utils/json.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/json.py",
+        "mozi/tests/test_utils_json.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/json.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/json.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_json.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/json.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-5",
+      "subject": "实现 utils/memoize.py",
+      "description": "实现记忆化装饰器",
+      "phase": "8.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/memoize.ts",
+        "python_original": "mozi/src/claude_code/utils/memoize.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/memoize.py",
+        "mozi/tests/test_utils_memoize.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/memoize.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/memoize.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_memoize.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/memoize.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-6",
+      "subject": "实现 utils/auth.py",
+      "description": "实现认证和API密钥管理",
+      "phase": "8.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/auth.ts",
+        "python_original": "mozi/src/claude_code/utils/auth.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/auth.py",
+        "mozi/tests/test_utils_auth.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/auth.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/auth.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_auth.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/auth.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-7",
+      "subject": "实现 utils/auth_cloud.py",
+      "description": "实现 AWS/GCP 云认证",
+      "phase": "8.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/cloudAuth.ts",
+        "python_original": "mozi/src/claude_code/utils/auth_cloud.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/auth_cloud.py",
+        "mozi/tests/test_utils_auth_cloud.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/auth_cloud.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/auth_cloud.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_auth_cloud.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/cloudAuth.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-8",
+      "subject": "实现 utils/messages.py",
+      "description": "实现消息创建/解析工具函数",
+      "phase": "8.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/messages.ts",
+        "python_original": "mozi/src/claude_code/utils/messages.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/messages.py",
+        "mozi/tests/test_utils_messages.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/messages.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/messages.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_messages.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/messages.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-9",
+      "subject": "实现 utils/session_storage.py",
+      "description": "实现会话持久化和项目管理",
+      "phase": "8.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/sessionStorage.ts",
+        "python_original": "mozi/src/claude_code/utils/session_storage.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/session_storage.py",
+        "mozi/tests/test_utils_session_storage.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/session_storage.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/session_storage.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_session_storage.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/sessionStorage.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-10",
+      "subject": "实现 utils/hooks.py - Hook核心",
+      "description": "实现钩子核心，包含 HookEvent 枚举、HookResult、create_base_hook_input、exec_command_hook",
+      "phase": "8.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/hooks.ts",
+        "python_original": "mozi/src/claude_code/utils/hooks.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/hooks.py",
+        "mozi/tests/test_utils_hooks.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/hooks.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/hooks.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_hooks.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/hooks.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-11",
+      "subject": "实现 hooks_config_manager.py",
+      "description": "实现钩子配置管理",
+      "phase": "8.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/hooksConfigManager.ts",
+        "python_original": "mozi/src/claude_code/utils/hooks_config_manager.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/hooks_config_manager.py",
+        "mozi/tests/test_hooks_config_manager.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/hooks_config_manager.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/hooks_config_manager.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_hooks_config_manager.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/hooksConfigManager.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-12a",
+      "subject": "实现 utils/bash/parser.py",
+      "description": "实现 shell 命令解析器，支持参数提取、节点遍历",
+      "phase": "8.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/bashParser.ts",
+        "python_original": "mozi/src/claude_code/utils/bash/parser.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/bash/parser.py",
+        "mozi/tests/test_utils_bash_parser.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/bash/parser.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/bash/parser.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_bash_parser.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/bashParser.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-12b",
+      "subject": "实现 utils/bash/commands.py",
+      "description": "实现命令前缀提取、帮助命令检测",
+      "phase": "8.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/bashCommands.ts",
+        "python_original": "mozi/src/claude_code/utils/bash/commands.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/bash/commands.py",
+        "mozi/tests/test_utils_bash_commands.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/bash/commands.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/bash/commands.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_bash_commands.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/bashCommands.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-12c",
+      "subject": "实现 utils/bash/ast_security.py",
+      "description": "实现安全 AST 分析，支持路径约束检查、超时控制",
+      "phase": "8.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/astSecurity.ts",
+        "python_original": "mozi/src/claude_code/utils/bash/ast_security.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/bash/ast_security.py",
+        "mozi/tests/test_utils_bash_ast_security.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/bash/ast_security.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/bash/ast_security.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_bash_ast_security.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/astSecurity.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-12d",
+      "subject": "实现 utils/bash/shell_quote.py",
+      "description": "实现 shell 引号转义、参数安全引用",
+      "phase": "8.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/shellQuote.ts",
+        "python_original": "mozi/src/claude_code/utils/bash/shell_quote.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/bash/shell_quote.py",
+        "mozi/tests/test_utils_bash_shell_quote.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/bash/shell_quote.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/bash/shell_quote.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_bash_shell_quote.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/shellQuote.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-12e",
+      "subject": "实现 utils/bash/heredoc.py",
+      "description": "实现 here document 处理",
+      "phase": "8.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/heredoc.ts",
+        "python_original": "mozi/src/claude_code/utils/bash/heredoc.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/bash/heredoc.py",
+        "mozi/tests/test_utils_bash_heredoc.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/bash/heredoc.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/bash/heredoc.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_bash_heredoc.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/heredoc.ts"
+        ]
+      }
+    },
+    {
+      "id": "P8-12f",
+      "subject": "实现 utils/bash/__init__.py",
+      "description": "实现 bash 模块导出",
+      "phase": "8.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/bashParser.ts (模块导出)",
+        "python_original": "mozi/src/claude_code/utils/bash/__init__.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/bash/__init__.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/bash/__init__.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/bash/__init__.py"
+        ],
+        "test": [
+          "python -c \"from claude_code.utils.bash import *\""
+        ],
+        "functional_equivalence": [
+          "对比 bash 模块导出"
+        ]
+      }
+    },
+    {
+      "id": "P8-13",
+      "subject": "实现 utils/attachments.py",
+      "description": "实现附件生成工具",
+      "phase": "8.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/attachments.ts",
+        "python_original": "mozi/src/claude_code/utils/attachments.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/utils/attachments.py",
+        "mozi/tests/test_utils_attachments.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/utils/attachments.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/utils/attachments.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_utils_attachments.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/utils/attachments.ts"
+        ]
+      }
+    }
+  ]
+}

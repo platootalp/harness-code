@@ -1,0 +1,203 @@
+{
+  "meta": {
+    "name": "Phase 4: CLI/REPL 设计",
+    "description": "CLI入口、Textual TUI应用、输出处理、状态管理",
+    "source": "docs/migration/2026-04-05-phase-4-cli-repl-design.md",
+    "order": 5
+  },
+  "tasks": [
+    {
+      "id": "P4-1",
+      "subject": "实现 main.py - Click CLI 入口",
+      "description": "实现 CLI 主入口，支持 --print 头内模式、--resume 会话恢复、--model 模型选择、--mcp-config MCP 配置等选项",
+      "phase": "4.1",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/main.tsx (CLI 入口)",
+        "python_original": "mozi/src/claude_code/main.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/main.py",
+        "mozi/tests/test_main.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/main.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/main.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_main.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/main.tsx CLI 入口参数"
+        ]
+      }
+    },
+    {
+      "id": "P4-2",
+      "subject": "实现 cli/app.py - ClaudeCodeApp",
+      "description": "实现 Textual TUI 应用主类，包含消息显示、输入处理、命令处理、流式输出、键盘绑定",
+      "phase": "4.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/screens/REPL.tsx (Textual UI)",
+        "python_original": "mozi/src/claude_code/cli/app.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/cli/app.py",
+        "mozi/tests/test_cli_app.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/cli/app.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/cli/app.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_cli_app.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/screens/REPL.tsx TUI 实现"
+        ]
+      }
+    },
+    {
+      "id": "P4-3",
+      "subject": "实现 cli/output.py - OutputHandler",
+      "description": "实现输出处理器，支持 markdown 渲染、代码高亮、表格/面板、流式文本",
+      "phase": "4.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/cli/print.ts",
+        "python_original": "mozi/src/claude_code/cli/output.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/cli/output.py",
+        "mozi/tests/test_cli_output.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/cli/output.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/cli/output.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_cli_output.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/cli/print.ts 输出处理"
+        ]
+      }
+    },
+    {
+      "id": "P4-4",
+      "subject": "实现 cli/state.py - REPLState",
+      "description": "实现 REPL 状态管理，包含消息历史、输入模式、任务跟踪",
+      "phase": "4.4",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/state/AppStateStore.ts (REPL 状态)",
+        "python_original": "mozi/src/claude_code/cli/state.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/cli/state.py",
+        "mozi/tests/test_cli_state.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/cli/state.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/cli/state.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_cli_state.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/state/AppStateStore.ts REPL 状态"
+        ]
+      }
+    },
+    {
+      "id": "P4-5",
+      "subject": "实现历史导航、Vim 模式、中断处理",
+      "description": "实现 REPL 交互功能",
+      "phase": "4.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/cli/history.ts, src/vim/",
+        "python_original": "mozi/src/claude_code/cli/history.py, vim.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/cli/history.py",
+        "mozi/src/claude_code/cli/vim.py",
+        "mozi/tests/test_cli_interaction.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/cli/history.py mozi/src/claude_code/cli/vim.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/cli/history.py mozi/src/claude_code/cli/vim.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_cli_interaction.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/cli/history.ts, src/vim/ 交互功能"
+        ]
+      }
+    },
+    {
+      "id": "P4-6",
+      "subject": "实现挂起/恢复功能",
+      "description": "实现 SIGTSTP 信号处理",
+      "phase": "4.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/cli/suspend.ts",
+        "python_original": "mozi/src/claude_code/cli/suspend.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/cli/suspend.py",
+        "mozi/tests/test_cli_suspend.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/cli/suspend.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/cli/suspend.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_cli_suspend.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/cli/suspend.ts 挂起功能"
+        ]
+      }
+    }
+  ]
+}

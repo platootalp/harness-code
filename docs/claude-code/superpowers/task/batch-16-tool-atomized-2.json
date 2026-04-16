@@ -1,0 +1,707 @@
+{
+  "meta": {
+    "name": "Phase 2.3: 工具系统拆分 - Agent/团队/计划模式/交互工具",
+    "description": "将 P2-13, P2-14, P2-15, P2-16, P2-17, P2-18, P2-19 拆分为独立任务",
+    "source": "docs/migration/2026-04-05-phase-2-tools-system-design.md",
+    "order": 16,
+    "note": "从 batch-03 拆分出来的独立任务"
+  },
+  "tasks": [
+    {
+      "id": "P2-13a",
+      "subject": "实现 AgentTool",
+      "description": "实现 Agent 调用工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/AgentTool/",
+        "python_original": "mozi/src/claude_code/tools/agent.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/agent.py",
+        "mozi/tests/test_tools_agent.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/agent.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/agent.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_agent.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/AgentTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-13b",
+      "subject": "实现 TeamCreateTool",
+      "description": "实现团队创建工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TeamCreateTool/",
+        "python_original": "mozi/src/claude_code/tools/team_create.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/team_create.py",
+        "mozi/tests/test_tools_team_create.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/team_create.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/team_create.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_team_create.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TeamCreateTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-13c",
+      "subject": "实现 TeamDeleteTool",
+      "description": "实现团队删除工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TeamDeleteTool/",
+        "python_original": "mozi/src/claude_code/tools/team_delete.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/team_delete.py",
+        "mozi/tests/test_tools_team_delete.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/team_delete.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/team_delete.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_team_delete.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TeamDeleteTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-13d",
+      "subject": "实现 SendMessageTool",
+      "description": "实现消息发送工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/SendMessageTool/",
+        "python_original": "mozi/src/claude_code/tools/send_message.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/send_message.py",
+        "mozi/tests/test_tools_send_message.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/send_message.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/send_message.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_send_message.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/SendMessageTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-14a",
+      "subject": "实现 EnterPlanModeTool",
+      "description": "实现进入计划模式工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/EnterPlanModeTool/",
+        "python_original": "mozi/src/claude_code/tools/enter_plan_mode.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/enter_plan_mode.py",
+        "mozi/tests/test_tools_enter_plan_mode.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/enter_plan_mode.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/enter_plan_mode.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_enter_plan_mode.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/EnterPlanModeTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-14b",
+      "subject": "实现 ExitPlanModeV2Tool",
+      "description": "实现退出计划模式工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/ExitPlanModeV2Tool/",
+        "python_original": "mozi/src/claude_code/tools/exit_plan_mode.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/exit_plan_mode.py",
+        "mozi/tests/test_tools_exit_plan_mode.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/exit_plan_mode.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/exit_plan_mode.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_exit_plan_mode.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/ExitPlanModeV2Tool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-15a",
+      "subject": "实现 AskUserQuestionTool",
+      "description": "实现用户问题工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/AskUserQuestionTool/",
+        "python_original": "mozi/src/claude_code/tools/ask_question.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/ask_question.py",
+        "mozi/tests/test_tools_ask_question.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/ask_question.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/ask_question.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_ask_question.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/AskUserQuestionTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-15b",
+      "subject": "实现 BriefTool",
+      "description": "实现简报工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/BriefTool/",
+        "python_original": "mozi/src/claude_code/tools/brief.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/brief.py",
+        "mozi/tests/test_tools_brief.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/brief.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/brief.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_brief.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/BriefTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-15c",
+      "subject": "实现 ConfigTool",
+      "description": "实现配置工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/ConfigTool/",
+        "python_original": "mozi/src/claude_code/tools/config.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/config.py",
+        "mozi/tests/test_tools_config.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/config.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/config.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_config.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/ConfigTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-15d",
+      "subject": "实现 LSPTool",
+      "description": "实现语言服务器协议工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/LSPTool/",
+        "python_original": "mozi/src/claude_code/tools/lsp.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/lsp.py",
+        "mozi/tests/test_tools_lsp.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/lsp.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/lsp.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_lsp.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/LSPTool/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P2-16a",
+      "subject": "实现 ListMcpResourcesTool",
+      "description": "实现 MCP 资源列表工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/ListMcpResourcesTool/",
+        "python_original": "mozi/src/claude_code/tools/list_mcp_resources.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/list_mcp_resources.py",
+        "mozi/tests/test_tools_list_mcp_resources.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/list_mcp_resources.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/list_mcp_resources.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_list_mcp_resources.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/ListMcpResourcesTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-16b",
+      "subject": "实现 ReadMcpResourceTool",
+      "description": "实现 MCP 资源读取工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/ReadMcpResourceTool/",
+        "python_original": "mozi/src/claude_code/tools/read_mcp_resource.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/read_mcp_resource.py",
+        "mozi/tests/test_tools_read_mcp_resource.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/read_mcp_resource.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/read_mcp_resource.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_read_mcp_resource.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/ReadMcpResourceTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-17a",
+      "subject": "实现 CronCreateTool",
+      "description": "实现定时任务创建工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/CronCreateTool/",
+        "python_original": "mozi/src/claude_code/tools/cron_create.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/cron_create.py",
+        "mozi/tests/test_tools_cron_create.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/cron_create.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/cron_create.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_cron_create.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/CronCreateTool/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (24/24)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P2-17b",
+      "subject": "实现 CronDeleteTool",
+      "description": "实现定时任务删除工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/CronDeleteTool/",
+        "python_original": "mozi/src/claude_code/tools/cron_delete.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/cron_delete.py",
+        "mozi/tests/test_tools_cron_delete.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/cron_delete.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/cron_delete.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_cron_delete.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/CronDeleteTool/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (19/19)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P2-17c",
+      "subject": "实现 CronListTool",
+      "description": "实现定时任务列表工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/CronListTool/",
+        "python_original": "mozi/src/claude_code/tools/cron_list.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/cron_list.py",
+        "mozi/tests/test_tools_cron_list.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/cron_list.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/cron_list.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_cron_list.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/CronListTool/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (24/24)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P2-18a",
+      "subject": "实现 EnterWorktreeTool",
+      "description": "实现进入 Git worktree 工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/EnterWorktreeTool/",
+        "python_original": "mozi/src/claude_code/tools/enter_worktree.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/enter_worktree.py",
+        "mozi/tests/test_tools_enter_worktree.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/enter_worktree.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/enter_worktree.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_enter_worktree.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/EnterWorktreeTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-18b",
+      "subject": "实现 ExitWorktreeTool",
+      "description": "实现退出 Git worktree 工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/ExitWorktreeTool/",
+        "python_original": "mozi/src/claude_code/tools/exit_worktree.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/exit_worktree.py",
+        "mozi/tests/test_tools_exit_worktree.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/exit_worktree.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/exit_worktree.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_exit_worktree.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/ExitWorktreeTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-19a",
+      "subject": "实现 NotebookEditTool",
+      "description": "实现 Jupyter notebook 编辑工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/NotebookEditTool/",
+        "python_original": "mozi/src/claude_code/tools/notebook_edit.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/notebook_edit.py",
+        "mozi/tests/test_tools_notebook_edit.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/notebook_edit.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/notebook_edit.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_notebook_edit.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/NotebookEditTool/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P2-19b",
+      "subject": "实现 ToolSearchTool",
+      "description": "实现工具搜索工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/ToolSearchTool/",
+        "python_original": "mozi/src/claude_code/tools/tool_search.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/tool_search.py",
+        "mozi/tests/test_tools_tool_search.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/tool_search.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/tool_search.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_tool_search.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/ToolSearchTool/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (23/23)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P2-19c",
+      "subject": "实现 StructuredOutputTool",
+      "description": "实现结构化输出工具",
+      "phase": "2.3",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/StructuredOutputTool/",
+        "python_original": "mozi/src/claude_code/tools/structured_output.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/structured_output.py",
+        "mozi/tests/test_tools_structured_output.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/structured_output.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/structured_output.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_structured_output.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/StructuredOutputTool/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (22/22)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    }
+  ]
+}
