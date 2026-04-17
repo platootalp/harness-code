@@ -20,7 +20,7 @@ class TestCLIVersion:
     async def test_version_output(self, api_key: str):
         """验证版本输出包含版本号."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main", "--version",
+            sys.executable, "-m", "claude-code-py.cli.main", "--version",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -37,7 +37,7 @@ class TestCLIHelp:
     async def test_help_flag(self, api_key: str):
         """验证 --help 标志工作正常."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main", "--help",
+            sys.executable, "-m", "claude-code-py.cli.main", "--help",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -51,7 +51,7 @@ class TestCLIHelp:
     async def test_help_shows_print_mode(self, api_key: str):
         """验证 help 中显示 --print 选项."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main", "--help",
+            sys.executable, "-m", "claude-code-py.cli.main", "--help",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -63,7 +63,7 @@ class TestCLIHelp:
     async def test_help_shows_permission_mode(self, api_key: str):
         """验证 help 中显示 --permission-mode 选项."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main", "--help",
+            sys.executable, "-m", "claude-code-py.cli.main", "--help",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -79,7 +79,7 @@ class TestCLIHeadlessMode:
     async def test_print_mode_requires_prompt(self, api_key: str):
         """验证 --print 模式需要提供 prompt."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main", "--print",
+            sys.executable, "-m", "claude-code-py.cli.main", "--print",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -92,7 +92,7 @@ class TestCLIHeadlessMode:
     async def test_print_mode_with_prompt(self, api_key: str, temp_project):
         """验证 --print 模式能正常处理 prompt."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "Say hello",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -112,7 +112,7 @@ class TestCLIAuthModes:
     async def test_permission_mode_auto(self, api_key: str, temp_project):
         """验证 --permission-mode auto 可以接受."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "auto", "hello",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -127,7 +127,7 @@ class TestCLIAuthModes:
     async def test_permission_mode_bypass(self, api_key: str, temp_project):
         """验证 --permission-mode bypassPermissions 可以接受."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "bypassPermissions", "hello",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -141,7 +141,7 @@ class TestCLIAuthModes:
     async def test_permission_mode_deny(self, api_key: str, temp_project):
         """验证 --permission-mode deny 可以接受."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "deny", "hello",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -155,7 +155,7 @@ class TestCLIAuthModes:
     async def test_permission_mode_invalid_rejected(self, api_key: str, temp_project):
         """验证无效的 permission-mode 被拒绝."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "invalid_mode", "hello",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},

@@ -96,7 +96,7 @@ class TestCronCreateTool:
         self, cron_create_tool: CronCreateTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[],
         ):
             result = cron_create_tool.validate_input(
@@ -111,7 +111,7 @@ class TestCronCreateTool:
     ) -> None:
         # A cron with specific date in the past that won't match in the next year
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[],
         ):
             result = cron_create_tool.validate_input(
@@ -125,11 +125,11 @@ class TestCronCreateTool:
     ) -> None:
         mock_tasks = [{"id": f"task-{i}"} for i in range(50)]
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=mock_tasks,
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = cron_create_tool.validate_input(
@@ -146,11 +146,11 @@ class TestCronCreateTool:
         mock_teammate_ctx = {"agent_id": "researcher@my-team"}
 
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[mock_task],
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=mock_teammate_ctx,
             ):
                 result = cron_create_tool.validate_input(
@@ -165,11 +165,11 @@ class TestCronCreateTool:
         self, cron_create_tool: CronCreateTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[],
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = cron_create_tool.validate_input(
@@ -182,11 +182,11 @@ class TestCronCreateTool:
         self, cron_create_tool: CronCreateTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.add_cron_task",
+            "claude-code-py.utils.cron_tasks.add_cron_task",
             return_value="new-job-id",
         ) as mock_add:
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = await cron_create_tool.call(
@@ -216,11 +216,11 @@ class TestCronCreateTool:
         self, cron_create_tool: CronCreateTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.add_cron_task",
+            "claude-code-py.utils.cron_tasks.add_cron_task",
             return_value="job-id",
         ) as mock_add:
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = await cron_create_tool.call(
@@ -241,15 +241,15 @@ class TestCronCreateTool:
         self, cron_create_tool: CronCreateTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.add_cron_task",
+            "claude-code-py.utils.cron_tasks.add_cron_task",
             return_value="durable-job-id",
         ) as mock_add:
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 with patch(
-                    "claw_py.utils.cron.is_durable_cron_enabled",
+                    "claude-code-py.utils.cron.is_durable_cron_enabled",
                     return_value=True,
                 ):
                     result = await cron_create_tool.call(
@@ -273,11 +273,11 @@ class TestCronCreateTool:
         self, cron_create_tool: CronCreateTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.add_cron_task",
+            "claude-code-py.utils.cron_tasks.add_cron_task",
             return_value="oneshot-job-id",
         ) as mock_add:
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = await cron_create_tool.call(

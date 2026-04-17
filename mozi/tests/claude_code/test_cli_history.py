@@ -44,14 +44,14 @@ class TestCommandHistoryAdd:
 
     def test_add_command(self) -> None:
         """add() calls add_to_history with the command."""
-        with patch("claw_py.cli.history.add_to_history") as mock_add:
+        with patch("claude-code-py.cli.history.add_to_history") as mock_add:
             ch = CommandHistory(state=MockREPLState())
             ch.add("hello world")
             mock_add.assert_called_once_with("hello world")
 
     def test_add_empty_command_not_called(self) -> None:
         """add() does not call add_to_history for empty commands."""
-        with patch("claw_py.cli.history.add_to_history") as mock_add:
+        with patch("claude-code-py.cli.history.add_to_history") as mock_add:
             ch = CommandHistory(state=MockREPLState())
             ch.add("")
             ch.add("   ")

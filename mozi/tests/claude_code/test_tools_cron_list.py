@@ -116,11 +116,11 @@ class TestCronListTool:
         }
 
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[mock_task1, mock_task2],
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = await cron_list_tool.call(
@@ -145,11 +145,11 @@ class TestCronListTool:
         self, cron_list_tool: CronListTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[],
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = await cron_list_tool.call(

@@ -97,7 +97,7 @@ class TestSessionIdExists:
         try:
             session_id = f"test-{os.getpid()}"
             with patch(
-                "claw_py.utils.session_storage.get_transcript_path_for_session",
+                "claude-code-py.utils.session_storage.get_transcript_path_for_session",
                 return_value=temp_path,
             ):
                 assert session_id_exists(session_id) is True
@@ -176,7 +176,7 @@ class TestWriteReadAgentMetadata:
             )
             agent_id = f"agent-{os.getpid()}"
             with patch(
-                "claw_py.utils.session_storage.get_projects_dir",
+                "claude-code-py.utils.session_storage.get_projects_dir",
                 return_value=tmpdir,
             ):
                 await write_agent_metadata(agent_id, meta)
@@ -188,7 +188,7 @@ class TestWriteReadAgentMetadata:
     async def test_nonexistent_agent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch(
-                "claw_py.utils.session_storage.get_projects_dir",
+                "claude-code-py.utils.session_storage.get_projects_dir",
                 return_value=tmpdir,
             ):
                 result = await read_agent_metadata("nonexistent-agent-xyz")

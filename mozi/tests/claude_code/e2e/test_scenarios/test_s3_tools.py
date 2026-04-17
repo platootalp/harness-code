@@ -25,7 +25,7 @@ class TestGrepTool:
         test_file.write_text("def hello():\n    print('hello world')\n    return True\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Use grep to find 'hello' in {test_file}",
             cwd=str(temp_project),
@@ -46,7 +46,7 @@ class TestGrepTool:
         test_file.write_text("def hello():\n    print('hello world')\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Use grep to find 'goodbye' in {test_file}",
             cwd=str(temp_project),
@@ -72,7 +72,7 @@ class TestGlobTool:
         (temp_project / "file3.txt").write_text("# text file")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Use glob to find all .py files in {temp_project}",
             cwd=str(temp_project),
@@ -94,7 +94,7 @@ class TestTaskTool:
     async def test_task_create(self, api_key: str, temp_project: Path):
         """验证创建任务."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Create a task with description 'Test task' and subject 'Test'",
             cwd=str(temp_project),
@@ -112,7 +112,7 @@ class TestTaskTool:
     async def test_task_list(self, api_key: str, temp_project: Path):
         """验证列出任务."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "List all available tasks",
             cwd=str(temp_project),
@@ -134,7 +134,7 @@ class TestWebFetchTool:
     async def test_web_fetch_basic(self, api_key: str, temp_project: Path):
         """验证基本的网页获取."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Fetch the content of https://example.com",
             cwd=str(temp_project),
@@ -156,7 +156,7 @@ class TestWebSearchTool:
     async def test_web_search_basic(self, api_key: str, temp_project: Path):
         """验证基本的网页搜索."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Search the web for 'Python programming'",
             cwd=str(temp_project),

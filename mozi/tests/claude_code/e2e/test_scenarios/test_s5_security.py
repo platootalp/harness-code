@@ -21,7 +21,7 @@ class TestPermissionModes:
     async def test_auto_mode_allows_normal_commands(self, api_key: str, temp_project: Path):
         """验证 auto 模式允许正常命令."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "auto",
             "List files in current directory using ls",
             cwd=str(temp_project),
@@ -37,7 +37,7 @@ class TestPermissionModes:
     async def test_bypass_mode_bypasses_permissions(self, api_key: str, temp_project: Path):
         """验证 bypassPermissions 模式绕过权限检查."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "bypassPermissions",
             "Create a test file",
             cwd=str(temp_project),
@@ -53,7 +53,7 @@ class TestPermissionModes:
     async def test_deny_mode_blocks_dangerous(self, api_key: str, base_url: str, temp_project: Path):
         """验证 deny 模式阻止危险命令."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "deny",
             "rm -rf /",
             cwd=str(temp_project),
@@ -77,7 +77,7 @@ class TestReadOnlyMode:
     async def test_read_only_blocks_write(self, api_key: str, temp_project: Path):
         """验证只读模式阻止写操作."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "read-only",
             "Create a new file called test.txt with content",
             cwd=str(temp_project),
@@ -104,7 +104,7 @@ class TestSecurityRules:
         rules_file.write_text('{"rules": []}')
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--permission-mode", "auto",
             "Echo hello",
             cwd=str(temp_project),

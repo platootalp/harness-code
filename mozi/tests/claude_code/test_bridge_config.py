@@ -35,7 +35,7 @@ class TestBridgeConfig:
             verbose=False,
             sandbox=False,
             bridge_id="bridge-123",
-            worker_type="claw_py",
+            worker_type="claude-code-py",
             environment_id="env-456",
             api_base_url="https://api.claude.ai",
             session_ingress_url="https://api.claude.ai",
@@ -49,7 +49,7 @@ class TestBridgeConfig:
         assert config.verbose is False
         assert config.sandbox is False
         assert config.bridge_id == "bridge-123"
-        assert config.worker_type == "claw_py"
+        assert config.worker_type == "claude-code-py"
         assert config.environment_id == "env-456"
         assert config.api_base_url == "https://api.claude.ai"
         assert config.session_ingress_url == "https://api.claude.ai"
@@ -80,7 +80,7 @@ class TestBridgeConfig:
 
     def test_worker_type_enum_values(self) -> None:
         """WorkerType enum should have expected values."""
-        assert WorkerType.CLAUDE_CODE.value == "claw_py"
+        assert WorkerType.CLAUDE_CODE.value == "claude-code-py"
         assert WorkerType.CLAUDE_CODE_ASSISTANT.value == "claude_code_assistant"
 
     def test_spawn_mode_enum_values(self) -> None:

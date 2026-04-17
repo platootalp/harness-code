@@ -26,7 +26,7 @@ class TestSkillDiscovery:
     async def test_skill_list_command(self, api_key: str, temp_project: Path):
         """验证 /skills 命令可以列出可用 skills."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "/skills",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -50,7 +50,7 @@ class TestSkillDiscovery:
         )
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "Discover skills in the project",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -76,7 +76,7 @@ class TestSkillExecution:
         )
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Use the /simplify skill on {test_file}",
             cwd=str(temp_project),
@@ -97,7 +97,7 @@ class TestSkillExecution:
         test_file.write_text("def hello():\n    return 'world'\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Use /verify to check {test_file}",
             cwd=str(temp_project),
@@ -117,7 +117,7 @@ class TestSkillExecution:
         test_file.write_text("x = 1\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Use a skill that only allows Read tool on {test_file}, do not use Write",
             cwd=str(temp_project),
@@ -142,7 +142,7 @@ class TestSkillAliases:
 
         # simplify skill 的别名是 improve 和 clean
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"/improve {test_file}",
             cwd=str(temp_project),
@@ -167,7 +167,7 @@ class TestSkillConditional:
         test_file.write_text("# TODO: implement this\ndef placeholder():\n    pass\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Check if any skill should activate for {test_file}",
             cwd=str(temp_project),
@@ -191,7 +191,7 @@ class TestSkillForkedExecution:
         test_file.write_text("value = 42\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Run /simplify in forked mode on {test_file}",
             cwd=str(temp_project),
@@ -212,7 +212,7 @@ class TestSkillToolIntegration:
     async def test_skill_appears_in_tool_list(self, api_key: str, temp_project: Path):
         """验证 skill 工具出现在工具列表中."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "List all available tools",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -234,7 +234,7 @@ class TestSkillToolIntegration:
         test_file2.write_text("y = 2\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"/simplify {test_file1} {test_file2}",
             cwd=str(temp_project),

@@ -119,7 +119,7 @@ class TestConfigTool:
         self, config_tool: ConfigTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.tools.config.is_supported",
+            "claude-code-py.tools.config.is_supported",
             return_value=False,
         ):
             result = await config_tool.call(
@@ -142,19 +142,19 @@ class TestConfigTool:
         mock_config.format_on_read = None
 
         with patch(
-            "claw_py.tools.config.is_supported",
+            "claude-code-py.tools.config.is_supported",
             return_value=True,
         ):
             with patch(
-                "claw_py.tools.config.get_config",
+                "claude-code-py.tools.config.get_config",
                 return_value=mock_config,
             ):
                 with patch(
-                    "claw_py.tools.config.get_path",
+                    "claude-code-py.tools.config.get_path",
                     return_value=["theme"],
                 ):
                     with patch(
-                        "claw_py.tools.config.get_global_config",
+                        "claude-code-py.tools.config.get_global_config",
                         return_value={"theme": "dark"},
                     ):
                         result = await config_tool.call(
@@ -181,19 +181,19 @@ class TestConfigTool:
         mock_config.format_on_read = format_fn
 
         with patch(
-            "claw_py.tools.config.is_supported",
+            "claude-code-py.tools.config.is_supported",
             return_value=True,
         ):
             with patch(
-                "claw_py.tools.config.get_config",
+                "claude-code-py.tools.config.get_config",
                 return_value=mock_config,
             ):
                 with patch(
-                    "claw_py.tools.config.get_path",
+                    "claude-code-py.tools.config.get_path",
                     return_value=["model"],
                 ):
                     with patch(
-                        "claw_py.tools.config.get_global_config",
+                        "claude-code-py.tools.config.get_global_config",
                         return_value={"model": "sonnet"},
                     ):
                         result = await config_tool.call(
@@ -211,7 +211,7 @@ class TestConfigTool:
         self, config_tool: ConfigTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.tools.config.is_supported",
+            "claude-code-py.tools.config.is_supported",
             return_value=False,
         ):
             result = await config_tool.call(
@@ -235,23 +235,23 @@ class TestConfigTool:
         mock_config.app_state_key = None
 
         with patch(
-            "claw_py.tools.config.is_supported",
+            "claude-code-py.tools.config.is_supported",
             return_value=True,
         ):
             with patch(
-                "claw_py.tools.config.get_config",
+                "claude-code-py.tools.config.get_config",
                 return_value=mock_config,
             ):
                 with patch(
-                    "claw_py.tools.config.get_path",
+                    "claude-code-py.tools.config.get_path",
                     return_value=["theme"],
                 ):
                     with patch(
-                        "claw_py.tools.config.get_global_config",
+                        "claude-code-py.tools.config.get_global_config",
                         return_value={"theme": "light"},
                     ):
                         with patch(
-                            "claw_py.tools.config.save_global_config",
+                            "claude-code-py.tools.config.save_global_config",
                         ):
                             result = await config_tool.call(
                                 {"setting": "theme", "value": "dark"},
@@ -277,23 +277,23 @@ class TestConfigTool:
         mock_config.app_state_key = None
 
         with patch(
-            "claw_py.tools.config.is_supported",
+            "claude-code-py.tools.config.is_supported",
             return_value=True,
         ):
             with patch(
-                "claw_py.tools.config.get_config",
+                "claude-code-py.tools.config.get_config",
                 return_value=mock_config,
             ):
                 with patch(
-                    "claw_py.tools.config.get_path",
+                    "claude-code-py.tools.config.get_path",
                     return_value=["verbose"],
                 ):
                     with patch(
-                        "claw_py.tools.config.get_global_config",
+                        "claude-code-py.tools.config.get_global_config",
                         return_value={"verbose": False},
                     ):
                         with patch(
-                            "claw_py.tools.config.save_global_config",
+                            "claude-code-py.tools.config.save_global_config",
                         ):
                             result = await config_tool.call(
                                 {"setting": "verbose", "value": "true"},
@@ -316,19 +316,19 @@ class TestConfigTool:
         mock_config.app_state_key = None
 
         with patch(
-            "claw_py.tools.config.is_supported",
+            "claude-code-py.tools.config.is_supported",
             return_value=True,
         ):
             with patch(
-                "claw_py.tools.config.get_config",
+                "claude-code-py.tools.config.get_config",
                 return_value=mock_config,
             ):
                 with patch(
-                    "claw_py.tools.config.get_path",
+                    "claude-code-py.tools.config.get_path",
                     return_value=["verbose"],
                 ):
                     with patch(
-                        "claw_py.tools.config.get_global_config",
+                        "claude-code-py.tools.config.get_global_config",
                         return_value={"verbose": False},
                     ):
                         result = await config_tool.call(

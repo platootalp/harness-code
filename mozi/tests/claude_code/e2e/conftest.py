@@ -65,7 +65,7 @@ async def cli_process(
 ) -> AsyncGenerator[asyncio.subprocess.Process, None]:
     """启动 CLI 进程，带自动清理."""
     proc = await asyncio.create_subprocess_exec(
-        sys.executable, "-m", "claw_py.cli.main",
+        sys.executable, "-m", "claude-code-py.cli.main",
         "--print", "hello",
         cwd=str(temp_project),
         env={**os.environ, "ANTHROPIC_API_KEY": api_key, "ANTHROPIC_BASE_URL": base_url},

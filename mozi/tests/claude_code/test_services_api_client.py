@@ -58,7 +58,7 @@ class TestHTTPClientContextManager:
     @pytest.mark.asyncio
     async def test_context_manager_enters(self) -> None:
         """Test that context manager properly initializes client."""
-        with patch("claw_py.services.api.client.httpx.AsyncClient") as MockAsyncClient:
+        with patch("claude-code-py.services.api.client.httpx.AsyncClient") as MockAsyncClient:
             mock_client = MagicMock()
             mock_client.aclose = AsyncMock()
             MockAsyncClient.return_value = mock_client
@@ -70,7 +70,7 @@ class TestHTTPClientContextManager:
     @pytest.mark.asyncio
     async def test_context_manager_exits(self) -> None:
         """Test that context manager properly closes client."""
-        with patch("claw_py.services.api.client.httpx.AsyncClient") as MockAsyncClient:
+        with patch("claude-code-py.services.api.client.httpx.AsyncClient") as MockAsyncClient:
             mock_client = MagicMock()
             mock_client.aclose = AsyncMock()
             MockAsyncClient.return_value = mock_client
@@ -82,7 +82,7 @@ class TestHTTPClientContextManager:
     @pytest.mark.asyncio
     async def test_context_manager_with_base_url(self) -> None:
         """Test context manager with base URL."""
-        with patch("claw_py.services.api.client.httpx.AsyncClient") as MockAsyncClient:
+        with patch("claude-code-py.services.api.client.httpx.AsyncClient") as MockAsyncClient:
             mock_client = MagicMock()
             mock_client.aclose = AsyncMock()
             MockAsyncClient.return_value = mock_client

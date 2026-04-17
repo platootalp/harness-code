@@ -21,7 +21,7 @@ class TestPluginLoading:
     async def test_plugin_command(self, api_key: str, temp_project: Path):
         """验证插件相关命令存在."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "List available plugins",
             cwd=str(temp_project),
@@ -40,7 +40,7 @@ class TestPluginExecution:
     async def test_plugin_invoke(self, api_key: str, temp_project: Path):
         """验证插件调用."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Use a plugin to complete a task",
             cwd=str(temp_project),

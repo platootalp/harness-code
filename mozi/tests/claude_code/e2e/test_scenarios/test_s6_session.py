@@ -22,7 +22,7 @@ class TestSessionPersistence:
         """验证会话在重启后保持."""
         # 第一个请求
         proc1 = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "My name is Claude",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -33,7 +33,7 @@ class TestSessionPersistence:
 
         # 第二个请求使用 --continue
         proc2 = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--continue",
             "What is my name?",
             cwd=str(temp_project),
@@ -55,7 +55,7 @@ class TestSessionResume:
     async def test_resume_by_id(self, api_key: str, temp_project: Path):
         """验证通过 session ID 恢复会话."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--session-id", "test-session-123",
             "Hello",
             cwd=str(temp_project),

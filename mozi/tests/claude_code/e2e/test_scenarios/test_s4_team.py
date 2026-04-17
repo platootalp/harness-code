@@ -21,7 +21,7 @@ class TestAgentTool:
     async def test_agent_invocation(self, api_key: str, temp_project: Path):
         """验证 agent 工具调用."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Use the agent tool to complete a simple task",
             cwd=str(temp_project),
@@ -41,7 +41,7 @@ class TestSendMessageTool:
     async def test_send_message(self, api_key: str, temp_project: Path):
         """验证 send_message 工具调用."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Send a message to another agent",
             cwd=str(temp_project),
@@ -61,7 +61,7 @@ class TestTeamTools:
     async def test_team_create(self, api_key: str, temp_project: Path):
         """验证 team_create 工具调用."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Create a team with two agents",
             cwd=str(temp_project),
@@ -76,7 +76,7 @@ class TestTeamTools:
     async def test_team_delete(self, api_key: str, temp_project: Path):
         """验证 team_delete 工具调用."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Delete the current team",
             cwd=str(temp_project),

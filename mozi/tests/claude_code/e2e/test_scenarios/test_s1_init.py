@@ -21,7 +21,7 @@ class TestProjectInit:
     async def test_init_command(self, api_key: str, temp_project: Path):
         """验证 init 命令存在并可以执行."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "init",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},

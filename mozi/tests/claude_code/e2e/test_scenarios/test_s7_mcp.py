@@ -21,7 +21,7 @@ class TestMCPConnection:
     async def test_mcp_config_option(self, api_key: str, temp_project: Path):
         """验证 --mcp-config 选项存在."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "--mcp-config", "/tmp/nonexistent.json",
             "List resources",
             cwd=str(temp_project),
@@ -42,7 +42,7 @@ class TestMCPResources:
     async def test_list_mcp_resources(self, api_key: str, temp_project: Path):
         """验证 list_mcp_resources 工具存在."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "List available MCP resources",
             cwd=str(temp_project),
@@ -61,7 +61,7 @@ class TestMCPTools:
     async def test_mcp_tool_invocation(self, api_key: str, temp_project: Path):
         """验证通过 MCP 调用工具."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             "Call an MCP tool",
             cwd=str(temp_project),

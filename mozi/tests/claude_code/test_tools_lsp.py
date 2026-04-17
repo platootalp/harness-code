@@ -183,7 +183,7 @@ class TestLSPTool:
         self, lsp_tool: LSPTool, mock_context: MagicMock, temp_file: str
     ) -> None:
         with patch(
-            "claw_py.tools.lsp._get_lsp_server_manager",
+            "claude-code-py.tools.lsp._get_lsp_server_manager",
             return_value=None,
         ):
             result = await lsp_tool.call(
@@ -214,11 +214,11 @@ class TestLSPTool:
             mock_manager.open_file = AsyncMock()
             mock_manager.send_request = AsyncMock(return_value=None)
             with patch(
-                "claw_py.tools.lsp._get_lsp_server_manager",
+                "claude-code-py.tools.lsp._get_lsp_server_manager",
                 return_value=mock_manager,
             ):
                 with patch(
-                    "claw_py.tools.lsp.os.path.getsize",
+                    "claude-code-py.tools.lsp.os.path.getsize",
                     return_value=50_000_000,
                 ):
                     result = await lsp_tool.call(

@@ -91,7 +91,7 @@ class TestCronDeleteTool:
         self, cron_delete_tool: CronDeleteTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[],
         ):
             result = cron_delete_tool.validate_input(
@@ -108,11 +108,11 @@ class TestCronDeleteTool:
         mock_teammate_ctx = {"agent_id": "researcher@my-team"}
 
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[mock_task],
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=mock_teammate_ctx,
             ):
                 result = cron_delete_tool.validate_input(
@@ -129,11 +129,11 @@ class TestCronDeleteTool:
         mock_teammate_ctx = {"agent_id": "researcher@my-team"}
 
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[mock_task],
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=mock_teammate_ctx,
             ):
                 result = cron_delete_tool.validate_input(
@@ -147,11 +147,11 @@ class TestCronDeleteTool:
         mock_task = {"id": "job-123", "agent_id": "researcher@my-team"}
 
         with patch(
-            "claw_py.utils.cron_tasks.list_all_cron_tasks",
+            "claude-code-py.utils.cron_tasks.list_all_cron_tasks",
             return_value=[mock_task],
         ):
             with patch(
-                "claw_py.utils.teammate_context.get_teammate_context",
+                "claude-code-py.utils.teammate_context.get_teammate_context",
                 return_value=None,
             ):
                 result = cron_delete_tool.validate_input(
@@ -165,7 +165,7 @@ class TestCronDeleteTool:
         self, cron_delete_tool: CronDeleteTool, mock_context: MagicMock
     ) -> None:
         with patch(
-            "claw_py.utils.cron_tasks.remove_cron_tasks",
+            "claude-code-py.utils.cron_tasks.remove_cron_tasks",
         ) as mock_remove:
             result = await cron_delete_tool.call(
                 {"id": "job-123"},
@@ -184,7 +184,7 @@ class TestCronDeleteTool:
         # Even if the job is not found during call(), it should still succeed
         # (idempotent deletion)
         with patch(
-            "claw_py.utils.cron_tasks.remove_cron_tasks",
+            "claude-code-py.utils.cron_tasks.remove_cron_tasks",
         ) as mock_remove:
             result = await cron_delete_tool.call(
                 {"id": "nonexistent"},

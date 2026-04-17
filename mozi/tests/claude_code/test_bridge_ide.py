@@ -231,7 +231,7 @@ class TestGetPlatform:
         with patch.object(sys, "platform", "linux2"), patch.object(
             os.path, "exists", return_value=True
         ), patch(
-            "claw_py.bridge.ide.Path.read_text",
+            "claude-code-py.bridge.ide.Path.read_text",
             return_value="microsoft\nwsl",
         ):
             assert get_platform() == "wsl"
@@ -335,7 +335,7 @@ class TestGetSortedIdeLockfiles:
     def test_returns_empty_when_dir_missing(self, tmp_path: Path) -> None:
         """Should return empty list when IDE lockfile dir doesn't exist."""
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir",
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir",
             return_value=tmp_path / "nonexistent",
         ):
             assert get_sorted_ide_lockfiles() == []
@@ -357,7 +357,7 @@ class TestGetSortedIdeLockfiles:
         new_file.touch()
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ):
             result = get_sorted_ide_lockfiles()
 
@@ -454,7 +454,7 @@ class TestIsCwdInWorkspace:
     def test_subdirectory(self) -> None:
         """Should match when cwd is a subdirectory."""
         assert _is_cwd_in_workspace("/project/src", ["/project"]) is True
-        assert _is_cwd_in_workspace("/project/src/claw_py", ["/project/src"]) is True
+        assert _is_cwd_in_workspace("/project/src/claude-code-py", ["/project/src"]) is True
 
     def test_no_match(self) -> None:
         """Should not match unrelated paths."""
@@ -483,16 +483,16 @@ class TestDetectHostIp:
     def test_non_wsl(self) -> None:
         """Should return 127.0.0.1 on non-WSL platforms."""
         with patch(
-            "claw_py.bridge.ide.get_platform", return_value="linux"
+            "claude-code-py.bridge.ide.get_platform", return_value="linux"
         ):
             assert detect_host_ip(False, 8080) == "127.0.0.1"
 
     def test_wsl_windows_ide(self) -> None:
         """Should return gateway IP in WSL when connecting to Windows IDE."""
         with patch(
-            "claw_py.bridge.ide.get_platform", return_value="wsl"
+            "claude-code-py.bridge.ide.get_platform", return_value="wsl"
         ), patch(
-            "claw_py.bridge.ide.check_ide_connection",
+            "claude-code-py.bridge.ide.check_ide_connection",
             return_value=True,
         ), patch(
             "subprocess.run",
@@ -507,7 +507,7 @@ class TestDetectHostIp:
     def test_wsl_fallback(self) -> None:
         """Should fallback to 127.0.0.1 when gateway lookup fails."""
         with patch(
-            "claw_py.bridge.ide.get_platform", return_value="wsl"
+            "claude-code-py.bridge.ide.get_platform", return_value="wsl"
         ), patch(
             "subprocess.run",
             side_effect=OSError,
@@ -524,7 +524,7 @@ class TestDetectIdes:
     def test_returns_empty_when_no_lockfiles(self, tmp_path: Path) -> None:
         """Should return empty list when no lockfiles exist."""
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir",
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir",
             return_value=tmp_path / "nonexistent",
         ):
             assert detect_ides(cwd="/tmp") == []
@@ -545,9 +545,9 @@ class TestDetectIdes:
         )
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ), patch(
-            "claw_py.bridge.ide.is_process_running", return_value=True
+            "claude-code-py.bridge.ide.is_process_running", return_value=True
         ):
             result = detect_ides(cwd=str(tmp_path))
 
@@ -572,7 +572,7 @@ class TestDetectIdes:
         )
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ):
             result = detect_ides(cwd=str(tmp_path))
 
@@ -594,7 +594,7 @@ class TestDetectIdes:
         )
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ):
             result = detect_ides(cwd=str(tmp_path), include_invalid=True)
 
@@ -617,7 +617,7 @@ class TestDetectIdes:
         )
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ), patch.dict(os.environ, {"CLAUDE_CODE_SSE_PORT": "9999"}):
             result = detect_ides(cwd=str(tmp_path))
 
@@ -641,9 +641,9 @@ class TestDetectIdes:
         )
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ), patch(
-            "claw_py.bridge.ide.is_process_running", return_value=True
+            "claude-code-py.bridge.ide.is_process_running", return_value=True
         ):
             result = detect_ides(cwd=str(tmp_path))
 
@@ -666,9 +666,9 @@ class TestDetectIdes:
         )
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ), patch(
-            "claw_py.bridge.ide.is_process_running", return_value=True
+            "claude-code-py.bridge.ide.is_process_running", return_value=True
         ):
             result = detect_ides(cwd=str(tmp_path))
 
@@ -690,9 +690,9 @@ class TestCleanupStaleIdeLockfiles:
         lockfile.write_text("invalid content")
         # Make it unreadable by patching read_ide_lockfile to return None
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ), patch(
-            "claw_py.bridge.ide.read_ide_lockfile", return_value=None
+            "claude-code-py.bridge.ide.read_ide_lockfile", return_value=None
         ):
             cleanup_stale_ide_lockfiles()
 
@@ -708,16 +708,16 @@ class TestCleanupStaleIdeLockfiles:
         lockfile.write_text(json.dumps({"workspaceFolders": []}))
 
         with patch(
-            "claw_py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
+            "claude-code-py.bridge.ide.get_ide_lockfile_dir", return_value=lock_dir
         ), patch(
-            "claw_py.bridge.ide.read_ide_lockfile",
+            "claude-code-py.bridge.ide.read_ide_lockfile",
             return_value=IdeLockfileInfo(
                 workspace_folders=["/tmp"],
                 port=8080,
                 pid=os.getpid(),
             ),
         ), patch(
-            "claw_py.bridge.ide.check_ide_connection",
+            "claude-code-py.bridge.ide.check_ide_connection",
             return_value=True,
         ):
             removed = cleanup_stale_ide_lockfiles()
@@ -797,7 +797,7 @@ class TestDetectRunningIdes:
     def test_macos_ps(self) -> None:
         """Should use ps on macOS."""
         with patch(
-            "claw_py.bridge.ide.get_platform", return_value="macos"
+            "claude-code-py.bridge.ide.get_platform", return_value="macos"
         ), patch(
             "subprocess.run",
             return_value=MagicMock(
@@ -811,7 +811,7 @@ class TestDetectRunningIdes:
     def test_linux_ps(self) -> None:
         """Should use ps on Linux."""
         with patch(
-            "claw_py.bridge.ide.get_platform", return_value="linux"
+            "claude-code-py.bridge.ide.get_platform", return_value="linux"
         ), patch(
             "subprocess.run",
             return_value=MagicMock(returncode=0, stdout="pycharm"),
@@ -822,7 +822,7 @@ class TestDetectRunningIdes:
     def test_command_failure(self) -> None:
         """Should return empty list on command failure."""
         with patch(
-            "claw_py.bridge.ide.get_platform", return_value="macos"
+            "claude-code-py.bridge.ide.get_platform", return_value="macos"
         ), patch(
             "subprocess.run",
             side_effect=OSError,
@@ -839,9 +839,9 @@ class TestIsVscodeExtensionInstalled:
     def test_vscode_based(self) -> None:
         """Should check extension for VS Code-based IDEs."""
         with patch(
-            "claw_py.bridge.ide.is_vscode_ide", return_value=True
+            "claude-code-py.bridge.ide.is_vscode_ide", return_value=True
         ), patch(
-            "claw_py.bridge.ide._get_vscode_cli_command",
+            "claude-code-py.bridge.ide._get_vscode_cli_command",
             return_value="code",
         ), patch(
             "subprocess.run",
@@ -856,6 +856,6 @@ class TestIsVscodeExtensionInstalled:
     def test_non_vscode(self) -> None:
         """Should return False for non-VS Code IDEs."""
         with patch(
-            "claw_py.bridge.ide.is_vscode_ide", return_value=False
+            "claude-code-py.bridge.ide.is_vscode_ide", return_value=False
         ):
             assert is_vscode_extension_installed(IdeType.PYCHARM) is False

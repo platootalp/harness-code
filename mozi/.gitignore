@@ -40,7 +40,7 @@ Thumbs.db
 *.pdf
 src_mvp/
 
-# Node (claw/)
+# Node (claude-code/)
 node_modules/
 *.tsbuildinfo
 .next/

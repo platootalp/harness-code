@@ -26,7 +26,7 @@ class TestFileRead:
 
         # 调用 CLI 读取文件
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", f"Read the file {test_file} and tell me what it contains",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -45,7 +45,7 @@ class TestFileRead:
         nonexistent = temp_project / "does_not_exist.py"
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", f"Try to read {nonexistent}",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -70,7 +70,7 @@ class TestFileEdit:
 
         # 调用 CLI 编辑文件
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Edit {test_file} to change 'hello' to 'hello world'",
             cwd=str(temp_project),
@@ -94,7 +94,7 @@ class TestCodeGeneration:
         new_file = temp_project / "generated.py"
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Create a new file {new_file} with a simple hello world function",
             cwd=str(temp_project),
@@ -116,7 +116,7 @@ class TestCodeGeneration:
         source_file.write_text("def add(a, b):\n    return a + b\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Write a test file for {source_file} using pytest",
             cwd=str(temp_project),
@@ -136,7 +136,7 @@ class TestCodeGeneration:
         new_file = temp_project / "hello.py"
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Write a complete Python script to {new_file} that prints 'Hello, World!'",
             cwd=str(temp_project),
@@ -162,7 +162,7 @@ class TestCodeModification:
         (temp_project / "config.py").write_text("DEBUG = True\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Change DEBUG to False in {temp_project}/config.py and update main.py to use new config",
             cwd=str(temp_project),
@@ -182,7 +182,7 @@ class TestCodeModification:
         test_file.write_text("def old_function_name():\n    return 'hello'\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Rename 'old_function_name' to 'new_function_name' in {test_file}",
             cwd=str(temp_project),
@@ -202,7 +202,7 @@ class TestCodeModification:
         test_file.write_text("x = datetime.now()\n")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Add 'from datetime import datetime' import to {test_file}",
             cwd=str(temp_project),
@@ -224,7 +224,7 @@ class TestCodeModification:
         test_file.write_text("\n".join(lines))
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print",
             f"Add docstrings to all functions in {test_file}",
             cwd=str(temp_project),
@@ -245,7 +245,7 @@ class TestBashTool:
     async def test_bash_echo(self, api_key: str, temp_project: Path):
         """验证 bash echo 命令."""
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", "Run this bash command: echo 'hello from bash'",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
@@ -266,7 +266,7 @@ class TestBashTool:
         (temp_project / "file2.txt").write_text("content2")
 
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "claw_py.cli.main",
+            sys.executable, "-m", "claude-code-py.cli.main",
             "--print", f"List files in {temp_project} using ls",
             cwd=str(temp_project),
             env={**os.environ, "ANTHROPIC_API_KEY": api_key},
