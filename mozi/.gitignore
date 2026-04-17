@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+.venv/
+.venv
+venv/
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Linting/Type checking
+.ruff_cache/
+.mypy_cache/
+.pyright/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.env
+.env.local
+.DS_Store
+Thumbs.db
+
+# Project specific
+*.pdf
+src_mvp/
+
+# Node (claw/)
+node_modules/
+*.tsbuildinfo
+.next/
+out/
