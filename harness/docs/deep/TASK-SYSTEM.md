@@ -580,3 +580,190 @@ const oldTodos = appState.todos[todoKey] ?? []
 - TodoList 负责**"计划"**——人可读的任务清单，支持依赖和认领
 - 后台任务负责**"执行"**——具体的长时操作，独立运行
 - Session/Team 负责**"隔离/共享"**——sessionId 隔离单人，teamName 共享 Team 上下文
+
+---
+
+## 十一、SubAgent 输出传递给 Main Agent
+
+### 11.1 核心机制概览
+
+SubAgent 的输出通过 **XML Task Notification 消息** 传递给 Main Agent。当 SubAgent 执行完毕后，其最终输出 (`finalMessage`) 被封装成 XML 消息 enqueue 到消息队列，下一次 query 循环时 Main Agent 会收到这条消息并注入到对话上下文中。
+
+```mermaid
+sequenceDiagram
+    participant SubAgent as SubAgent
+    participant LocalAgentTask as LocalAgentTask
+    participant MessageQueue as MessageQueue
+    participant MainAgent as Main Agent QueryEngine
+    participant AppState as AppState.tasks
+
+    SubAgent->>LocalAgentTask: Agent 执行完毕
+    LocalAgentTask->>LocalAgentTask: completeAgentTask(result)
+    LocalAgentTask->>AppState: 更新状态: completed<br/>保存 result.content
+    LocalAgentTask->>LocalAgentTask: enqueueAgentNotification()
+    LocalAgentTask->>MessageQueue: 写入 XML 消息
+    Note over MessageQueue: <task_notification><br/>  <task_id>a1b2c3d4...</task_id><br/>  <status>completed</status><br/>  <summary>Agent "xxx" completed</summary><br/>  <result>finalMessage</result><br/></task_notification>
+    MainAgent->>MessageQueue: 下次 query 轮询
+    MessageQueue->>MainAgent: 返回 XML 消息
+    MainAgent->>MainAgent: 解析消息，注入到对话
+```
+
+### 11.2 详细流程分解
+
+#### Step 1: SubAgent 执行完毕
+
+```typescript
+// AgentTool.tsx - SubAgent 执行后
+const agentResult = await runAgent(...)
+const finalMessage = extractTextContent(agentResult.finalResult.content, '\n')
+
+// 完成 agent task
+completeAsyncAgent(backgroundedTaskId, rootSetAppState)
+
+// 发送通知
+enqueueAgentNotification({
+  taskId: backgroundedTaskId,
+  description,
+  status: 'completed',
+  finalMessage,        // ← SubAgent 的最终输出文本
+  usage: { ... },
+  toolUseId: toolUseContext.toolUseId,
+  ...worktreeResult
+})
+```
+
+#### Step 2: `enqueueAgentNotification` 构建 XML 消息
+
+```typescript
+// LocalAgentTask.tsx - enqueueAgentNotification()
+const summary = status === 'completed' ? `Agent "${description}" completed` : ...
+const resultSection = finalMessage ? `\n<result>${finalMessage}</result>` : ''
+
+const message = `<${TASK_NOTIFICATION_TAG}>
+<${TASK_ID_TAG}>${taskId}</${TASK_ID_TAG}>
+<${STATUS_TAG}>${status}</${STATUS_TAG}>
+<${SUMMARY_TAG}>${summary}</${SUMMARY_TAG}>${resultSection}
+</${TASK_NOTIFICATION_TAG}>`
+
+enqueuePendingNotification({
+  value: message,
+  mode: 'task-notification'
+})
+```
+
+**XML 消息格式：**
+
+```xml
+<task_notification>
+  <task_id>a1b2c3d4e5f6g7h8</task_id>
+  <tool_use_id>tool_xxx</tool_use_id>
+  <task_type>local_agent</task_type>
+  <output_file>/path/to/output</output_file>
+  <status>completed</status>
+  <summary>Agent "xxx" completed</summary>
+  <result>这是 SubAgent 的最终输出文本</result>
+  <usage><total_tokens>1234</total_tokens>...</usage>
+</task_notification>
+```
+
+#### Step 3: Main Agent 接收并注入消息
+
+```typescript
+// query.ts - 查询消息队列，获取 task_notification
+const messages = dequeuePendingMessages()
+
+// Main Agent 的 query 循环会收到这条消息作为 user message
+// TaskNotification 会被解析并作为对话上下文
+```
+
+### 11.3 两种通知方式
+
+| 方式 | 说明 | 代码路径 |
+|------|------|----------|
+| **同步等待 (foreground)** | Agent 作为 foreground task 运行，Main Agent 等待结果直接获取 | `runAgent()` 返回 `agentResult` |
+| **异步通知 (background)** | Agent 后台运行，通过 `enqueueAgentNotification` 发送 XML 消息给 Main Agent | `enqueueAgentNotification()` → 消息队列 |
+
+```typescript
+// 同步模式 (foreground)
+const result = await runAgent(...)
+// Main Agent 直接使用 result
+
+// 异步模式 (background)
+enqueueAgentNotification({ finalMessage: "..." })
+// Main Agent 在下次 query 中通过消息队列收到
+```
+
+### 11.4 SubAgent 结果存储
+
+SubAgent 的结果不仅通过消息通知，还在 `AppState.tasks` 和磁盘都有存储：
+
+```typescript
+// AppState.tasks[agentId] = { ... }
+{
+  status: 'completed',
+  result: {
+    content: [...],      // 最终内容块
+    stopReason: 'end_turn',
+    usage: {...}
+  },
+  evictAfter: Date.now() + 30000  // 30秒后从内存驱逐
+}
+```
+
+**存储位置：**
+
+```
+{project}/.claude/tmp/{sessionId}/tasks/{agentId}.output
+  → 符号链接到完整 transcript
+```
+
+### 11.5 完整时序图
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Main as Main Session
+    participant AgentTool as AgentTool
+    participant Task as LocalAgentTask
+    participant Queue as MessageQueue
+    participant Poll as pollTasks()
+
+    User->>Main: "实现功能X"
+    Main->>AgentTool: 启动 SubAgent
+    AgentTool->>Task: registerAsyncAgent(agentId)
+    Task->>Task: AppState.tasks[agentId] = running
+    Task->>Queue: 写入 pending notification
+
+    par 并行执行
+        AgentTool->>AgentTool: runAgent() 执行
+        loop 每秒轮询
+            Poll->>Task: 检查状态
+        end
+    end
+
+    AgentTool->>Task: completeAgentTask(result)
+    AgentTool->>Queue: enqueueAgentNotification(finalMessage)
+    Note over Queue: <task_notification><br/>  <result>SubAgent输出</result>
+    AgentTool->>Task: 标记 notified=true
+
+    loop 下次 query
+        Main->>Queue: dequeue messages
+        Queue->>Main: 返回 XML 消息
+        Main->>Main: 解析 result 字段
+    end
+
+    Main->>User: 展示结果
+```
+
+### 11.6 关键代码路径
+
+| 步骤 | 文件 | 函数 |
+|------|------|------|
+| 启动 SubAgent | `AgentTool.tsx` | `AgentTool.call()` |
+| 注册 Task | `LocalAgentTask.tsx` | `registerAsyncAgent()` |
+| 执行 Agent | `AgentTool.tsx` | `runAgent()` |
+| 完成 Task | `LocalAgentTask.tsx` | `completeAgentTask()` |
+| 发送通知 | `LocalAgentTask.tsx` | `enqueueAgentNotification()` |
+| 接收消息 | `query.ts` | `query()` 主循环 |
+
+**核心是 XML 消息队列机制**：`enqueueAgentNotification` 将 SubAgent 的最终输出 (`finalMessage`) 封装成 XML，通过 `enqueuePendingNotification` 进入消息队列，Main Agent 在下次 query 轮询时获取并注入到对话上下文。
