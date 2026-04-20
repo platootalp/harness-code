@@ -77,13 +77,43 @@
 
 ---
 
-## 三、Skill 动态发现机制
+## 三、Skill 发现机制
 
-### 3.1 什么是"动态发现"
+### 3.1 两层发现架构
 
-**Skill 的动态发现**指的是：在文件操作时**遍历查找** `.claude/skills/` 目录，而不是在启动时扫描所有可能的目录。
+```
+Skills 发现分两层：
 
-这不是懒加载，而是**按需发现**——只在你操作某个目录下的文件时，才去检查那个目录里有没有 `.claude/skills/`。
+启动时加载（固定目录）：
+  ├── ~/.claude/skills/           ✅ 已加载
+  ├── .claude/skills/（项目根）    ✅ 已加载
+  └── managed/.claude/skills/      ✅ 已加载
+
+动态发现（嵌套目录）：
+  └── src/components/.claude/skills/   ❌ 启动时不知道
+                                         ↓
+                                    只有操作文件时才加载
+```
+
+### 3.2 什么是"动态发现"
+
+**动态发现**指的是：启动时不知道、只有文件操作时才去查找的那些**嵌套目录下的 Skills**。
+
+```
+项目结构示例：
+/project/
+├── .claude/skills/           ← 启动时加载
+│   └── general/SKILL.md
+├── src/
+│   ├── components/
+│   │   └── .claude/skills/   ← 动态发现（只有编辑 src/ 时才加载）
+│   │       └── react-best-practices/SKILL.md
+│   └── utils/
+│       └── .claude/skills/   ← 动态发现（只有编辑 utils/ 时才加载）
+│           └── python-guides/SKILL.md
+```
+
+这不是懒加载，而是**发现范围的扩展**——固定目录启动时加载，嵌套目录按需发现。
 
 ### 3.2 发现流程
 
@@ -174,18 +204,18 @@ skill-name/
 ### Skill 加载流程
 
 ```
-启动时（发现阶段）：
+启动时（固定目录）：
   initBundledSkills()           → 注册内置 skills
-  getSkillDirCommands()         → 扫描已知的 ~/.claude/skills/ 等目录
+  getSkillDirCommands()         → 扫描 ~/.claude/skills/、项目根 .claude/skills/ 等
 
-文件操作时（动态发现）：
+文件操作时（嵌套目录动态发现）：
   FileEditTool.call()
-    → discoverSkillDirsForPaths()   ← 遍历文件路径查找 .claude/skills/
+    → discoverSkillDirsForPaths()   ← 遍历文件路径查找嵌套的 .claude/skills/
     → addSkillDirectories()          ← 加载 SKILL.md → Command 对象
     → activateConditionalSkills()    ← paths 匹配激活
 ```
 
-**动态发现的是什么**：是**目录路径**，不是文件内容。加载到内存的是 `SKILL.md` 的解析结果（一个 ~5KB 的 Command 对象）。
+**动态发现的是什么**：是**嵌套在子目录中的 Skills 目录**（如 `src/components/.claude/skills/`），这些目录在启动时不知道存在。只有文件操作时遍历路径才发现。
 
 ### Tool 延迟加载
 
@@ -367,7 +397,8 @@ export const BashTool = buildTool({
 
 | 特性 | 字段 | 说明 |
 |------|------|------|
-| **动态发现** | 文件操作触发 | 遍历查找 `.claude/skills/` |
+| **启动时加载** | 固定目录 | `~/.claude/skills/`、`.claude/skills/` 等 |
+| **动态发现** | 嵌套目录 | `src/components/.claude/skills/` 等 |
 | 条件激活 | `paths` | 文件路径匹配才激活 |
 | 执行模式 | `context: fork` | 子 agent 执行 |
 | 远程技能 | `EXPERIMENTAL_SKILL_SEARCH` | AKI/GCS 按需加载 |
@@ -463,7 +494,8 @@ export const BashTool = buildTool({
 | 维度 | Skill | Tool | MCP |
 |------|-------|------|-----|
 | **本质** | Prompt 模板 | 可执行代码 | 远程服务代理 |
-| **动态发现** | ✅ 文件操作时遍历发现 | ❌ 启动时全部注册 | ❌ MCP 连接时全部加载 |
+| **启动时加载** | ✅ 固定目录 | ❌ 启动时全部注册 | ❌ MCP 连接时全部加载 |
+| **动态发现** | ✅ 嵌套目录按需 | ❌ 无 | ❌ 无 |
 | **内容延迟** | ✅ 引用文件 LLM 按需读取 | ❌ 代码必须全量 | ❌ Schema 必须全量 |
 | **启动内存** | ~250KB | ~500KB | ~2-10MB |
 | **扩展方式** | 写 Markdown | 写 TypeScript | 接 MCP 服务器 |
