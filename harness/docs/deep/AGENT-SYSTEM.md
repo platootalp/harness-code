@@ -52,7 +52,7 @@ flowchart TD
         end
     end
 
-    style TA fill:#c8e6c9
+    style TA fill:#2e7d32
 ```
 
 ### 0.3 Agent 与其他 Task 类型的区别
@@ -103,8 +103,8 @@ flowchart LR
 
     L1 --> L2 --> L3 --> L4 --> L5 --> L6
 
-    style L2 fill:#fff3e0
-    style L5 fill:#c8e6c9
+    style L2 fill:#e65100
+    style L5 fill:#2e7d32
 ```
 
 ---
@@ -292,9 +292,9 @@ flowchart TD
     TmuxPanes <--> AgentTool
     RemoteAgent <--> AgentTool
 
-    style MainAgent fill:#e1f5fe
-    style SubAgents fill:#f3e5f5
-    style SharedState fill:#fff3e0
+    style MainAgent fill:#0277bd
+    style SubAgents fill:#4a148c
+    style SharedState fill:#e65100
 ```
 
 **读图说明：**
@@ -441,8 +441,8 @@ flowchart LR
     Conversation --> FC
     Conversation -. "只看当前 prompt" .-> SA
 
-    style ForkChild fill:#c8e6c9
-    style SubAgent fill:#fff9c4
+    style ForkChild fill:#2e7d32
+    style SubAgent fill:#f57f17
 ```
 
 ### 2.5.4 模式选择决策图
@@ -469,11 +469,11 @@ flowchart TD
     Coord --> End
     Swarm --> End
 
-    style Single fill:#e1f5fe
-    style SubAgent fill:#c8e6c9
-    style Fork fill:#c8e6c9
-    style Coord fill:#fff9c4
-    style Swarm fill:#f3e5f5
+    style Single fill:#0277bd
+    style SubAgent fill:#2e7d32
+    style Fork fill:#2e7d32
+    style Coord fill:#f57f17
+    style Swarm fill:#4a148c
 ```
 
 ### 2.5.5 四种模式总结
@@ -714,8 +714,8 @@ flowchart LR
     M1 --> M2 --> M3 --> M4 --> M5
     M4 -. "不等待 SubAgent"|-> B5
 
-    style MainTurn fill:#e1f5fe
-    style Background fill:#c8e6c9
+    style MainTurn fill:#0277bd
+    style Background fill:#2e7d32
 ```
 
 #### 3.5.6 SubAgent 的让出点
@@ -810,9 +810,9 @@ flowchart TD
     BE3 --> Shared
     BE4 --> Shared
 
-    style Leader fill:#e1f5fe
-    style Backends fill:#f3e5f5
-    style Shared fill:#fff3e0
+    style Leader fill:#0277bd
+    style Backends fill:#4a148c
+    style Shared fill:#e65100
 ```
 
 ### 4.2 消息传递机制：Mailbox
@@ -1039,8 +1039,8 @@ flowchart TD
     T2 --> C3
     T3 --> C2
 
-    style Coordinator fill:#e1f5fe
-    style Workers fill:#f3e5f5
+    style Coordinator fill:#0277bd
+    style Workers fill:#4a148c
 ```
 
 ### 6.2 Coordinator 工作流程

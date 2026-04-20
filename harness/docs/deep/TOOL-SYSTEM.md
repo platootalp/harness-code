@@ -34,10 +34,10 @@ flowchart LR
     pool --> BuiltInTools
     pool --> MCPLayer
 
-    style Agent fill:#e3f2fd
-    style ToolLayer fill:#fff3e0
-    style BuiltInTools fill:#e8f5e9
-    style MCPLayer fill:#f3e5f5
+    style Agent fill:#1565c0
+    style ToolLayer fill:#e65100
+    style BuiltInTools fill:#1b5e20
+    style MCPLayer fill:#4a148c
 ```
 
 ---

@@ -34,9 +34,9 @@ flowchart LR
     loadSkills --> SkillSources
     dynamic --> SkillSources
 
-    style Agent fill:#e3f2fd
-    style SkillLayer fill:#fff3e0
-    style SkillSources fill:#e8f5e9
+    style Agent fill:#1565c0
+    style SkillLayer fill:#e65100
+    style SkillSources fill:#1b5e20
 ```
 
 ---

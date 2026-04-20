@@ -56,9 +56,9 @@ flowchart LR
     A -. "完成解锁" .-> B
     B -. "完成解锁" .-> C
 
-    style A fill:#c8e6c9
-    style B fill:#fff9c4
-    style C fill:#ffcdd2
+    style A fill:#2e7d32
+    style B fill:#f57f17
+    style C fill:#b71c1c
 ```
 
 **依赖检查逻辑（`claimTask()`）：**
@@ -232,9 +232,9 @@ flowchart LR
     pollTasks -.-> AppState.tasks
     evictTerminalTask -.-> AppState.tasks
 
-    style 触发层 fill:#e8f5e9
-    style 框架层 fill:#e3f2fd
-    style 状态层 fill:#fff3e0
+    style 触发层 fill:#1b5e20
+    style 框架层 fill:#1565c0
+    style 状态层 fill:#e65100
 ```
 
 ### 3.2 框架函数
@@ -292,9 +292,9 @@ flowchart LR
 
     C --> V1 --> V2
 
-    style C fill:#90EE90
-    style V1 fill:#FFE4B5
-    style V2 fill:#FFB6C1
+    style C fill:#2e7d32
+    style V1 fill:#f57f17
+    style V2 fill:#b71c1c
 ```
 
 - **LocalAgentTask：** `PANEL_GRACE_MS = 30_000`（30 秒）
@@ -336,10 +336,10 @@ flowchart TD
     AgentTool --> registerTask
     registerTask --> TaskMemory
 
-    style TodoListDisk fill:#e1f5fe
-    style TaskMemory fill:#fff3e0
-    style TaskOutput fill:#fff3e0
-    style AppStateTodos fill:#f3e5f5
+    style TodoListDisk fill:#0277bd
+    style TaskMemory fill:#e65100
+    style TaskOutput fill:#e65100
+    style AppStateTodos fill:#4a148c
 ```
 
 **关键关系：**
@@ -782,3 +782,568 @@ sequenceDiagram
 | 接收消息 | `query.ts` | `query()` 主循环 |
 
 **核心是 XML 消息队列机制**：`enqueueAgentNotification` 将 SubAgent 的最终输出 (`finalMessage`) 封装成 XML，通过 `enqueuePendingNotification` 进入消息队列，Main Agent 在下次 query 轮询时获取并注入到对话上下文。
+
+---
+
+## 十二、TodoList 与 Task 的深度对比与设计原理解析
+
+### 12.1 为什么需要两套独立的系统？
+
+**根本原因：用途完全不同，无法合并**
+
+| 需求 | TodoList 能满足吗？ | Task 能满足吗？ |
+|------|-------------------|----------------|
+| 追踪"实现登录API" → "写测试" → "审查" 依赖链 | ✅ 完美支持 | ❌ 无依赖机制 |
+| 实时看到 `npm install` 的输出 | ❌ 只是状态 | ✅ 输出监控 |
+| 长时间运行不阻塞 Main Agent | ❌ 同步等待 | ✅ 后台执行 |
+| 人类查看/管理任务清单 | ✅ UI 友好 | ❌ 无专用 UI |
+| 支持任务认领（claim）| ✅ | ❌ |
+| 任务取消/停止 | ❌ | ✅ TaskStop |
+
+**一个类比：**
+- **TodoList** = 项目的 **Trello/Jira 看板**（人看、管理依赖）
+- **Task** = 系统的 **进程管理器**（系统追踪执行、输出）
+
+### 12.2 整体交互流程
+
+```
+用户输入
+    │
+    ▼
+Main Agent（QueryEngine.query()）
+    │
+    ├─→ 分析请求 → 决定是否拆解任务
+    │      │
+    │      ├─→ 场景1: 简单任务 → 直接执行 → 返回结果
+    │      │
+    │      └─→ 场景2: 复杂任务 → Main Agent 自己规划
+    │              │
+    │              ├─→ 创建 TodoList（Task工具）规划依赖关系
+    │              │
+    │              └─→ 启动 SubAgent（通过 AgentTool）
+    │                      │
+    │                      ├─→ Foreground: 等待结果 → 继续处理
+    │                      │
+    │                      └─→ Background:
+    │                              1. registerAsyncAgent() 注册 Task
+    │                              2. void runAsyncAgentLifecycle() 后台执行
+    │                              3. pollTasks() 每秒轮询
+    │                              4. 完成 → enqueueAgentNotification() XML通知
+    │                              5. Main Agent 下次 query 收到结果
+```
+
+### 12.3 Main Agent 何时拆解创建任务？
+
+**不是自动拆解，是按需决策：**
+
+| 触发条件 | 行为 |
+|---------|------|
+| 简单命令（如 `ls`） | 直接执行，不拆解 |
+| 复杂多步骤任务 | Main Agent 分析后创建 TodoList + 启动 SubAgent |
+| 显式调用 `/agent` 或 `AgentTool` | 强制启动 SubAgent |
+| Foreground 执行超时（默认 120s） | 自动转 Background |
+| Coordinator 模式 | Main Agent 不执行，只协调分配 |
+
+**拆解的依据：**
+- LLM 自己判断任务复杂度
+- 用户通过 `AgentTool` 显式指定
+- 超过前台执行时间阈值自动转后台
+
+### 12.4 Main Agent 与 SubAgent 如何通信？
+
+| 通信模式 | 机制 | 使用场景 |
+|---------|------|---------|
+| **Foreground（同步）** | `for await (msg of runAgent())` 直接 yield | 需要实时看到 SubAgent 输出 |
+| **Background（异步）** | XML Notification → 消息队列 → 下次 query 轮询 | 长时任务，Main Agent 继续处理其他事 |
+| **Team/Mailbox** | 文件邮箱 `~/.claude/teams/{team}/inboxes/{agent}.json` | 跨进程 Team 协作 |
+
+**Background 模式详解：**
+
+```typescript
+// AgentTool.tsx - Background 模式
+if (shouldRunAsync) {
+  registerAsyncAgent(agentId, ...)
+
+  // 关键：使用 void，不等待结果
+  void runWithAgentContext(
+    asyncAgentContext,
+    () => runAsyncAgentLifecycle({...})
+  )
+
+  // 立即返回，不阻塞 Main Agent
+  return { status: 'async_launched' }
+}
+```
+
+**为什么 Background SubAgent 不会阻塞 Main Agent？**
+
+因为 SubAgent 本质上是 async generator，大量 `await` 操作自然让出事件循环：
+
+| 操作 | 是否让出 | 让出时机 |
+|------|----------|---------|
+| API 调用 (`query()`) | ✅ | `await` 时让出 |
+| 工具调用 (`BashTool`) | ✅ | `await exec()` 时让出 |
+| 文件读写 | ✅ | `await fs.readFile()` 时让出 |
+| CPU 计算（无 await） | ❌ | 不让出 |
+
+### 12.5 TodoList：内存 + 文件，以哪个为主？
+
+**两者都有，磁盘是 source of truth（主）：**
+
+```
+AppState.todos[key] ──────→ 内存索引（key = agentId ?? sessionId）
+        │
+        │ 同步写
+        ▼
+~/.claude/config/tasks/{taskListId}/
+├── tasks.json          ← 真正的 TodoList 存储
+└── claims/             ← 认领状态
+```
+
+| 操作 | 内存 | 磁盘 |
+|------|------|------|
+| **读取** | `AppState.todos[key]` | 从磁盘加载 |
+| **写入** | 先写内存，再异步写磁盘 | 是 source of truth |
+| **崩溃恢复** | 丢失 | 不丢失 |
+| **跨 Session** | ❌（进程内） | ✅ Team 场景 |
+
+**为什么这样设计？**
+- 磁盘确保跨 Session 持久化（Session 重启不丢任务）
+- 内存确保高速读写（不用每次都读磁盘）
+- Team 场景下磁盘文件真正共享（`taskListId = teamName`）
+
+### 12.6 为什么监控文件输出？
+
+**不是监控"文件"，是监控"输出"：**
+
+```
+SubAgent 执行
+    │
+    ├─→ Console/stdout → {project}/.claude/tmp/{sessionId}/tasks/{agentId}.output
+    │
+    └─→ pollTasks() 每秒读取这个文件
+            │
+            ├─→ 检测新内容（通过 offset 偏移量）
+            ├─→ 更新进度（toolUseCount, tokenCount）
+            └─→ 识别终态（completed/failed/killed）
+```
+
+**为什么用文件而不是纯内存？**
+
+| 方案 | 优势 | 劣势 |
+|------|------|------|
+| **纯内存** | 速度快 | 进程崩溃丢失，无法跨 Session |
+| **纯磁盘** | 持久化 | 速度慢 |
+| **文件输出 + 内存状态（当前方案）** | 持久化 + 高速 ✅ | 需要协调 |
+
+**实际设计：**
+- **内存**：`AppState.tasks` — Task 状态（快）
+- **磁盘**：`.output` 文件 — 输出内容（持久化 + 可查看）
+- **符号链接**：指向完整的 transcript 文件
+
+**文件监控的优势：**
+1. **持久化**：进程崩溃后可以恢复
+2. **可查看**：用户可以 `cat {taskId}.output` 查看实时输出
+3. **跨 Session**：输出文件绑定 sessionId，Session 结束后仍可查看
+4. **增量读取**：通过 `outputOffset` 跟踪已读位置，避免重复读取
+
+### 12.7 架构全景图
+
+```mermaid
+flowchart TD
+    subgraph 计划层
+        TodoList["TodoList
+        路径: ~/.claude/config/tasks/{taskListId}/
+        用途: 人类可读任务清单 + 依赖关系
+        状态: pending/in_progress/completed"]
+    end
+
+    subgraph 执行层
+        Task["后台任务（Task）
+        路径: AppState.tasks + {project}/.claude/tmp/{sessionId}/tasks/
+        用途: 长时操作执行 + 输出追踪
+        状态: pending/running/completed/failed/killed"]
+    end
+
+    subgraph 通信层
+        XML["XML Notification
+        路径: 消息队列
+        用途: SubAgent → Main Agent 结果传递"]
+
+        Mailbox["File Mailbox
+        路径: ~/.claude/teams/{team}/inboxes/
+        用途: Team 成员间通信"]
+    end
+
+    subgraph 监控层
+        Poll["pollTasks()
+        频率: 每秒
+        监控: AppState.tasks + .output 文件"]
+    end
+
+    TodoList -. "人类管理" .-> Task
+    Task --> XML --> Mailbox
+    Poll -. "每秒轮询" .-> Task
+
+    style TodoList fill:#0277bd
+    style Task fill:#e65100
+    style XML fill:#2e7d32
+    style Mailbox fill:#4a148c
+```
+
+### 12.8 设计原则总结
+
+| 原则 | 说明 |
+|------|------|
+| **职责分离** | TodoList 管"计划"（人看的任务清单），Task 管"执行"（系统追踪的长时操作） |
+| **内存+磁盘** | 内存用于高速访问，磁盘用于持久化，各取所长 |
+| **文件监控** | 用文件作为输出载体，支持持久化、可查看、增量读取 |
+| **XML 通知** | SubAgent 结果通过 XML 消息队列传递，解耦 Main/Sub Agent |
+| **一对一映射** | SubAgent 的 Agent ID 就是 Task ID，简化关联管理 |
+| **Session 隔离** | 后台任务绑定 sessionId，单人 Session 不跨 Session；Team 场景通过 teamName 共享 |
+
+---
+
+## 十三、完整流程图：TodoList vs Task 及交互关系
+
+### 13.1 TodoList 完整生命周期流程图
+
+```mermaid
+flowchart TD
+    subgraph 创建阶段
+        A1["用户输入请求"]
+        A2{"任务复杂？\n需要多步骤？"}
+        A3["Agent 调用\nTodoWriteTool / TaskCreateTool"]
+        A4["创建 TodoItem\nid=数字字符串\nstatus=pending"]
+        A5["设置 blockedBy\n依赖关系"]
+        A6["写入 AppState.todos\nkey=agentId??sessionId"]
+        A7["异步写入磁盘\n~/.claude/config/tasks/{taskListId}/tasks.json"]
+    end
+
+    subgraph 依赖检查
+        B1{"claimTask()\n是否被阻塞？"}
+        B2["blockedBy 中\n所有任务 completed?"]
+        B3["✅ 无阻塞\n认领成功"]
+        B4["❌ 被阻塞\n返回 blocked"]
+        B5["updateTask()\nstatus=in_progress"]
+    end
+
+    subgraph 执行阶段
+        C1["Agent 执行任务"]
+        C2["AgentTool 启动 SubAgent"]
+        C3["SubAgent 后台执行\n（独立 Task 系统）"]
+        C4["SubAgent 完成\n通知 Main Agent"]
+    end
+
+    subgraph 完成阶段
+        D1["updateTask()\nstatus=completed"]
+        D2["解锁被 blocks 的任务\n清除 blockedBy"]
+        D3["同步写磁盘\n持久化"]
+        D4["可选：触发\nTaskCompleted Hook"]
+    end
+
+    A1 --> A2
+    A2 -->|"否，不拆解"| A3
+    A2 -->|"是，多步骤"| A3
+    A3 --> A4
+    A4 --> A5
+    A5 --> A6
+    A6 --> A7
+    A7 --> B1
+    B1 --> B2
+    B2 -->|"无 blockedBy"| B3
+    B2 -->|"有 blockedBy"| B4
+    B3 --> B5
+    B5 --> C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 --> D1
+    D1 --> D2
+    D2 --> D3
+    D3 --> D4
+
+    style A1 fill:#1565c0
+    style B1 fill:#f57f17
+    style C3 fill:#2e7d32
+    style D1 fill:#2e7d32
+```
+
+### 13.2 后台任务（Task）完整生命周期流程图
+
+```mermaid
+flowchart TD
+    subgraph 触发层
+        T1["Tool 调用: BashTool / AgentTool"]
+        T2{"任务类型?"}
+        T3A["local_bash"]
+        T3B["local_agent"]
+        T3C["in_process_teammate"]
+        T3D["remote_agent"]
+    end
+
+    subgraph 注册阶段
+        R1["registerTask() 创建 TaskState"]
+        R2["生成 taskId: {prefix}{8位随机}"]
+        R3["AppState.tasks[taskId] = running"]
+        R4["创建输出文件"]
+    end
+
+    subgraph 执行层
+        E1["任务开始执行"]
+        E2{"执行模式?"}
+        E3A["Foreground: for await runAgent()"]
+        E3B["Background: void runAsyncAgentLifecycle()"]
+        E4["pollTasks() 每秒轮询"]
+        E5["读取输出文件，检查 outputOffset"]
+        E6["更新 AppState.tasks 进度"]
+    end
+
+    subgraph 完成阶段
+        F1{"执行结果?"}
+        F2["status = completed"]
+        F3["status = failed"]
+        F4["status = killed"]
+        F5["enqueueAgentNotification() XML入队"]
+        F6["标记 notified = true"]
+        F7["设置 evictAfter = now + 30s"]
+    end
+
+    subgraph 驱逐阶段
+        D1{"满足驱逐条件?\n终态 + notified + 超时"}
+        D2["evictTerminalTask()\n从 AppState.tasks 删除"]
+        D3["保留输出文件，用户可查看"]
+    end
+
+    T1 --> T2
+    T2 --> T3A
+    T2 --> T3B
+    T2 --> T3C
+    T2 --> T3D
+    T3A --> R1
+    T3B --> R1
+    T3C --> R1
+    T3D --> R1
+    R1 --> R2
+    R2 --> R3
+    R3 --> R4
+    R4 --> E1
+    E1 --> E2
+    E2 --> E3A
+    E2 --> E3B
+    E3A --> E4
+    E3B --> E4
+    E4 --> E5
+    E5 --> E6
+    E6 --> F1
+    F1 --> F2
+    F1 --> F3
+    F1 --> F4
+    F2 --> F5
+    F3 --> F5
+    F4 --> F5
+    F5 --> F6
+    F6 --> F7
+    F7 --> D1
+    D1 -->|"否，继续监控"| E4
+    D1 -->|"是，30s后"| D2
+    D2 --> D3
+
+    style T1 fill:#1565c0
+    style R1 fill:#f57f17
+    style E4 fill:#1b5e20
+    style F2 fill:#2e7d32
+    style D2 fill:#b71c1c
+```
+
+### 13.3 TodoList 与 Task 交互关系全景图
+
+```mermaid
+flowchart LR
+    subgraph 用户层
+        User["用户输入"]
+    end
+
+    subgraph MainAgent["Main Agent（QueryEngine）"]
+        Query["query() 循环"]
+        Analyze["分析请求"]
+        Decide{"决策：\n是否拆解任务？"}
+    end
+
+    subgraph TodoList系统["TodoList 系统（计划层）"]
+        subgraph TodoListStates
+            TL1["pending"]
+            TL2["in_progress"]
+            TL3["completed"]
+        end
+        TodoCreate["TodoWriteTool\n.createTask()"]
+        TodoClaim["claimTask()\n检查 blockedBy"]
+        TodoUpdate["updateTask()\n修改状态"]
+        TodoBlock["blockTask()\n设置依赖"]
+        TodoDisk["~/.claude/config/tasks/{taskListId}/"]
+        TodoMemory["AppState.todos[key]"]
+    end
+
+    subgraph Task系统["Task 系统（执行层）"]
+        subgraph TaskStates
+            TS1["pending"]
+            TS2["running"]
+            TS3["completed/failed/killed"]
+        end
+        TaskRegister["registerTask()"]
+        TaskExecute["runAgent() / exec()"]
+        TaskPoll["pollTasks()\n每秒轮询"]
+        TaskNotify["enqueueAgentNotification()\nXML 通知"]
+        TaskOutput["{project}/.claude/tmp/{sessionId}/tasks/"]
+        TaskMemory["AppState.tasks[id]"]
+    end
+
+    subgraph 通信层
+        XMLQueue["消息队列\nenqueue/dequeue"]
+        NextQuery["下次 query 轮询"]
+    end
+
+    %% 用户 → Main Agent
+    User --> Analyze
+
+    %% Main Agent → TodoList（创建/更新）
+    Analyze --> Decide
+    Decide -->|"简单任务"| TaskRegister
+    Decide -->|"复杂任务\n需要规划"| TodoCreate
+    TodoCreate --> TodoBlock
+    TodoBlock --> TodoMemory
+    TodoMemory -. "异步" .-> TodoDisk
+
+    %% TodoList → SubAgent（认领后启动执行）
+    TodoClaim -->|"认领成功"| TaskRegister
+    TodoUpdate -->|"status=in_progress"| TaskExecute
+
+    %% Task 执行
+    TaskRegister --> TaskMemory
+    TaskMemory --> TaskOutput
+    TaskExecute --> TaskPoll
+    TaskPoll -. "每秒检查" .-> TaskOutput
+    TaskPoll -. "更新进度" .-> TaskMemory
+
+    %% Task → 通知 Main Agent
+    TaskExecute --> TaskNotify
+    TaskNotify --> XMLQueue
+    XMLQueue --> NextQuery
+    NextQuery --> Query
+
+    %% Task → 更新 TodoList
+    TaskExecute --> TodoUpdate
+
+    %% Main Agent → 用户
+    Query -->|"结果返回"| User
+
+    %% 样式
+    style User fill:#0d47a1
+    style MainAgent fill:#1565c0
+    style TodoList系统 fill:#f9a825
+    style Task系统 fill:#388e3c
+    style 通信层 fill:#7b1fa2
+```
+
+### 13.4 关键交互点说明
+
+| 交互点 | 说明 | 代码位置 |
+|--------|------|---------|
+| **TodoList → Task** | Agent 认领 TodoList 任务后，通过 `AgentTool` 启动 SubAgent，创建对应的 Task | `TodoWriteTool` → `AgentTool.call()` |
+| **Task → TodoList** | SubAgent 执行完成后，更新 TodoList 任务状态为 `completed` | `runAgent()` → `updateTask()` |
+| **共享 key** | `AppState.todos[agentId]` 和 `AppState.tasks[agentId]` 使用相同的 agentId 作为 key | `AppState.ts` |
+| **无直接耦合** | TodoList 和 Task 是**独立的**，TodoList 负责计划，Task 负责执行 | — |
+| **XML 通知桥接** | Task 完成通过 XML 通知 Main Agent，Main Agent 再更新 TodoList | `enqueueAgentNotification()` → `query()` |
+
+### 13.5 两种系统字段对照
+
+```mermaid
+flowchart LR
+    subgraph TodoList字段
+        TL["id: 数字字符串
+        subject: 标题
+        status: pending|in_progress|completed
+        blockedBy: string[]
+        blocks: string[]
+        owner: agentId
+        activeForm: 进行时态"]
+    end
+
+    subgraph Task字段
+        TK["id: {prefix}{8位随机}
+        type: local_agent|local_bash|...
+        status: pending|running|completed|failed|killed
+        outputFile: 磁盘路径
+        outputOffset: 字节偏移
+        notified: boolean
+        evictAfter: 时间戳
+        toolUseCount: 工具调用数
+        tokenCount: token 计数"]
+    end
+
+    TL -->|"计划层"| TK
+    TK -->|"执行层"| TL
+
+    style TodoList字段 fill:#f57f17
+    style Task字段 fill:#2e7d32
+```
+
+### 13.6 Team 场景下的完整流程
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Leader as Leader Agent
+    participant TodoList as TodoList\n~/.claude/config/tasks/{teamName}/
+    participant TaskLeader as Task(Leader)\nAppState.tasks
+    participant Spawn as spawnTeammate()
+    participant Teammate as Teammate Agent
+    participant TaskMember as Task(Teammate)\nAppState.tasks
+    participant Mailbox as Mailbox\n~/.claude/teams/{team}/inboxes/
+    participant Poll as pollTasks()
+
+    User->>Leader: "实现功能 X"
+    Leader->>Leader: 分析：拆解任务
+    Leader->>TodoList: createTask(#1 "实现 API")
+    Leader->>TodoList: createTask(#2 "写测试" blockedBy: #1)
+    Leader->>TodoList: claimTask(#1) → status=in_progress
+
+    Leader->>Spawn: spawnTeammate("worker")
+    Spawn->>TaskLeader: registerTask(running)
+    Spawn->>Mailbox: 创建 inbox
+    Spawn->>Teammate: 启动执行
+
+    Teammate->>Teammate: runAgent() query loop
+    Teammate->>TaskMember: registerTask(running)
+    Teammate->>TodoList: claimTask(#2) → 检查 #1 completed ✅
+
+    Teammate->>TaskMember: status=completed
+    Teammate->>Mailbox: idle_notification + 结果
+    TaskMember->>Poll: 完成标记
+
+    loop pollTasks() 每秒
+        Poll->>TaskMember: 检查状态
+    end
+
+    Mailbox->>Leader: 新消息通知
+    Leader->>Mailbox: readMailbox()
+    Leader->>Leader: 分析 teammate 结果
+    Leader->>TodoList: updateTask(#2, completed)
+    Leader->>Teammate: SendMessage / Shutdown
+
+    Leader->>User: 展示最终结果
+```
+
+### 13.7 总结：两套系统的本质区别
+
+| 维度 | TodoList | Task |
+|------|----------|------|
+| **本质** | 人工可读的任务清单 | 系统执行的作业追踪 |
+| **创建** | Agent 显式调用 | Tool 自动创建 |
+| **管理** | 人类/Agent 共同管理 | 系统自动管理 |
+| **依赖** | ✅ blockedBy/blocks | ❌ 无 |
+| **认领** | ✅ claimTask() | ❌ |
+| **执行追踪** | ❌ 不知道执行到哪了 | ✅ 输出文件 + 进度 |
+| **生命周期** | Session/Team 级别 | Session 绑定 |
+| **调度者** | Agent 主动认领 | pollTasks() 被动轮询 |
+| **类比** | Trello/Jira 看板 | 进程管理器 / top 命令 |

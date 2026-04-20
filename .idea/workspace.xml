@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="403051d7-2c8f-4c3a-826e-35d0b0bfdcfe" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM-OVERVIEW.md" beforeDir="false" afterPath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/harness/docs/deep/AGENT-SYSTEM.review.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/harness/docs/deep/REVIEW-REPORT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM.review.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
