@@ -85,7 +85,9 @@
 | **数量级** | 通常 < 50 个 | ~30 个内置 | 可达数百个 |
 | **典型内存** | ~100KB - 2MB | ~500KB | ~2-10MB |
 | **加载时机** | 启动时 + 动态发现 | 启动时注册 | MCP 连接时 |
-| **懒加载** | ❌ 内容直接加载 | ❌ 全部注册 | ⚠️ 工具列表按需 |
+| **懒加载** | ❌ `markdownContent` 全量加载 | ✅ `shouldDefer` + ToolSearch 按需 | ✅ 同样通过 ToolSearch |
+
+**关键区别**：Tool 和 MCP 通过 `shouldDefer` + `ToolSearch` 实现真正的延迟加载，Skill 不支持延迟加载（`markdownContent` 直接全量加载到内存）。
 
 ---
 
@@ -107,16 +109,24 @@
 
 **加载到内存**：完整 `Command` 对象，包含 `markdownContent` 闭包引用
 
-### Tool 加载流程
+### Tool 延迟加载
 
 ```
 启动时：
   assembleToolPool()
-    → 内置 Tool 注册（Tool.ts 静态）
-    → MCP 工具转换（client.ts listTools）
+    → 内置 Tool 注册
+    → shouldDefer=true 标记为延迟
+    → MCP 工具默认延迟
+
+ToolSearch 模式：
+  模型请求时：
+    → 检查 deferredTools
+    → ToolSearchTool 搜索工具
+    → 返回 tool_reference 块
+    → 下次请求才加载完整 Schema
 ```
 
-**加载到内存**：`Tool` 对象，包含完整的 `call()` 实现
+**延迟机制**：通过 `shouldDefer` 标记 + `ENABLE_TOOL_SEARCH` 环境变量控制，配合 ToolSearchTool 实现按需加载。
 
 ### MCP 工具加载流程
 
