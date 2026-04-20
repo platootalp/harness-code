@@ -64,6 +64,16 @@ flowchart LR
 **依赖检查逻辑（`claimTask()`）：**
 
 ```typescript
+// 检查任务是否已被其他 agent 认领
+if (task.owner && task.owner !== claimantAgentId) {
+  return { success: false, reason: 'already_claimed', task }
+}
+
+// 检查任务是否已解决
+if (task.status === 'completed') {
+  return { success: false, reason: 'already_resolved', task }
+}
+
 // 只有 blockedBy 中所有任务都 completed 时才能认领
 const unresolvedTaskIds = new Set(
   allTasks.filter(t => t.status !== 'completed').map(t => t.id)
@@ -84,12 +94,17 @@ function getTaskListId(): string {
   if (process.env.CLAUDE_CODE_TASK_LIST_ID)
     return process.env.CLAUDE_CODE_TASK_LIST_ID
 
-  // 2. 进程内 teammate → 用 teamName（与 tmux/iTerm2 teammates 共享）
+// 2. 进程内 teammate → 用 teammateContext.teamName
   const teammateCtx = getTeammateContext()
   if (teammateCtx)
     return teammateCtx.teamName
 
-  // 3. 兜底: leaderTeamName（TeamCreate） > sessionId
+  // 3. tmux/iTerm2 teammates → 用 dynamicTeamContext.teamName（通过 CLI 参数传入）
+  const dynamicTeamContext = getDynamicTeamContext()
+  if (dynamicTeamContext?.teamName)
+    return dynamicTeamContext.teamName
+
+  // 4. 兜底: leaderTeamName（TeamCreate） > sessionId
   return getTeamName() || leaderTeamName || getSessionId()
 }
 ```
@@ -267,11 +282,11 @@ flowchart LR
         C["status='completed'<br/>retain=false<br/>evictAfter=now+30s"]
     end
 
-    subgraph 0-30秒[宽限期 30 秒]
+    subgraph zero_to_thirty_sec["宽限期 30 秒"]
         V1["面板可见<br/>可查看结果"]
     end
 
-    subgraph 30秒后[30 秒后]
+    subgraph after_thirty_sec["30 秒后"]
         V2["可驱逐"]
     end
 
@@ -486,7 +501,7 @@ registerTask(taskState, setAppState)  // AppState.tasks[agentId] = taskState
 `AppState.todos` 的 key 是 `agentId ?? sessionId`：
 
 ```typescript
-// TodoWriteTool.tsx
+// TodoWriteTool.ts
 const todoKey = context.agentId ?? getSessionId()
 const oldTodos = appState.todos[todoKey] ?? []
 ```

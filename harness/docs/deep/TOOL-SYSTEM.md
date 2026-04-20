@@ -163,12 +163,14 @@ export type ToolUseContext = {
   // === 执行环境 ===
   abortController: AbortController
   messages: Message[]                    // 对话历史
-  agentId?: AgentId                      // SubAgent 的 ID
-  agentType?: string
+  agentId?: AgentId                      // SubAgent 的 ID（仅 SubAgent 设置）
+  agentType?: string                     // SubAgent 类型名
+  toolUseId?: string                     // 当前工具调用的唯一 ID
 
   // === 状态管理 ===
   getAppState(): AppState
   setAppState(f: (prev: AppState) => AppState): void
+  /** 与 setAppState 不同，此函数始终作用于根 store，用于后台任务和 session hooks */
   setAppStateForTasks?: (f: (prev: AppState) => AppState) => void
 
   // === 工具选项 ===
@@ -181,43 +183,63 @@ export type ToolUseContext = {
     thinkingConfig: ThinkingConfig
     mcpClients: MCPServerConnection[]
     mcpResources: Record<string, ServerResource[]>
+    isNonInteractiveSession: boolean
+    agentDefinitions: AgentDefinitionsResult
+    maxBudgetUsd?: number
     customSystemPrompt?: string
     appendSystemPrompt?: string
-    refreshTools?: () => Tools           // 动态刷新工具列表
-    // ...
+    querySource?: QuerySource
+    refreshTools?: () => Tools           // 动态刷新工具列表（用于 MCP 服务器连接）
   }
-
-  // === 交互 & UI ===
-  setToolJSX?: SetToolJSXFn             // 显示工具进度 UI
-  setHasInterruptibleToolInProgress?: (v: boolean) => void
-  addNotification?: (notif: Notification) => void
-  sendOSNotification?: (opts) => void
-  requestPrompt?: (sourceName, toolInputSummary?) => (request: PromptRequest) => Promise<PromptResponse>
 
   // === 文件 & 会话 ===
   readFileState: FileStateCache
   updateFileHistoryState: (f: (prev: FileHistoryState) => FileHistoryState) => void
   updateAttributionState: (f: (prev: AttributionState) => FileHistoryState) => void
+  setConversationId?: (id: UUID) => void
+
+  // === 交互 & UI ===
+  setToolJSX?: SetToolJSXFn             // 显示工具进度 UI
+  setHasInterruptibleToolInProgress?: (v: boolean) => void  // 仅 REPL 模式
+  addNotification?: (notif: Notification) => void
+  sendOSNotification?: (opts: { message: string; notificationType: string }) => void
+  requestPrompt?: (sourceName, toolInputSummary?) => (request: PromptRequest) => Promise<PromptResponse>
+  openMessageSelector?: () => void
+  handleElicitation?: (serverName, params, signal) => Promise<ElicitResult>  // URL 采集
 
   // === 工具执行追踪 ===
-  toolUseId?: string
   setInProgressToolUseIDs: (f: (prev: Set<string>) => Set<string>) => void
+  setResponseLength: (f: (prev: number) => number) => void
   toolDecisions?: Map<string, { source: string; decision: 'accept' | 'reject'; timestamp: number }>
 
   // === 权限 & 验证 ===
-  localDenialTracking?: DenialTrackingState
-  contentReplacementState?: ContentReplacementState
-  requireCanUseTool?: boolean
+  localDenialTracking?: DenialTrackingState  // SubAgent 权限拒绝追踪
+  requireCanUseTool?: boolean           // speculation 模式需要强制调用 canUseTool
+
+  // === Skill & Memory ===
+  nestedMemoryAttachmentTriggers?: Set<string>
+  loadedNestedMemoryPaths?: Set<string>  // 已注入的 CLAUDE.md 路径
+  dynamicSkillDirTriggers?: Set<string>
+  discoveredSkillNames?: Set<string>     // 本次 session 通过 skill_discovery 发现的技能
+  userModified?: boolean
+
+  // === 指标 & 调试 ===
+  pushApiMetricsEntry?: (ttftMs: number) => void  // OTPS 追踪
+  setStreamMode?: (mode: SpinnerMode) => void
+  onCompactProgress?: (event: CompactProgressEvent) => void
+  setSDKStatus?: (status: SDKStatus) => void
+  queryTracking?: QueryChainTracking
 
   // === Prompt 缓存 ===
-  renderedSystemPrompt?: SystemPrompt    // 冻结的系统提示词字节数
+  renderedSystemPrompt?: SystemPrompt    // 冻结的系统提示词字节数（fork 时使用）
 
   // === 其他 ===
-  queryTracking?: QueryChainTracking
   criticalSystemReminder_EXPERIMENTAL?: string
-  appendSystemMessage?: (msg: SystemMessage) => void
-  openMessageSelector?: () => void
-  // ...
+  appendSystemMessage?: (msg: Exclude<SystemMessage, SystemLocalCommandMessage>) => void
+  preserveToolUseResults?: boolean       // in-process teammate 保留工具结果
+  fileReadingLimits?: { maxTokens?: number; maxSizeBytes?: number }
+  globLimits?: { maxResults?: number }
+  contentReplacementState?: ContentReplacementState  // 工具结果预算
 }
 ```
 
@@ -333,7 +355,7 @@ if (isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE)) {
 | **SkillTool** | Skill 调用 | 工具能力扩展 |
 | **BriefTool** | 文件摘要 | AI 生成摘要 |
 | **GrepTool / GlobTool** | 代码搜索 | 内嵌 vs 独立 |
-| **ToolSearchTool** | 延迟工具搜索 | defer 机制 |
+| **ToolSearchTool** | 工具搜索发现 | defer 机制（自身**不延迟**，用于选择其他延迟工具） |
 | **ListMcpResourcesTool / ReadMcpResourceTool** | MCP 资源访问 | URI 路由 |
 | **SnipTool** | 历史剪报（HISTORY_SNIP） | 历史记录剪报 |
 | **WorkflowTool** | 工作流脚本 | 脚本执行 |
@@ -572,6 +594,28 @@ TeamDeleteTool, EnterWorktreeTool, ExitWorktreeTool,
 RemoteTriggerTool, CronCreateTool, CronDeleteTool, CronListTool,
 + 所有 MCP 服务器提供的工具
 ```
+
+### 6.2.1 alwaysLoad 机制
+
+**功能**：强制工具在 Turn 1 就可用，绕过 ToolSearch 延迟加载。
+
+**MCP 工具设置方式**：
+```typescript
+// MCP 服务器通过 _meta 设置
+_meta?: { 'anthropic/alwaysLoad': true }
+```
+
+**内置工具直接设置**：
+```typescript
+alwaysLoad?: boolean  // 在 Tool 定义中直接设置
+```
+
+**优先级**：`alwaysLoad` > `shouldDefer` — 任何工具设置 `alwaysLoad: true`，即使 `shouldDefer: true` 也立即加载。
+
+**使用场景**：
+- 通信通道工具（Brief, SendUserFile）
+- Agent 工具（Fork 模式下 Turn 1 必须可用）
+- 其他必须在首轮就暴露给模型的工具
 
 ### 6.3 ToolSearchTool 搜索能力
 

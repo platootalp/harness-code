@@ -102,7 +102,7 @@ type State = {
 ### 2.2 循环继续原因（Continue / Terminal）
 
 ```typescript
-// query/transitions.ts
+// query.ts (inline types, not in separate file)
 type Terminal =
   | { reason: 'completed' }
   | { reason: 'stop_hook_prevented' }
@@ -849,7 +849,7 @@ Main Agent 的 `query()` 在**下次循环**通过 `getCommandsByMaxPriority()` 
 | `query/config.ts` | 不可变配置快照 |
 | `query/stopHooks.ts` | StopHooks 执行逻辑 |
 | `query/tokenBudget.ts` | Token 预算检查 |
-| `query/transitions.ts` | Continue/Terminal 类型 |
+| `query.ts` (inline) | Continue/Terminal 类型定义 |
 | `services/tools/StreamingToolExecutor.ts` | 流式工具执行器 |
 | `services/tools/toolOrchestration.ts` | 批量工具执行 |
 | `services/compact/autoCompact.ts` | 自动压缩 |

@@ -273,6 +273,30 @@ export function notifySessionStateChanged(
 
 ## 三、Session 持久化
 
+### 3.0 持久化时机总览
+
+Session 在以下**四个时间点**进行持久化：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     运行时（增量）                            │
+│  useLogMessages → recordTranscript → insertMessageChain     │
+│         ↓                                                   │
+│  enqueueWrite() → 100ms 批量 → drainWriteQueue()           │
+│                        ↓                 ↓                    │
+│                   本地 .jsonl    →   远程 Ingress (可选)    │
+├─────────────────────────────────────────────────────────────┤
+│                     退出时（清理）                            │
+│  gracefulShutdown → flush() + reAppendSessionMetadata()     │
+├─────────────────────────────────────────────────────────────┤
+│                     Resume 时（恢复）                         │
+│  loadTranscriptFile → restoreSessionMetadata                 │
+├─────────────────────────────────────────────────────────────┤
+│                     特殊操作（立即）                         │
+│  saveCustomTitle / saveAgentSetting / compact               │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ### 3.1 磁盘存储结构
 
 Session 的持久化包含两个层面：
@@ -310,13 +334,111 @@ type SessionMetadata = {
 }
 ```
 
-### 3.3 Session 文件指针
+### 3.3 持久化时机详解
 
+#### 3.3.1 运行时增量写入（每条消息）
+
+```mermaid
+flowchart LR
+    subgraph Trigger["消息产生"]
+        UM["用户消息"]
+        AM["助手消息"]
+        SM["系统消息"]
+    end
+
+    subgraph Write["写入流程"]
+        E["useLogMessages hook"]
+        RT["recordTranscript()"]
+        IC["insertMessageChain()"]
+        Q["enqueueWrite()"]
+    end
+
+    subgraph Disk["磁盘"]
+        L["本地 .jsonl"]
+        R["远程 Ingress"]
+    end
+
+    UM --> E --> RT --> IC --> Q
+    Q -->|"100ms 批量"| L
+    Q -->|"persistToRemote()"| R
+```
+
+**调用链：**
+```
+useLogMessages(messages)
+  → recordTranscript(slice)  // 增量追加新消息
+    → Project.insertMessageChain()
+      → enqueueWrite()  // 进入写队列
+        → flushTimer (100ms) 触发批量写入
+        → drainWriteQueue()  // 写入 .jsonl 文件
+        → persistToRemote()  // 远程同步
+```
+
+**关键机制：**
+- `useLogMessages` 是 React hook，每次消息数组变化触发
+- 使用**增量写入**（只写新消息），避免 O(n) 全量扫描
+- 写队列批量合并，100ms 定时刷新到磁盘
+- 远程持久化走 `sessionIngress.appendSessionLog()`（乐观并发 + 重试）
+
+#### 3.3.2 会话退出时（Graceful Shutdown）
+
+```
+gracefulShutdown()
+  → runCleanupFunctions()
+    → Project.flush()           // 等待所有 pending writes
+    → Project.reAppendSessionMetadata()  // 重新追加 metadata 到 EOF
+```
+
+**退出时追加的 metadata（确保在文件末尾 64KB 内）：**
+- `custom-title` - 用户设置的会话名
+- `tag` - 会话标签
+- `agent-name` / `agent-color` - Agent 信息
+- `mode` - coordinator/normal 模式
+- `worktree` - 当前 worktree 状态
+
+**注册方式（`sessionStorage.ts:449`）：**
 ```typescript
-// 关键操作
-adoptResumedSessionFile()    // resume 时指向旧 transcript
-resetSessionFilePointer()    // 切换 session 时重置
-reAppendSessionMetadata()   // 退出时写回 metadata
+registerCleanup(async () => {
+  await project?.flush()
+  project?.reAppendSessionMetadata()  // 重写 metadata 到 EOF
+})
+```
+
+#### 3.3.3 会话恢复时（Resume）
+
+```mermaid
+flowchart TD
+    Resume["--resume 或 /resume"]
+    Load["loadTranscriptFile()"]
+    Meta["恢复 metadata"]
+    Switch["switchSession()"]
+
+    Resume --> Load
+    Resume --> Switch
+    Switch --> Meta
+```
+
+**`switchSession()` 时：**
+- 切换 `sessionId` + `sessionProjectDir`
+- 通过 `onSessionSwitch` 信号触发其他组件更新
+
+#### 3.3.4 特定操作时（立即写入）
+
+| 操作 | 触发函数 | 说明 |
+|------|----------|------|
+| 首次用户消息 | `materializeSessionFile()` | 创建 `.jsonl` 文件，写入缓存的 metadata |
+| 会话重命名 | `saveCustomTitle()` | **立即** `appendEntryToFile` 追加到文件 |
+| Agent 设置 | `saveAgentSetting()` | 缓存到内存，退出时写入 |
+| 压缩完成 | `compact.ts` | 写入 `compact-boundary` + metadata |
+| Fork session | `recordContentReplacement()` | 复制 content replacement 记录 |
+
+**立即写入示例：**
+```typescript
+// saveCustomTitle - 用户重命名时立即落盘
+export async function saveCustomTitle(sessionId, customTitle, fullPath) {
+  appendEntryToFile(resolvedPath, { type: 'custom-title', customTitle, sessionId })
+  // 不走批量队列，直接 append
+}
 ```
 
 ---

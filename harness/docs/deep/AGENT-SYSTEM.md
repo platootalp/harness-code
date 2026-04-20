@@ -40,8 +40,8 @@ Claude Code 中存在**两套独立的任务系统**：
 
 ```mermaid
 flowchart TD
-    subgraph TaskSystem["Task 系统（后台任务）"]
-        subgraph TaskTypes["TaskType 分类"]
+    subgraph TaskSystem
+        subgraph TaskTypes
             TB["local_bash<br/>本地 shell 命令"]
             TA["local_agent<br/>本地异步 Agent ← 本文主题"]
             TR["remote_agent<br/>远程 Claude.ai 会话"]
@@ -92,13 +92,13 @@ registerTask(taskState, setAppState)  // AppState.tasks[agentId] = taskState
 
 ```mermaid
 flowchart LR
-    subgraph Lifecycle["Agent / Task 生命周期"]
+    subgraph Lifecycle
         L1["AgentTool.call()\nregisterAsyncAgent()"]
         L2["AppState.tasks[id] = running"]
         L3["runAgent() 执行\npollTasks() 监控"]
         L4["Agent 完成任务\ncompleteAgentTask()"]
         L5["enqueueAgentNotification()\n发送 XML 通知"]
-        L6["evictTerminalTask()\n30 秒后驱逐"]
+        L6["evictTaskOutput()\n30 秒后驱逐"]
     end
 
     L1 --> L2 --> L3 --> L4 --> L5 --> L6
@@ -158,7 +158,8 @@ type LocalAgentTaskState = TaskStateBase & {
   lastReportedToolCount: number
   lastReportedTokenCount: number
   isBackgrounded: boolean      // 是否已转入后台
-  pendingMessages: Message[]    // 待处理消息
+  pendingMessages: string[]     // 待处理消息
+  error?: string              // 错误信息
   retain: boolean               // 是否保留（不被驱逐）
   messages?: Message[]         // 对话消息
   diskLoaded: boolean           // 是否从磁盘加载
@@ -262,24 +263,24 @@ type AgentDefinition = {
 
 ```mermaid
 flowchart TD
-    subgraph MainProcess["同一 Node.js 进程"]
-        subgraph MainAgent["Main Agent"]
+    subgraph MainProcess
+        subgraph MainAgent
             QueryEngine["QueryEngine.query()"]
             AgentTool["AgentTool.call()"]
         end
 
-        subgraph SubAgents["SubAgents"]
+        subgraph SubAgents
             LocalAgentTask["LocalAgentTask<br/>(local_agent)"]
             InProcessTeammate["InProcessTeammate<br/>(in_process_teammate)"]
         end
 
-        subgraph SharedState["共享状态"]
+        subgraph SharedState
             AppState["AppState.tasks"]
             AppStateTodos["AppState.todos"]
         end
     end
 
-    subgraph External["进程外 / 终端"]
+    subgraph External
         TmuxPanes["tmux / iTerm2 Panes"]
         RemoteAgent["Remote Agent<br/>(CCR)"]
     end
@@ -300,7 +301,7 @@ flowchart TD
 
 - Main Agent 与 SubAgent 运行在**同一 Node.js 进程**内，通过 `AppState.tasks` 共享内存状态
 - `local_agent` 类型任务使用 `runAgent()` async generator 执行
-- `in_process_teammate` 类型任务使用 `runInProcessTeammate()` 执行循环
+- `in_process_teammate` 类型任务使用 `InProcessTeammateTask + inProcessRunner` 执行循环
 - tmux/iTerm2 panes 和 Remote Agent 是外部进程，通过 stdio 或 CCR 协议通信
 
 ### 2.2 Main Agent 与 SubAgent 的关键差异
@@ -420,7 +421,7 @@ Leader 和 teammates 通过 **File Mailbox** 通信，支持多种后端。
 
 ```mermaid
 flowchart LR
-    subgraph Conversation["完整对话历史"]
+    subgraph Conversation
         M1["用户: 实现登录功能"]
         M2["助手: 分析需求..."]
         M3["用户: 还要支持 OAuth"]
@@ -429,11 +430,11 @@ flowchart LR
         M6["用户: 完成了"]
     end
 
-    subgraph ForkChild["Fork Child 看到"]
+    subgraph ForkChild
         FC["继承 M1-M6 全部上下文<br/>placeholder tool_results"]
     end
 
-    subgraph SubAgent["SubAgent 看到"]
+    subgraph SubAgent
         SA["只有当前 prompt: '实现登录功能'"]
     end
 
@@ -503,19 +504,19 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    subgraph Setup["registerAgentForeground()"]
+    subgraph Setup
         A1["创建 LocalAgentTaskState"]
         A2["设置 autoBackgroundMs 定时器"]
         A3["返回 backgroundSignal Promise"]
     end
 
-    subgraph Execution["执行阶段"]
+    subgraph Execution
         B1["runAgent() async iterator"]
         B2["处理消息循环"]
         B3["检测 autoBackground 超时?"]
     end
 
-    subgraph Transition["转后台"]
+    subgraph Transition
         C1["backgroundAll() 触发"]
         C2["过渡到 async 路径"]
         C3["isBackgrounded = true"]
@@ -531,20 +532,20 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    subgraph Spawn["registerAsyncAgent()"]
+    subgraph Spawn
         R1["创建 LocalAgentTaskState"]
         R2["状态设为 running"]
         R3["立即返回 taskId"]
     end
 
-    subgraph Lifecycle["runAsyncAgentLifecycle()"]
+    subgraph Lifecycle
         L1["runAgent() 执行"]
         L2["pollTasks() 每秒监控"]
         L3["进度更新"]
         L4["Agent 完成"]
     end
 
-    subgraph Complete["完成通知"]
+    subgraph Complete
         N1["completeAgentTask()"]
         N2["enqueueAgentNotification()"]
         N3["XML 消息入队"]
@@ -691,7 +692,7 @@ return { status: 'async_launched' }
 
 ```mermaid
 flowchart LR
-    subgraph MainTurn["Main Agent Turn"]
+    subgraph MainTurn
         M1["用户请求"]
         M2["Main Agent 处理"]
         M3["启动 Background SubAgent"]
@@ -699,7 +700,7 @@ flowchart LR
         M5["Main Agent 继续处理"]
     end
 
-    subgraph Background["后台执行"]
+    subgraph Background
         B1["runAsyncAgentLifecycle"]
         B2["runAgent() 执行"]
         B3["query() 循环"]
@@ -782,20 +783,20 @@ SubAgent 之所以能"不让出也不阻塞"，是因为它本质上就是异步
 
 ```mermaid
 flowchart TD
-    subgraph Leader["Leader (Main Agent / Coordinator)"]
+    subgraph Leader
         L1["AgentTool.call()"]
         L2["spawnTeammate()"]
         L3["Mailbox 监听"]
     end
 
-    subgraph Backends["多种后端"]
+    subgraph Backends
         BE1["In-Process<br/>(同一进程)"]
         BE2["tmux<br/>(独立 CLI 进程)"]
         BE3["iTerm2<br/>(原生 panes)"]
         BE4["Remote<br/>(CCR)"]
     end
 
-    subgraph Shared["共享资源"]
+    subgraph Shared
         TeamFile["~/.claude/teams/{team}/config.json"]
         Mailboxes["~/.claude/teams/{team}/inboxes/"]
     end
@@ -1009,19 +1010,19 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    subgraph Coordinator["Coordinator (Main Agent)"]
+    subgraph Coordinator
         C1["协调者角色"]
         C2["任务分发"]
         C3["结果聚合"]
     end
 
-    subgraph Workers["Workers (SubAgents)"]
+    subgraph Workers
         W1["Worker 1"]
         W2["Worker 2"]
         W3["Worker N"]
     end
 
-    subgraph Tools["协作工具"]
+    subgraph Tools
         T1["SendMessage<br/>(继续 worker)"]
         T2["TaskStop<br/>(停止 worker)"]
         T3["AgentTool<br/>(启动 worker)"]

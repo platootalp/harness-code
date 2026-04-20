@@ -8,18 +8,18 @@ Claude Code 的 Skill 系统是**可扩展的 prompt 命令系统**，允许用�
 
 ```mermaid
 flowchart LR
-    subgraph Agent["Agent (Query Engine)"]
-        query["query() 循环"]
+    subgraph Agent
+        Agent["Agent (Query Engine)"]
     end
 
-    subgraph SkillLayer["Skill Layer"]
+    subgraph SkillLayer
         commands["getCommands()"]
         skillTool["SkillTool"]
         loadSkills["loadSkillsDir()"]
         dynamic["discoverSkillDirsForPaths()"]
     end
 
-    subgraph SkillSources["Skill Sources"]
+    subgraph SkillSources
         bundled["Bundled Skills<br/>/skills/bundled/"]
         disk["Disk Skills<br/>~/.claude/skills/<br/>.claude/skills/"]
         mcp["MCP Skills<br/>MCP Servers"]
@@ -51,31 +51,71 @@ export type Command = CommandBase &
   (PromptCommand | LocalCommand | LocalJSXCommand)
 ```
 
+`CommandBase` 是所有 Command 类型的共享基类，包含通用字段：
+
 | 类型 | 说明 | 用途 |
 |------|------|------|
 | `PromptCommand` | prompt 模板命令 | **Skill** 的核心类型 |
 | `LocalCommand` | 本地命令实现 | 非 prompt 类命令 |
 | `LocalJSXCommand` | React 组件命令 | UI 交互命令 |
 
-### 1.2 PromptCommand 接口
+### 1.2 CommandBase 接口（所有 Command 的共享基类）
 
 ```typescript
+// command.ts
+export type CommandBase = {
+  availability?: CommandAvailability[]
+  description: string
+  hasUserSpecifiedDescription?: boolean
+  /** Defaults to true. Only set when the command has conditional enablement (feature flags, env checks, etc). */
+  isEnabled?: () => boolean
+  /** Defaults to false. Only set when the command should be hidden from typeahead/help. */
+  isHidden?: boolean
+  name: string
+  aliases?: string[]
+  isMcp?: boolean
+  argumentHint?: string
+  whenToUse?: string            // 何时使用此命令的详细场景描述
+  version?: string
+  disableModelInvocation?: boolean
+  userInvocable?: boolean       // 是否可通过 /skill-name 调用
+  loadedFrom?:                  // 命令加载来源
+    | 'commands_DEPRECATED'
+    | 'skills'
+    | 'plugin'
+    | 'managed'
+    | 'bundled'
+    | 'mcp'
+  kind?: 'workflow'             // 区分工作流支持的命令
+  immediate?: boolean
+  isSensitive?: boolean
+  userFacingName?: () => string
+}
+```
+
+### 1.3 PromptCommand 接口
+
+```typescript
+// command.ts
 export type PromptCommand = {
   type: 'prompt'
   progressMessage: string
-  contentLength: number
+  contentLength: number // Length of command content in characters (used for token estimation)
   argNames?: string[]
-  allowedTools?: string[]        // 允许的工具白名单
-  model?: string                 // 模型覆盖
+  allowedTools?: string[]
+  model?: string
   source: SettingSource | 'builtin' | 'mcp' | 'plugin' | 'bundled'
-  pluginInfo?: { ... }
+  pluginInfo?: {
+    pluginManifest: PluginManifest
+    repository: string
+  }
   disableNonInteractive?: boolean
-  hooks?: HooksSettings          // 技能钩子
-  skillRoot?: string              // 资源目录路径
-  context?: 'inline' | 'fork'    // 执行上下文
-  agent?: string                 // Fork 时使用的 agent 类型
-  effort?: EffortValue            // 努力程度
-  paths?: string[]               // 条件技能路径匹配
+  hooks?: HooksSettings
+  skillRoot?: string
+  context?: 'inline' | 'fork'
+  agent?: string
+  effort?: EffortValue
+  paths?: string[]
   getPromptForCommand(
     args: string,
     context: ToolUseContext,
@@ -83,7 +123,7 @@ export type PromptCommand = {
 }
 ```
 
-### 1.3 BundledSkillDefinition 接口
+### 1.4 BundledSkillDefinition 接口
 
 ```typescript
 // bundledSkills.ts
@@ -108,6 +148,48 @@ export type BundledSkillDefinition = {
   ) => Promise<ContentBlockParam[]>
 }
 ```
+
+### 1.5 BundledSkillDefinition 与 PromptCommand 的关系
+
+**BundledSkillDefinition 是技能注册时的输入类型，PromptCommand 是系统内部的运行时类型。**
+
+`registerBundledSkill()` 函数将 `BundledSkillDefinition` 转换为 `PromptCommand & CommandBase`：
+
+```typescript
+// bundledSkills.ts
+function registerBundledSkill(definition: BundledSkillDefinition): void {
+  const command: PromptCommand & CommandBase = {
+    name: definition.name,
+    description: definition.description,
+    aliases: definition.aliases,
+    whenToUse: definition.whenToUse,
+    argumentHint: definition.argumentHint,
+    allowedTools: definition.allowedTools,
+    model: definition.model,
+    disableModelInvocation: definition.disableModelInvocation ?? false,
+    userInvocable: definition.userInvocable ?? true,
+    isEnabled: definition.isEnabled,
+    isHidden: !(definition.userInvocable ?? true),
+    contentLength: 0,
+    source: 'bundled',
+    loadedFrom: 'bundled',
+    hooks: definition.hooks,
+    skillRoot,
+    context: definition.context,
+    agent: definition.agent,
+    files: definition.files,
+    progressMessage: 'running',
+    getPromptForCommand,
+  }
+  bundledSkills.push(command)
+}
+```
+
+关键转换点：
+- `BundledSkillDefinition.userInvocable` → `PromptCommand.isHidden` (取反)
+- `BundledSkillDefinition.isEnabled` → `PromptCommand.isEnabled` (直接传递)
+- `BundledSkillDefinition.whenToUse` → `CommandBase.whenToUse` (直接传递)
+- `BundledSkillDefinition` 中的 `files` 字段会在首次调用时提取到磁盘
 
 ---
 
