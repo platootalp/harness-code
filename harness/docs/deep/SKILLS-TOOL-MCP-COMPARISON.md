@@ -193,9 +193,9 @@ skill-name/
 | **延迟加载** | ✅ 发现延迟，内容不小 | ✅ `shouldDefer` + ToolSearch | ✅ 同样通过 ToolSearch |
 
 **关键点**：
-- Skill 的 `SKILL.md` 很小（~5KB），即使全量加载也几乎不占内存
-- Skill 引用的其他文件由 LLM 按需读取，不占启动内存
-- 真正占内存的是 MCP 的 JSON Schema（每个 3-10KB，数百个可达数 MB）
+- Skill 的 `SKILL.md` 很小（~5KB），引用文件由 LLM 按需读取
+- Tool/MCP 通过 `shouldDefer` + ToolSearch 实现 Schema 延迟加载
+- 三者都支持某种形式的按需加载
 
 ---
 
@@ -496,7 +496,7 @@ export const BashTool = buildTool({
 | **本质** | Prompt 模板 | 可执行代码 | 远程服务代理 |
 | **启动时加载** | ✅ 固定目录 | ❌ 启动时全部注册 | ❌ MCP 连接时全部加载 |
 | **动态发现** | ✅ 嵌套目录按需 | ❌ 无 | ❌ 无 |
-| **内容延迟** | ✅ 引用文件 LLM 按需读取 | ❌ 代码必须全量 | ❌ Schema 必须全量 |
+| **内容延迟** | ✅ 引用文件 LLM 按需 | ✅ Schema 可延迟加载 | ✅ Schema 可延迟加载 |
 | **启动内存** | ~250KB | ~500KB | ~2-10MB |
 | **扩展方式** | 写 Markdown | 写 TypeScript | 接 MCP 服务器 |
 | **执行能力** | ❌ 无 | ✅ 完整 | ⚠️ 取决于服务器 |
@@ -511,3 +511,4 @@ export const BashTool = buildTool({
 
 - Skill：只加载 `SKILL.md`（~5KB），引用文件由 LLM 按需读取
 - Tool/MCP：通过 `shouldDefer` + ToolSearch 实现 Schema 的延迟加载
+- 三者都支持按需加载，只是实现方式不同
