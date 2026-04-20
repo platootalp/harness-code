@@ -77,37 +77,115 @@
 
 ---
 
-## 三、内存占用对比
+## 三、Skill 动态发现机制
 
-| 维度 | Skill | Tool | MCP |
-|------|-------|------|-----|
-| **内容形式** | Markdown 文本 (~5KB) | TypeScript 代码 | JSON Schema (~3-10KB) |
-| **数量级** | 通常 < 50 个 | ~30 个内置 | 可达数百个 |
-| **典型内存** | ~100KB - 2MB | ~500KB | ~2-10MB |
-| **加载时机** | 启动时 + 动态发现 | 启动时注册 | MCP 连接时 |
-| **懒加载** | ❌ `markdownContent` 全量加载 | ✅ `shouldDefer` + ToolSearch 按需 | ✅ 同样通过 ToolSearch |
+### 3.1 什么是"动态发现"
 
-**关键区别**：Tool 和 MCP 通过 `shouldDefer` + `ToolSearch` 实现真正的延迟加载，Skill 不支持延迟加载（`markdownContent` 直接全量加载到内存）。
+**Skill 的动态发现**指的是：在文件操作时**遍历查找** `.claude/skills/` 目录，而不是在启动时扫描所有可能的目录。
+
+这不是懒加载，而是**按需发现**——只在你操作某个目录下的文件时，才去检查那个目录里有没有 `.claude/skills/`。
+
+### 3.2 发现流程
+
+```
+文件操作触发（如 Read/Edit/Write）：
+  ↓
+1. discoverSkillDirsForPaths([filePath])
+   - 从文件的父目录向上遍历到 cwd
+   - 检查每个层级是否有 .claude/skills/
+   - 跳过 gitignored 的目录
+   - 返回发现的目录列表
+
+2. addSkillDirectories(newDirs)
+   - 加载这些目录下的 SKILL.md
+   - 解析 frontmatter
+   - 创建 Command 对象存入 dynamicSkills Map
+
+3. activateConditionalSkillsForPaths([filePath])
+   - 如果 Skill 有 paths frontmatter
+   - 匹配成功则激活
+   - 不匹配则保持待激活状态
+```
+
+### 3.3 发现示例
+
+```
+项目结构：
+/project/
+├── src/
+│   ├── components/
+│   │   ├── Button.tsx      ← 操作这个文件
+│   │   └── .claude/
+│   │       └── skills/     ← 发现这个目录！
+│   │           └── react-best-practices/
+│   │               └── SKILL.md
+│   └── utils/
+└── .claude/
+    └── skills/             ← 也被发现（更上层）
+        └── general/
+            └── SKILL.md
+```
+
+当 `Button.tsx` 被编辑时，系统会向上遍历，发现 `src/components/.claude/skills/` 和 `.claude/skills/` 两个目录。
+
+### 3.4 内存中的内容
+
+| 部分 | 是否加载到内存 | 说明 |
+|------|--------------|------|
+| `SKILL.md` 正文 | ✅ 是 | 解析 frontmatter 后存入 Command 对象 |
+| 目录中的其他文件 | ❌ 否 | LLM 需要时通过 `Read` 工具按需读取 |
+| `${CLAUDE_SKILL_DIR}` 变量 | ✅ 替换 | 运行时替换为实际路径 |
+
+### 3.5 Skill 目录结构示例
+
+```
+skill-name/
+├── SKILL.md              ← 全量加载到内存（~5KB）
+├── templates/
+│   └── template.md       ← LLM 按需 Read
+├── schemas/
+│   └── config.json       ← LLM 按需 Read
+└── scripts/
+    └── run.sh             ← 通过 !`...` 按需执行
+```
 
 ---
 
-## 四、加载流程对比
+## 四、内存占用对比
+
+| 维度 | Skill | Tool | MCP |
+|------|-------|------|-----|
+| **内容形式** | Markdown 文本 + frontmatter | TypeScript 代码 + Zod Schema | JSON Schema |
+| **加载到内存** | `SKILL.md` 正文（~5KB） | 全部（代码必须） | 全部 Schema |
+| **数量级** | 通常 < 50 个 | ~30 个内置 | 可达数百个 |
+| **启动时内存** | ~250KB | ~500KB | ~2-10MB |
+| **引用文件** | LLM 按需 Read | N/A | N/A |
+| **延迟加载** | ✅ 发现延迟，内容不小 | ✅ `shouldDefer` + ToolSearch | ✅ 同样通过 ToolSearch |
+
+**关键点**：
+- Skill 的 `SKILL.md` 很小（~5KB），即使全量加载也几乎不占内存
+- Skill 引用的其他文件由 LLM 按需读取，不占启动内存
+- 真正占内存的是 MCP 的 JSON Schema（每个 3-10KB，数百个可达数 MB）
+
+---
+
+## 五、加载流程对比
 
 ### Skill 加载流程
 
 ```
-启动时：
+启动时（发现阶段）：
   initBundledSkills()           → 注册内置 skills
-  getSkillDirCommands()          → 扫描 ~/.claude/skills/
+  getSkillDirCommands()         → 扫描已知的 ~/.claude/skills/ 等目录
 
 文件操作时（动态发现）：
   FileEditTool.call()
-    → discoverSkillDirsForPaths()  ← 遍历查找 .claude/skills/
-    → addSkillDirectories()       ← 加载 SKILL.md → Command 对象
-    → activateConditionalSkills() ← paths 匹配激活
+    → discoverSkillDirsForPaths()   ← 遍历文件路径查找 .claude/skills/
+    → addSkillDirectories()          ← 加载 SKILL.md → Command 对象
+    → activateConditionalSkills()    ← paths 匹配激活
 ```
 
-**加载到内存**：完整 `Command` 对象，包含 `markdownContent` 闭包引用
+**动态发现的是什么**：是**目录路径**，不是文件内容。加载到内存的是 `SKILL.md` 的解析结果（一个 ~5KB 的 Command 对象）。
 
 ### Tool 延迟加载
 
@@ -126,8 +204,6 @@ ToolSearch 模式：
     → 下次请求才加载完整 Schema
 ```
 
-**延迟机制**：通过 `shouldDefer` 标记 + `ENABLE_TOOL_SEARCH` 环境变量控制，配合 ToolSearchTool 实现按需加载。
-
 ### MCP 工具加载流程
 
 ```
@@ -139,11 +215,9 @@ MCP 连接时：
     → AppState.mcp.commands       ← 存入内存
 ```
 
-**加载到内存**：每个工具的 `inputSchema`（完整 JSON Schema 对象）
-
 ---
 
-## 五、执行流程对比
+## 六、执行流程对比
 
 ### Skill 执行
 
@@ -160,9 +234,8 @@ sequenceDiagram
     PROMPT-->>ST: ContentBlockParam[] (prompt文本)
     ST->>ST: 注入到对话消息
     Note over ST: 模型处理 prompt
+    Note over ST: 如需引用文件 → Read 工具按需读取
 ```
-
-**结果**：prompt 被注入对话，模型生成响应
 
 ### Tool 执行
 
@@ -178,8 +251,6 @@ sequenceDiagram
     Tool-->>TP: ToolResult
     TP-->>Model: 工具结果
 ```
-
-**结果**：工具执行实际动作，返回结构化结果
 
 ### MCP 执行
 
@@ -201,11 +272,9 @@ sequenceDiagram
     TP-->>Model: 工具结果
 ```
 
-**结果**：远程服务执行，返回结果
-
 ---
 
-## 六、SKILL.md vs Tool vs MCP Schema
+## 七、SKILL.md vs Tool vs MCP Schema
 
 ### SKILL.md 示例
 
@@ -218,6 +287,9 @@ allowed-tools:
   - Edit
   - Bash
 effort: medium
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
 ---
 
 # Simplify
@@ -226,6 +298,9 @@ Review all changed files for reuse, quality, and efficiency.
 
 ## Phase 1: Identify Changes
 Run `git diff` to see what changed.
+
+## Phase 2: Use Templates
+Reference ${CLAUDE_SKILL_DIR}/templates/review-template.md
 ````
 
 ### Tool 定义示例
@@ -240,7 +315,6 @@ export const BashTool = buildTool({
   }),
   description: async ({ command }) => `Execute shell command: ${command}`,
   async call({ command, timeout }, context) {
-    // 执行 shell 命令
     const result = await exec(command, { timeout })
     return { content: result.stdout }
   }
@@ -275,7 +349,7 @@ export const BashTool = buildTool({
 
 ---
 
-## 七、权限与安全对比
+## 八、权限与安全对比
 
 | 维度 | Skill | Tool | MCP |
 |------|-------|------|-----|
@@ -287,46 +361,46 @@ export const BashTool = buildTool({
 
 ---
 
-## 八、特性开关对比
+## 九、特性开关对比
 
 ### Skill 特性
 
 | 特性 | 字段 | 说明 |
 |------|------|------|
-| 条件技能 | `paths` | 文件路径匹配激活 |
+| **动态发现** | 文件操作触发 | 遍历查找 `.claude/skills/` |
+| 条件激活 | `paths` | 文件路径匹配才激活 |
 | 执行模式 | `context: fork` | 子 agent 执行 |
-| 懒加载内容 | ❌ | 全量加载 |
 | 远程技能 | `EXPERIMENTAL_SKILL_SEARCH` | AKI/GCS 按需加载 |
 
 ### Tool 特性
 
 | 特性 | 字段 | 说明 |
 |------|------|------|
+| 延迟加载 | `shouldDefer` | ToolSearch 模式 |
+| 强制加载 | `alwaysLoad` | 始终可用 |
 | 并发安全 | `isConcurrencySafe()` | 是否可并发执行 |
-| 只读标识 | `isReadOnly()` | 是否只读 |
 | 进度回调 | `onProgress` | 长时间操作进度 |
-| 延迟工具 | `alwaysLoad: false` | 按需加载 |
 
 ### MCP 特性
 
 | 特性 | 字段 | 说明 |
 |------|------|------|
+| 延迟加载 | 默认 `shouldDefer` | ToolSearch 模式 |
 | 只读注解 | `readOnlyHint` | hint 工具只读 |
 | 破坏性注解 | `destructiveHint` | hint 具破坏性 |
 | 开放世界 | `openWorldHint` | hint 调用外部 |
-| 搜索摘要 | `searchHint` | 工具搜索关键词 |
 
 ---
 
-## 九、优缺点对比
+## 十、优缺点对比
 
 ### Skill
 
 | 优点 | 缺点 |
 |------|------|
 | ✅ 实现简单（纯文本） | ❌ 不能执行实际动作 |
-| ✅ 可组合、灵活 | ❌ 全量加载占用内存 |
-| ✅ 支持参数替换 | ❌ 权限控制粗糙 |
+| ✅ 引用文件按需读取，不占内存 | ❌ 全量加载 SKILL.md（小问题） |
+| ✅ 支持参数替换、变量替换 | ❌ 权限控制粗糙 |
 | ✅ 易于分享（Markdown） | ❌ 无状态，难以做复杂流程 |
 
 ### Tool
@@ -349,7 +423,7 @@ export const BashTool = buildTool({
 
 ---
 
-## 十、选择指南
+## 十一、选择指南
 
 ```
 需要执行动作？
@@ -367,35 +441,41 @@ export const BashTool = buildTool({
 
 ---
 
-## 十一、相关文件
+## 十二、相关文件
 
 | 系统 | 核心文件 | 说明 |
 |------|----------|------|
-| **Skill** | `skills/loadSkillsDir.ts` | 技能加载与发现 |
+| **Skill** | `skills/loadSkillsDir.ts` | 技能目录发现与加载 |
 | | `skills/bundledSkills.ts` | 内置技能注册 |
+| | `skills/bundled/*.ts` | 各内置技能实现 |
 | | `tools/SkillTool/SkillTool.ts` | 技能工具实现 |
+| | `commands.ts` | 命令查找与获取 |
 | **Tool** | `Tool.ts` | 工具核心接口 |
-| | `tools/*/Tool.ts` | 各工具实现 |
 | | `tools.ts` | 工具池管理 |
+| | `utils/toolSearch.ts` | ToolSearch 延迟加载 |
 | **MCP** | `services/mcp/client.ts` | MCP 客户端 |
 | | `tools/MCPTool/MCPTool.ts` | MCP 工具包装 |
-| | `services/mcp/types.ts` | MCP 类型定义 |
 
 ---
 
-## 十二、总结
+## 十三、总结
 
 | 维度 | Skill | Tool | MCP |
 |------|-------|------|-----|
 | **本质** | Prompt 模板 | 可执行代码 | 远程服务代理 |
-| **内存占用** | 小 (~1MB) | 中 (~500KB) | 大 (~5MB) |
+| **动态发现** | ✅ 文件操作时遍历发现 | ❌ 启动时全部注册 | ❌ MCP 连接时全部加载 |
+| **内容延迟** | ✅ 引用文件 LLM 按需读取 | ❌ 代码必须全量 | ❌ Schema 必须全量 |
+| **启动内存** | ~250KB | ~500KB | ~2-10MB |
 | **扩展方式** | 写 Markdown | 写 TypeScript | 接 MCP 服务器 |
 | **执行能力** | ❌ 无 | ✅ 完整 | ⚠️ 取决于服务器 |
-| **灵活性** | ✅ 最高 | ❌ 最低 | ⚠️ 中等 |
-| **标准化** | ❌ 非标准 | ✅ 标准化 | ✅ 标准协议 |
 
 **设计原则**：
 
-- **Skill** = 让模型知道"怎么做"（指导）
-- **Tool** = 让模型能够"做什么"（能力）
-- **MCP** = 让模型能够"访问什么"（资源）
+- **Skill** = 告诉模型"怎么做"（指导），引用文件按需读取
+- **Tool** = 让模型"能做什么"（能力），代码必须全量加载
+- **MCP** = 让模型"能访问什么"（资源），Schema 必须全量加载
+
+**内存优化策略**：
+
+- Skill：只加载 `SKILL.md`（~5KB），引用文件由 LLM 按需读取
+- Tool/MCP：通过 `shouldDefer` + ToolSearch 实现 Schema 的延迟加载
