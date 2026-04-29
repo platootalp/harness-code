@@ -1,0 +1,391 @@
+{
+  "meta": {
+    "name": "Phase 11: \u63d2\u4ef6\u7cfb\u7edf\u8bbe\u8ba1",
+    "description": "\u63d2\u4ef6\u57fa\u7840\u8bbe\u65bd\u3001\u94a9\u5b50\u7cfb\u7edf\u3001\u63d2\u4ef6\u64cd\u4f5c\uff0c\u5185\u7f6e\u63d2\u4ef6\u3001\u52a0\u8f7d\u5668",
+    "source": "docs/migration/2026-04-06-phase-11-plugins-design.md",
+    "order": 12
+  },
+  "tasks": [
+    {
+      "id": "P11-1",
+      "subject": "\u5b9e\u73b0 plugins/base.py - BasePlugin, PluginManifest",
+      "description": "\u5b9e\u73b0\u63d2\u4ef6\u57fa\u7c7b\u548c\u6e05\u5355\u6570\u636e\u7ed3\u6784",
+      "phase": "11.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/types.ts",
+        "python_original": "mozi/src/claude_code/plugins/base.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/base.py",
+        "mozi/tests/test_plugins_base.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/base.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/base.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_base.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/types.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-2",
+      "subject": "\u5b9e\u73b0 plugins/registry.py - PluginRegistry",
+      "description": "\u5b9e\u73b0\u63d2\u4ef6\u6ce8\u518c\u8868",
+      "phase": "11.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/registry.ts",
+        "python_original": "mozi/src/claude_code/plugins/registry.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/registry.py",
+        "mozi/tests/test_plugins_registry.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/registry.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/registry.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_registry.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/registry.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-3",
+      "subject": "\u5b9e\u73b0 plugins/manifest.py",
+      "description": "\u5b9e\u73b0\u6e05\u5355\u89e3\u6790\u548c\u9a8c\u8bc1",
+      "phase": "11.1",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/manifest.ts",
+        "python_original": "mozi/src/claude_code/plugins/manifest.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/manifest.py",
+        "mozi/tests/test_plugins_manifest.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/manifest.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/manifest.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_manifest.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/manifest.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-4",
+      "subject": "\u5b9e\u73b0 plugins/hooks/manager.py - HookManager",
+      "description": "\u5b9e\u73b0\u94a9\u5b50\u7ba1\u7406\u5668\uff0c\u652f\u6301 PreToolUse/PostToolUse \u7b49\u4e8b\u4ef6",
+      "phase": "11.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/hooks/manager.ts",
+        "python_original": "mozi/src/claude_code/plugins/hooks/manager.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/hooks/manager.py",
+        "mozi/tests/test_plugins_hooks_manager.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/hooks/manager.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/hooks/manager.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_hooks_manager.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/hooks/manager.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-5",
+      "subject": "\u5b9e\u73b0 plugins/hooks/definitions.py",
+      "description": "\u5b9e\u73b0\u94a9\u5b50\u5b9a\u4e49\u6570\u636e\u7ed3\u6784",
+      "phase": "11.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/hooks/definitions.ts",
+        "python_original": "mozi/src/claude_code/plugins/hooks/definitions.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/hooks/definitions.py",
+        "mozi/tests/test_plugins_hooks_definitions.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/hooks/definitions.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/hooks/definitions.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_hooks_definitions.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/hooks/definitions.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-6",
+      "subject": "\u5b9e\u73b0 25 \u79cd\u94a9\u5b50\u7c7b\u578b",
+      "description": "\u5b9e\u73b0\u6240\u6709\u94a9\u5b50\u4e8b\u4ef6\u7c7b\u578b\u7684\u5904\u7406",
+      "phase": "11.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/hooks/types.ts",
+        "python_original": "mozi/src/claude_code/plugins/hooks/types.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/hooks/types.py",
+        "mozi/tests/test_plugins_hooks_types.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/hooks/types.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/hooks/types.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_hooks_types.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/hooks/types.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-7",
+      "subject": "\u5b9e\u73b0 plugins/operations.py - PluginOperations",
+      "description": "\u5b9e\u73b0\u63d2\u4ef6\u64cd\u4f5c: install/uninstall/enable/disable/update",
+      "phase": "11.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/operations.ts",
+        "python_original": "mozi/src/claude_code/plugins/operations.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/operations.py",
+        "mozi/tests/test_plugins_operations.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/operations.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/operations.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_operations.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/operations.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-8",
+      "subject": "\u5b9e\u73b0\u914d\u7f6e\u7ba1\u7406",
+      "description": "\u5b9e\u73b0 settings.json \u914d\u7f6e\u8bfb\u5199",
+      "phase": "11.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/settings.ts",
+        "python_original": "mozi/src/claude_code/plugins/settings.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/settings.py",
+        "mozi/tests/test_plugins_settings.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/settings.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/settings.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_settings.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/settings.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-9",
+      "subject": "\u5b9e\u73b0 plugins/builtin.py - BuiltinPluginRegistry",
+      "description": "\u5b9e\u73b0\u5185\u7f6e\u63d2\u4ef6\u6ce8\u518c\u8868",
+      "phase": "11.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/builtin.ts",
+        "python_original": "mozi/src/claude_code/plugins/builtin.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/builtin.py",
+        "mozi/tests/test_plugins_builtin.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/builtin.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/builtin.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_builtin.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/builtin.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-10",
+      "subject": "\u6ce8\u518c\u5185\u7f6e\u63d2\u4ef6",
+      "description": "\u6ce8\u518c skill-brainstorm, skill-debugging \u7b49\u5185\u7f6e\u63d2\u4ef6",
+      "phase": "11.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/builtinSkills.ts",
+        "python_original": "mozi/src/claude_code/plugins/builtin_skills.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/builtin_skills.py",
+        "mozi/tests/test_plugins_builtin_skills.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/builtin_skills.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/builtin_skills.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_builtin_skills.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/builtinSkills.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-11",
+      "subject": "\u5b9e\u73b0 plugins/loader.py - PluginLoader",
+      "description": "\u5b9e\u73b0\u63d2\u4ef6\u52a0\u8f7d\u5668",
+      "phase": "11.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/loader.ts",
+        "python_original": "mozi/src/claude_code/plugins/loader.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/loader.py",
+        "mozi/tests/test_plugins_loader.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/loader.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/loader.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_loader.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/loader.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-12",
+      "subject": "\u5b9e\u73b0 npm/pip/git/github \u6e90\u52a0\u8f7d",
+      "description": "\u5b9e\u73b0\u591a\u6e90\u63d2\u4ef6\u52a0\u8f7d",
+      "phase": "11.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/sources/*.ts",
+        "python_original": "mozi/src/claude_code/plugins/sources/npm.py, pip.py, git.py, github.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/sources/__init__.py",
+        "mozi/src/claude_code/plugins/sources/npm.py",
+        "mozi/src/claude_code/plugins/sources/pip.py",
+        "mozi/src/claude_code/plugins/sources/git.py",
+        "mozi/src/claude_code/plugins/sources/github.py",
+        "mozi/tests/test_plugins_sources.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/sources/"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/sources/"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_sources.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/sources/*.ts"
+        ]
+      }
+    },
+    {
+      "id": "P11-13",
+      "subject": "\u5b9e\u73b0\u7248\u672c\u7f13\u5b58\u7ba1\u7406",
+      "description": "\u5b9e\u73b0\u63d2\u4ef6\u7248\u672c\u548c\u7f13\u5b58\u7ba1\u7406",
+      "phase": "11.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/plugins/cache.ts",
+        "python_original": "mozi/src/claude_code/plugins/cache.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/plugins/cache.py",
+        "mozi/tests/test_plugins_cache.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/plugins/cache.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/plugins/cache.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_plugins_cache.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/plugins/cache.ts"
+        ]
+      }
+    }
+  ]
+}

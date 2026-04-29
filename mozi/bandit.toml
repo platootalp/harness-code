@@ -1,4 +1,0 @@
-[bandit]
-targets = ["mozi/"]
-confidence_level = 1
-severity_level = 1
