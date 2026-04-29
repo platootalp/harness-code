@@ -85,12 +85,12 @@ class TestTracingIntegration:
             "start_time": datetime.now().isoformat(),
             "attributes": {
                 "operation.type": "test",
-                "service.name": "mozi",
+                "service.name": "src",
             },
         }
 
         assert span["name"] == "test_operation"
-        assert span["attributes"]["service.name"] == "mozi"
+        assert span["attributes"]["service.name"] == "src"
 
     @pytest.mark.integration
     def test_trace_id_generation(self) -> None:
@@ -272,12 +272,12 @@ class TestLoggingIntegration:
         def set_level(component: str, level: str) -> None:
             log_levels[component] = level
 
-        set_level("mozi", "INFO")
-        set_level("mozi.orchestrator", "DEBUG")
-        set_level("mozi.infrastructure", "WARNING")
+        set_level("src", "INFO")
+        set_level("src.orchestrator", "DEBUG")
+        set_level("src.infrastructure", "WARNING")
 
-        assert log_levels["mozi"] == "INFO"
-        assert log_levels["mozi.orchestrator"] == "DEBUG"
+        assert log_levels["src"] == "INFO"
+        assert log_levels["src.orchestrator"] == "DEBUG"
 
     @pytest.mark.integration
     def test_log_message_format(self) -> None:

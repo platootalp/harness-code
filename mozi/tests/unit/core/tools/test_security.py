@@ -113,8 +113,8 @@ class TestPathWhitelistValidation:
     def test_path_within_whitelist(self) -> None:
         """Test path within whitelist is allowed."""
         is_valid, error = path_whitelist_validation(
-            "/Users/lijunyi/road/mozi/src/file.py",
-            ["/Users/lijunyi/road/mozi"],
+            "/Users/lijunyi/road/src/src/file.py",
+            ["/Users/lijunyi/road/src"],
         )
         assert is_valid is True
         assert error is None
@@ -123,7 +123,7 @@ class TestPathWhitelistValidation:
         """Test path outside whitelist is denied."""
         is_valid, error = path_whitelist_validation(
             "/etc/passwd",
-            ["/Users/lijunyi/road/mozi"],
+            ["/Users/lijunyi/road/src"],
         )
         assert is_valid is False
         assert "/etc/passwd" in error
@@ -131,7 +131,7 @@ class TestPathWhitelistValidation:
     def test_exact_match(self) -> None:
         """Test exact path match is allowed."""
         is_valid, error = path_whitelist_validation(
-            "/Users/lijunyi/road/mozi",
-            ["/Users/lijunyi/road/mozi"],
+            "/Users/lijunyi/road/src",
+            ["/Users/lijunyi/road/src"],
         )
         assert is_valid is True

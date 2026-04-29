@@ -90,7 +90,7 @@ class TestPGVectorMemoryStore:
 
         assert store.host == "localhost"
         assert store.port == 5432
-        assert store.database == "mozi"
+        assert store.database == "src"
         assert store.user == "postgres"
         assert store.table == "mozi_memory"
 

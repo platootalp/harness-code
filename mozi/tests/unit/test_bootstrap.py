@@ -34,7 +34,7 @@ class TestCreateFromTemplate:
         create_from_template(path)
         content = path.read_text()
         assert '[project]' in content
-        assert 'name = "mozi"' in content
+        assert 'name = "src"' in content
 
     def test_creates_ruff_toml(self, tmp_path: Path) -> None:
         """ruff.toml uses correct template."""

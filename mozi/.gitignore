@@ -37,6 +37,11 @@ htmlcov/
 Thumbs.db
 
 # Project specific
-cs/
-claude-code
 *.pdf
+src_mvp/
+
+# Node (claude-code/)
+node_modules/
+*.tsbuildinfo
+.next/
+out/

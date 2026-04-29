@@ -1,0 +1,531 @@
+{
+  "meta": {
+    "name": "Phase 3.4: 命令系统拆分 - P3-16, P3-17",
+    "description": "将 batch-04 中的粗粒度任务拆分为独立命令",
+    "source": "docs/migration/2026-04-05-phase-3-commands-system-design.md",
+    "order": 19,
+    "note": "从 batch-04 P3-16, P3-17 拆分出来的独立任务"
+  },
+  "tasks": [
+    {
+      "id": "P3-16a",
+      "subject": "实现 McpCommand",
+      "description": "实现 MCP 命令",
+      "phase": "3.8",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/McpCommand/",
+        "python_original": "mozi/src/claude_code/commands/mcp.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/mcp.py",
+        "mozi/tests/test_commands_mcp.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/mcp.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/mcp.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_mcp.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/McpCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-16b",
+      "subject": "实现 HooksCommand",
+      "description": "实现钩子命令",
+      "phase": "3.8",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/HooksCommand/",
+        "python_original": "mozi/src/claude_code/commands/hooks.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/hooks.py",
+        "mozi/tests/test_commands_hooks.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/hooks.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/hooks.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_hooks.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/HooksCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-16c",
+      "subject": "实现 IdeCommand",
+      "description": "实现 IDE 命令",
+      "phase": "3.8",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/IdeCommand/",
+        "python_original": "mozi/src/claude_code/commands/ide.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/ide.py",
+        "mozi/tests/test_commands_ide.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/ide.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/ide.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_ide.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/IdeCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-16d",
+      "subject": "实现 InitCommand",
+      "description": "实现初始化命令",
+      "phase": "3.8",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/InitCommand/",
+        "python_original": "mozi/src/claude_code/commands/init.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/init.py",
+        "mozi/tests/test_commands_init.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/init.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/init.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_init.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/InitCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-16e",
+      "subject": "实现 MemoryCommand",
+      "description": "实现记忆命令",
+      "phase": "3.8",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/MemoryCommand/",
+        "python_original": "mozi/src/claude_code/commands/memory.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/memory.py",
+        "mozi/tests/test_commands_memory.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/memory.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/memory.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_memory.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/MemoryCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-16f",
+      "subject": "实现 SkillsCommand",
+      "description": "实现技能命令",
+      "phase": "3.8",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/SkillsCommand/",
+        "python_original": "mozi/src/claude_code/commands/skills.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/skills.py",
+        "mozi/tests/test_commands_skills.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/skills.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/skills.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_skills.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/SkillsCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-17a",
+      "subject": "实现 AdvisorCommand",
+      "description": "实现顾问命令",
+      "phase": "3.9",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/AdvisorCommand/",
+        "python_original": "mozi/src/claude_code/commands/advisor.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/advisor.py",
+        "mozi/tests/test_commands_advisor.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/advisor.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/advisor.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_advisor.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/AdvisorCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-17b",
+      "subject": "实现 AgentsCommand",
+      "description": "实现代理命令",
+      "phase": "3.9",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/AgentsCommand/",
+        "python_original": "mozi/src/claude_code/commands/agents.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/agents.py",
+        "mozi/tests/test_commands_agents.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/agents.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/agents.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_agents.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/AgentsCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-17c",
+      "subject": "实现 BtwCommand",
+      "description": "实现顺便说命令",
+      "phase": "3.9",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/BtwCommand/",
+        "python_original": "mozi/src/claude_code/commands/btw.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/btw.py",
+        "mozi/tests/test_commands_btw.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/btw.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/btw.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_btw.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/BtwCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-17d",
+      "subject": "实现 ContextCommand",
+      "description": "实现上下文命令",
+      "phase": "3.9",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/ContextCommand/",
+        "python_original": "mozi/src/claude_code/commands/context.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/context.py",
+        "mozi/tests/test_commands_context.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/context.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/context.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_context.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/ContextCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-17e",
+      "subject": "实现 CopyCommand",
+      "description": "实现复制命令",
+      "phase": "3.9",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/CopyCommand/",
+        "python_original": "mozi/src/claude_code/commands/copy.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/copy.py",
+        "mozi/tests/test_commands_copy.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/copy.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/copy.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_copy.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/CopyCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-17f",
+      "subject": "实现 ExitCommand",
+      "description": "实现退出命令",
+      "phase": "3.9",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/ExitCommand/",
+        "python_original": "mozi/src/claude_code/commands/exit.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/exit.py",
+        "mozi/tests/test_commands_exit.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/exit.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/exit.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_exit.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/ExitCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    },
+    {
+      "id": "P3-17g",
+      "subject": "实现 FeedbackCommand",
+      "description": "实现反馈命令",
+      "phase": "3.9",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/FeedbackCommand/",
+        "python_original": "mozi/src/claude_code/commands/feedback.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/feedback.py",
+        "mozi/tests/test_commands_feedback.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/feedback.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/feedback.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_feedback.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/FeedbackCommand/"
+        ]
+      },
+      "verification_result": {
+        "lint": "passed",
+        "type_check": "passed",
+        "test": "passed (92 total tests)",
+        "functional_equivalence": "verified"
+      },
+      "reviewed_by": "reviewer-1",
+      "reviewed_at": "2026-04-08"
+    }
+  ]
+}

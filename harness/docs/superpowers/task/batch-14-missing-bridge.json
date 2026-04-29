@@ -1,0 +1,299 @@
+{
+  "meta": {
+    "name": "Phase 5.2: \u8865\u5145\u6865\u63a5\u7cfb\u7edf - \u6865\u63a5\u5de5\u5177\u4e0e\u914d\u7f6e",
+    "description": "\u5b9e\u73b0\u6865\u63a5\u7cfb\u7edf\u8865\u5145\u6587\u4ef6\uff1a\u914d\u7f6e\u3001API\u3001\u8c03\u8bd5\u5de5\u5177\u7b49",
+    "source": "docs/migration/2026-04-05-phase-5-bridge-system-design.md",
+    "order": 14,
+    "note": "\u8865\u5145 batch-06 \u4e2d\u7f3a\u5931\u7684\u6865\u63a5\u6587\u4ef6"
+  },
+  "tasks": [
+    {
+      "id": "P5-10",
+      "subject": "\u5b9e\u73b0 bridge/config.py - BridgeConfig",
+      "description": "\u5b9e\u73b0\u6865\u63a5\u914d\u7f6e\u7ba1\u7406",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/bridgeConfig.ts",
+        "python_original": "mozi/src/claude_code/bridge/config.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/config.py",
+        "mozi/tests/test_bridge_config.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/config.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/config.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_config.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/bridgeConfig.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-11",
+      "subject": "\u5b9e\u73b0 bridge/api.py - BridgeAPI",
+      "description": "\u5b9e\u73b0\u6865\u63a5 API \u63a5\u53e3",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/bridgeApi.ts",
+        "python_original": "mozi/src/claude_code/bridge/api.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/api.py",
+        "mozi/tests/test_bridge_api.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/api.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/api.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_api.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/bridgeApi.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-12",
+      "subject": "\u5b9e\u73b0 bridge/enabled.py - BridgeEnabled",
+      "description": "\u5b9e\u73b0\u6865\u63a5\u542f\u7528\u72b6\u6001\u68c0\u6d4b",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/bridgeEnabled.ts",
+        "python_original": "mozi/src/claude_code/bridge/enabled.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/enabled.py",
+        "mozi/tests/test_bridge_enabled.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/enabled.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/enabled.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_enabled.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/bridgeEnabled.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-13",
+      "subject": "\u5b9e\u73b0 bridge/messaging.py - BridgeMessaging",
+      "description": "\u5b9e\u73b0\u6865\u63a5\u6d88\u606f\u5904\u7406",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/bridgeMessaging.ts",
+        "python_original": "mozi/src/claude_code/bridge/messaging.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/messaging.py",
+        "mozi/tests/test_bridge_messaging.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/messaging.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/messaging.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_messaging.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/bridgeMessaging.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-14",
+      "subject": "\u5b9e\u73b0 bridge/pointer.py - BridgePointer",
+      "description": "\u5b9e\u73b0\u6865\u63a5\u6307\u9488\u6587\u4ef6\u7ba1\u7406",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/bridgePointer.ts",
+        "python_original": "mozi/src/claude_code/bridge/pointer.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/pointer.py",
+        "mozi/tests/test_bridge_pointer.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/pointer.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/pointer.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_pointer.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/bridgePointer.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-15",
+      "subject": "\u5b9e\u73b0 bridge/debug.py - BridgeDebug",
+      "description": "\u5b9e\u73b0\u6865\u63a5\u8c03\u8bd5\u5de5\u5177",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/bridgeDebug.ts",
+        "python_original": "mozi/src/claude_code/bridge/debug.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/debug.py",
+        "mozi/tests/test_bridge_debug.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/debug.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/debug.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_debug.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/bridgeDebug.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-16",
+      "subject": "\u5b9e\u73b0 bridge/session_runner.py - SessionRunner",
+      "description": "\u5b9e\u73b0\u4f1a\u8bdd\u8fd0\u884c\u5668",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/sessionRunner.ts",
+        "python_original": "mozi/src/claude_code/bridge/session_runner.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/session_runner.py",
+        "mozi/tests/test_bridge_session_runner.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/session_runner.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/session_runner.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_session_runner.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/sessionRunner.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-17",
+      "subject": "\u5b9e\u73b0 bridge/env_less.py - EnvLessBridgeConfig",
+      "description": "\u5b9e\u73b0\u65e0\u73af\u5883\u53d8\u91cf\u6865\u63a5\u914d\u7f6e",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/envLessBridgeConfig.ts",
+        "python_original": "mozi/src/claude_code/bridge/env_less.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/env_less.py",
+        "mozi/tests/test_bridge_env_less.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/env_less.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/env_less.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_env_less.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/envLessBridgeConfig.ts"
+        ]
+      }
+    },
+    {
+      "id": "P5-18",
+      "subject": "\u5b9e\u73b0 bridge/trusted_device.py - TrustedDevice",
+      "description": "\u5b9e\u73b0\u53ef\u4fe1\u8bbe\u5907\u7ba1\u7406",
+      "phase": "5.2",
+      "status": "completed",
+      "blockedBy": [
+        "P0-8"
+      ],
+      "source": {
+        "typescript": "src/bridge/trustedDevice.ts",
+        "python_original": "mozi/src/claude_code/bridge/trusted_device.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/bridge/trusted_device.py",
+        "mozi/tests/test_bridge_trusted_device.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/bridge/trusted_device.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/bridge/trusted_device.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_bridge_trusted_device.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/bridge/trustedDevice.ts"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+{
+  "meta": {
+    "name": "Phase 3: 命令系统设计",
+    "description": "命令框架、核心命令 (粗粒度任务 - 已拆分，保留用于整体追踪)",
+    "source": "docs/migration/2026-04-05-phase-3-commands-system-design.md",
+    "order": 4,
+    "note": "此文件保留粗粒度任务用于整体追踪。独立实现请使用 batch-17 (P3-4,10,11,12), batch-18 (P3-13,14,15), batch-19 (P3-16,17), batch-20 (P3-33 InstallGithubApp)"
+  },
+  "tasks": [
+    {
+      "id": "P3-1",
+      "subject": "实现 commands/base.py - BaseCommand",
+      "description": "实现命令基类，包含 CommandType, Availability 枚举，BaseCommand, PromptCommand 抽象类，execute/get_help/check_availability 方法",
+      "phase": "3.1",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands.ts (Command interface)",
+        "python_original": "mozi/src/claude_code/commands/base.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/base.py",
+        "mozi/tests/test_commands_base.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/base.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/base.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_base.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands.ts Command 接口"
+        ]
+      }
+    },
+    {
+      "id": "P3-2",
+      "subject": "实现 commands/registry.py - CommandRegistry",
+      "description": "实现命令注册表，包含 register/get/list_commands/execute/get_by_source 方法",
+      "phase": "3.1",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands.ts (CommandRegistry)",
+        "python_original": "mozi/src/claude_code/commands/registry.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/registry.py",
+        "mozi/tests/test_commands_registry.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/registry.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/registry.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_registry.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands.ts 命令注册逻辑"
+        ]
+      }
+    },
+    {
+      "id": "P3-3",
+      "subject": "实现 commands/loader.py - CommandLoader",
+      "description": "实现命令加载器，支持动态加载所有命令",
+      "phase": "3.1",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands.ts (命令加载逻辑)",
+        "python_original": "mozi/src/claude_code/commands/loader.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/loader.py",
+        "mozi/tests/test_commands_loader.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/loader.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/loader.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_loader.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands.ts 命令加载"
+        ]
+      }
+    },
+    {
+      "id": "P3-5",
+      "subject": "实现 CommitCommand",
+      "description": "实现 Git 提交命令",
+      "phase": "3.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/CommitCommand/",
+        "python_original": "mozi/src/claude_code/commands/commit.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/commit.py",
+        "mozi/tests/test_commands_commit.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/commit.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/commit.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_commit.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/CommitCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-6",
+      "subject": "实现 BranchCommand",
+      "description": "实现 Git 分支管理命令",
+      "phase": "3.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/BranchCommand/",
+        "python_original": "mozi/src/claude_code/commands/branch.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/branch.py",
+        "mozi/tests/test_commands_branch.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/branch.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/branch.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_branch.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/BranchCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-7",
+      "subject": "实现 ConfigCommand",
+      "description": "实现配置面板命令(local-jsx类型)",
+      "phase": "3.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/ConfigCommand/",
+        "python_original": "mozi/src/claude_code/commands/config.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/config.py",
+        "mozi/tests/test_commands_config.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/config.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/config.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_config.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/ConfigCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-8",
+      "subject": "实现 HelpCommand",
+      "description": "实现帮助命令",
+      "phase": "3.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/HelpCommand/",
+        "python_original": "mozi/src/claude_code/commands/help.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/help.py",
+        "mozi/tests/test_commands_help.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/help.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/help.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_help.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/HelpCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-9",
+      "subject": "实现 ModelCommand",
+      "description": "实现模型选择命令",
+      "phase": "3.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/ModelCommand/",
+        "python_original": "mozi/src/claude_code/commands/model.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/model.py",
+        "mozi/tests/test_commands_model.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/model.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/model.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_model.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/ModelCommand/"
+        ]
+      }
+    }
+  ]
+}

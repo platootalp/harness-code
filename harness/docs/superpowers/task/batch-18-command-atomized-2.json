@@ -1,0 +1,459 @@
+{
+  "meta": {
+    "name": "Phase 3.3: 命令系统拆分 - P3-13, P3-14, P3-15",
+    "description": "将 batch-04 中的粗粒度任务拆分为独立命令",
+    "source": "docs/migration/2026-04-05-phase-3-commands-system-design.md",
+    "order": 18,
+    "note": "从 batch-04 P3-13, P3-14, P3-15 拆分出来的独立任务"
+  },
+  "tasks": [
+    {
+      "id": "P3-13a",
+      "subject": "实现 ColorCommand",
+      "description": "实现颜色配置命令",
+      "phase": "3.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/ColorCommand/",
+        "python_original": "mozi/src/claude_code/commands/color.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/color.py",
+        "mozi/tests/test_commands_color.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/color.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/color.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_color.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/ColorCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-13b",
+      "subject": "实现 ThemeCommand",
+      "description": "实现主题切换命令",
+      "phase": "3.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/ThemeCommand/",
+        "python_original": "mozi/src/claude_code/commands/theme.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/theme.py",
+        "mozi/tests/test_commands_theme.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/theme.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/theme.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_theme.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/ThemeCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-13c",
+      "subject": "实现 FastCommand",
+      "description": "实现快速模式命令",
+      "phase": "3.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/FastCommand/",
+        "python_original": "mozi/src/claude_code/commands/fast.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/fast.py",
+        "mozi/tests/test_commands_fast.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/fast.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/fast.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_fast.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/FastCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-13d",
+      "subject": "实现 EffortCommand",
+      "description": "实现投入度配置命令",
+      "phase": "3.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/EffortCommand/",
+        "python_original": "mozi/src/claude_code/commands/effort.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/effort.py",
+        "mozi/tests/test_commands_effort.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/effort.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/effort.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_effort.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/EffortCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-13e",
+      "subject": "实现 VimCommand",
+      "description": "实现 Vim 模式命令",
+      "phase": "3.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/VimCommand/",
+        "python_original": "mozi/src/claude_code/commands/vim.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/vim.py",
+        "mozi/tests/test_commands_vim.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/vim.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/vim.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_vim.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/VimCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-14a",
+      "subject": "实现 CostCommand",
+      "description": "实现用量费用命令",
+      "phase": "3.6",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/CostCommand/",
+        "python_original": "mozi/src/claude_code/commands/cost.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/cost.py",
+        "mozi/tests/test_commands_cost.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/cost.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/cost.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_cost.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/CostCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-14b",
+      "subject": "实现 StatsCommand",
+      "description": "实现统计命令",
+      "phase": "3.6",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/StatsCommand/",
+        "python_original": "mozi/src/claude_code/commands/stats.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/stats.py",
+        "mozi/tests/test_commands_stats.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/stats.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/stats.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_stats.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/StatsCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-14c",
+      "subject": "实现 StatusCommand",
+      "description": "实现状态命令",
+      "phase": "3.6",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/StatusCommand/",
+        "python_original": "mozi/src/claude_code/commands/status.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/status.py",
+        "mozi/tests/test_commands_status.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/status.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/status.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_status.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/StatusCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-14d",
+      "subject": "实现 UsageCommand",
+      "description": "实现用量命令",
+      "phase": "3.6",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/UsageCommand/",
+        "python_original": "mozi/src/claude_code/commands/usage.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/usage.py",
+        "mozi/tests/test_commands_usage.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/usage.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/usage.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_usage.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/UsageCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-14e",
+      "subject": "实现 DoctorCommand",
+      "description": "实现诊断命令",
+      "phase": "3.6",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/DoctorCommand/",
+        "python_original": "mozi/src/claude_code/commands/doctor.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/doctor.py",
+        "mozi/tests/test_commands_doctor.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/doctor.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/doctor.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_doctor.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/DoctorCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-15a",
+      "subject": "实现 LoginCommand",
+      "description": "实现登录命令",
+      "phase": "3.7",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/LoginCommand/",
+        "python_original": "mozi/src/claude_code/commands/login.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/login.py",
+        "mozi/tests/test_commands_login.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/login.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/login.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_login.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/LoginCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-15b",
+      "subject": "实现 LogoutCommand",
+      "description": "实现登出命令",
+      "phase": "3.7",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/LogoutCommand/",
+        "python_original": "mozi/src/claude_code/commands/logout.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/logout.py",
+        "mozi/tests/test_commands_logout.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/logout.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/logout.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_logout.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/LogoutCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-15c",
+      "subject": "实现 UpgradeCommand",
+      "description": "实现升级命令",
+      "phase": "3.7",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/UpgradeCommand/",
+        "python_original": "mozi/src/claude_code/commands/upgrade.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/upgrade.py",
+        "mozi/tests/test_commands_upgrade.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/upgrade.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/upgrade.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_upgrade.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/UpgradeCommand/"
+        ]
+      }
+    },
+    {
+      "id": "P3-15d",
+      "subject": "实现 PassesCommand",
+      "description": "实现通行证命令",
+      "phase": "3.7",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/PassesCommand/",
+        "python_original": "mozi/src/claude_code/commands/passes.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/passes.py",
+        "mozi/tests/test_commands_passes.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/passes.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/passes.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_passes.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/commands/PassesCommand/"
+        ]
+      }
+    }
+  ]
+}

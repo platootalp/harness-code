@@ -44,7 +44,7 @@ class TestGrepTool:
             tool_name="grep",
             parameters={"pattern": "test", "path": "/etc/passwd"},
             permission_level=1,
-            allowed_paths=["/Users/lijunyi/road/mozi"],
+            allowed_paths=["/Users/lijunyi/road/src"],
         )
         result = await tool.execute(context)
         assert result.status == ToolStatus.DENIED

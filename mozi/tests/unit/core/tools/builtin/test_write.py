@@ -45,7 +45,7 @@ class TestWriteFileTool:
             tool_name="write",
             parameters={"path": "/etc/passwd", "content": "data"},
             permission_level=2,
-            allowed_paths=["/Users/lijunyi/road/mozi"],
+            allowed_paths=["/Users/lijunyi/road/src"],
         )
         result = await tool.execute(context)
         assert result.status == ToolStatus.DENIED

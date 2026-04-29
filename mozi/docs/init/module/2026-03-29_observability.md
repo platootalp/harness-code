@@ -171,7 +171,7 @@ class Histogram:
     "duration_ms": 45,
     "metadata": {
         "tool_name": "read_file",
-        "file_path": "/Users/lijunyi/road/mozi/README.md",
+        "file_path": "/Users/lijunyi/road/src/README.md",
         "status": "success"
     }
 }

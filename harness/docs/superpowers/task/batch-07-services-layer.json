@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "name": "Phase 6: \u670d\u52a1\u5c42\u8bbe\u8ba1",
+    "description": "MCP\u5ba2\u6237\u7aef\u3001\u4f1a\u8bdd\u5b58\u50a8\u3001Token\u8ba1\u7b97\u3001\u901a\u77e5\u670d\u52a1",
+    "source": "docs/migration/2026-04-05-phase-6-services-layer-design.md",
+    "order": 7
+  },
+  "tasks": [
+    {
+      "id": "P6-1",
+      "subject": "\u5b9e\u73b0 services/mcp/protocol.py - MCPProtocol",
+      "description": "\u5b9e\u73b0 MCP JSON-RPC \u534f\u8bae",
+      "phase": "6.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/mcp/protocol.ts",
+        "python_original": "mozi/src/claude_code/services/mcp/protocol.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/mcp/protocol.py",
+        "mozi/tests/test_services_mcp_protocol.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/mcp/protocol.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/mcp/protocol.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_mcp_protocol.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/services/mcp/protocol.ts"
+        ]
+      }
+    },
+    {
+      "id": "P6-2",
+      "subject": "\u5b9e\u73b0 services/mcp/client.py - MCPClient",
+      "description": "\u5b9e\u73b0 MCP \u5ba2\u6237\u7aef\uff0c\u652f\u6301\u591a\u4f20\u8f93\u7c7b\u578b(STDIO, SSE, HTTP, WS)\u3001OAuth\u8ba4\u8bc1",
+      "phase": "6.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/mcp/client.ts",
+        "python_original": "mozi/src/claude_code/services/mcp/client.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/mcp/client.py",
+        "mozi/tests/test_services_mcp_client.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/mcp/client.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/mcp/client.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_mcp_client.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/services/mcp/client.ts"
+        ]
+      }
+    },
+    {
+      "id": "P6-3",
+      "subject": "\u5b9e\u73b0 services/mcp/auth.py - ClaudeAuthProvider",
+      "description": "\u5b9e\u73b0 OAuth \u8ba4\u8bc1\u63d0\u4f9b\u8005\uff0c\u652f\u6301\u81ea\u52a8token\u5237\u65b0\u3001lockfile\u53bb\u91cd",
+      "phase": "6.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/mcp/auth.ts",
+        "python_original": "mozi/src/claude_code/services/mcp/auth.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/mcp/auth.py",
+        "mozi/tests/test_services_mcp_auth.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/mcp/auth.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/mcp/auth.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_mcp_auth.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/services/mcp/auth.ts"
+        ]
+      }
+    },
+    {
+      "id": "P6-4",
+      "subject": "\u5b9e\u73b0 services/storage/session.py - SessionStorage",
+      "description": "\u5b9e\u73b0\u4f1a\u8bdd\u5b58\u50a8\uff0c\u652f\u6301\u4fdd\u5b58/\u52a0\u8f7d/\u5217\u8868/\u5220\u9664\u4f1a\u8bdd",
+      "phase": "6.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/storage.ts",
+        "python_original": "mozi/src/claude_code/services/storage/session.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/storage/session.py",
+        "mozi/tests/test_services_storage_session.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/storage/session.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/storage/session.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_storage_session.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/services/storage.ts"
+        ]
+      }
+    },
+    {
+      "id": "P6-5",
+      "subject": "\u5b9e\u73b0 services/utils/token.py - TokenCounter",
+      "description": "\u5b9e\u73b0 Token \u8ba1\u7b97\u5de5\u5177",
+      "phase": "6.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/utils/tokens.ts",
+        "python_original": "mozi/src/claude_code/services/utils/token.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/utils/token.py",
+        "mozi/tests/test_services_utils_token.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/utils/token.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/utils/token.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_utils_token.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/utils/tokens.ts"
+        ]
+      }
+    },
+    {
+      "id": "P6-6",
+      "subject": "\u5b9e\u73b0\u901a\u77e5\u670d\u52a1 (Notifier)",
+      "description": "\u5b9e\u73b0\u901a\u77e5\u670d\u52a1",
+      "phase": "6.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/notifications.ts",
+        "python_original": "mozi/src/claude_code/services/notifier.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/notifier.py",
+        "mozi/tests/test_services_notifier.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/notifier.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/notifier.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_notifier.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/services/notifications.ts"
+        ]
+      }
+    }
+  ]
+}

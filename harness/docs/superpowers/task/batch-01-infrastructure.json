@@ -1,0 +1,442 @@
+{
+  "meta": {
+    "name": "Phase 0: 基础设施设计",
+    "description": "项目脚手架、核心模型、状态存储、API客户端、安全层",
+    "source": "docs/migration/2026-04-05-phase-0-infrastructure-design.md",
+    "order": 1
+  },
+  "tasks": [
+    {
+      "id": "P0-1",
+      "subject": "创建 pyproject.toml 项目配置",
+      "description": "创建 src_py/pyproject.toml，包含项目元数据、依赖(httpx, websockets, pydantic, textual, pytest, ruff, mypy等)、脚本入口",
+      "phase": "0.1",
+      "status": "completed",
+      "deliverables": [
+        "mozi/pyproject.toml"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/pyproject.toml"
+        ],
+        "type_check": [
+          "mypy mozi/pyproject.toml --no-error-summary"
+        ],
+        "test": [
+          "python -c \"import tomllib; data = tomllib.load(open('mozi/pyproject.toml', 'rb')); assert 'project' in data; assert 'dependencies' in data['project']; print('OK')\""
+        ]
+      }
+    },
+    {
+      "id": "P0-2",
+      "subject": "创建目录结构",
+      "description": "按照设计文档创建完整目录结构: src/claude_code/{models,engine,tools,commands,cli,bridge,services,state,security,utils,hooks,ui}",
+      "phase": "0.1",
+      "status": "completed",
+      "deliverables": [
+        "mozi/src/claude_code/__init__.py",
+        "mozi/src/claude_code/models/__init__.py",
+        "mozi/src/claude_code/engine/__init__.py",
+        "mozi/src/claude_code/engine/tools/__init__.py",
+        "mozi/src/claude_code/tools/__init__.py",
+        "mozi/src/claude_code/commands/__init__.py",
+        "mozi/src/claude_code/cli/__init__.py",
+        "mozi/src/claude_code/bridge/__init__.py",
+        "mozi/src/claude_code/services/__init__.py",
+        "mozi/src/claude_code/services/api/__init__.py",
+        "mozi/src/claude_code/state/__init__.py",
+        "mozi/src/claude_code/security/__init__.py",
+        "mozi/src/claude_code/utils/__init__.py",
+        "mozi/src/claude_code/hooks/__init__.py",
+        "mozi/src/claude_code/ui/__init__.py",
+        "mozi/tests/__init__.py"
+      ],
+      "verification": {
+        "static": [
+          "find mozi/src/claude_code -type d | sort | grep -E '(models|engine|tools|commands|cli|bridge|services|state|security|utils|hooks|ui)$'",
+          "find mozi/tests -type d | sort"
+        ],
+        "test": [
+          "python -c \"import claude_code; import claude_code.models; import claude_code.engine; import claude_code.tools; import claude_code.commands; import claude_code.cli; import claude_code.bridge; import claude_code.services; import claude_code.state; import claude_code.security; import claude_code.utils; import claude_code.hooks; import claude_code.ui; print('All modules importable')\""
+        ]
+      }
+    },
+    {
+      "id": "P0-3",
+      "subject": "实现 models/message.py",
+      "description": "实现 Role, ContentBlock, Message 数据模型，包含 to_dict, from_dict 方法",
+      "phase": "0.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/types/message.ts",
+        "python_original": "mozi/src/claude_code/models/message.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/models/message.py",
+        "mozi/tests/test_models_message.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/models/message.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/models/message.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_models_message.py -v"
+        ],
+        "functional_equivalence": [
+          "对比 src/types/message.ts Message 类型与 Python Message 序列化一致性"
+        ]
+      }
+    },
+    {
+      "id": "P0-4",
+      "subject": "实现 models/tool.py",
+      "description": "实现 ToolDefinition, ToolResult, ToolExecuteContext, BaseTool 抽象类",
+      "phase": "0.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/Tool.ts",
+        "python_original": "mozi/src/claude_code/models/tool.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/models/tool.py",
+        "mozi/tests/test_models_tool.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/models/tool.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/models/tool.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_models_tool.py -v"
+        ],
+        "functional_equivalence": [
+          "对比 src/Tool.ts Tool 接口与 Python BaseTool"
+        ]
+      }
+    },
+    {
+      "id": "P0-5",
+      "subject": "实现 models/task.py",
+      "description": "实现 TaskStatus, TaskType, Task 数据模型",
+      "phase": "0.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/Task.ts",
+        "python_original": "mozi/src/claude_code/models/task.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/models/task.py",
+        "mozi/tests/test_models_task.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/models/task.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/models/task.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_models_task.py -v"
+        ],
+        "functional_equivalence": [
+          "对比 src/Task.ts TaskStatus, TaskType, Task 与 Python"
+        ]
+      }
+    },
+    {
+      "id": "P0-6",
+      "subject": "实现 models/session.py",
+      "description": "实现 Session, AppState 数据模型",
+      "phase": "0.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/state/AppStateStore.ts",
+        "python_original": "mozi/src/claude_code/models/session.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/models/session.py",
+        "mozi/tests/test_models_session.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/models/session.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/models/session.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_models_session.py -v"
+        ],
+        "functional_equivalence": [
+          "对比 src/state/AppStateStore.ts AppState 与 Python AppState"
+        ]
+      }
+    },
+    {
+      "id": "P0-7",
+      "subject": "实现 models/events.py",
+      "description": "实现所有 StreamEvent 类型: ThinkingEvent, ToolUseEvent, ToolResultEvent, MessageStartEvent, ContentBlockStartEvent, ContentBlockDeltaEvent, MessageDeltaEvent, MessageStopEvent, TombstoneEvent",
+      "phase": "0.2",
+      "status": "completed",
+      "source": {
+        "typescript": "src/types/message.ts (StreamEvent types)",
+        "python_original": "mozi/src/claude_code/models/events.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/models/events.py",
+        "mozi/tests/test_models_events.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/models/events.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/models/events.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_models_events.py -v"
+        ],
+        "functional_equivalence": [
+          "对比 src/types/message.ts StreamEvent 类型"
+        ]
+      }
+    },
+    {
+      "id": "P0-8",
+      "subject": "实现 state/store.py",
+      "description": "实现 AsyncObservable 泛型状态存储，支持 subscribe, set_state, 锁机制",
+      "phase": "0.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/state/AppStateStore.ts",
+        "python_original": "mozi/src/claude_code/state/store.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/state/store.py",
+        "mozi/tests/test_state_store.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/state/store.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/state/store.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_state_store.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/state/AppStateStore.ts 状态存储机制"
+        ]
+      }
+    },
+    {
+      "id": "P0-9",
+      "subject": "实现 state/hooks.py",
+      "description": "实现状态变更钩子，支持 on_change 回调",
+      "phase": "0.3",
+      "status": "completed",
+      "source": {
+        "typescript": "src/state/AppStateStore.ts (订阅机制)",
+        "python_original": "mozi/src/claude_code/state/hooks.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/state/hooks.py",
+        "mozi/tests/test_state_hooks.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/state/hooks.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/state/hooks.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_state_hooks.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/state/AppStateStore.ts 订阅机制"
+        ]
+      }
+    },
+    {
+      "id": "P0-10",
+      "subject": "实现 services/api/client.py - HTTPClient",
+      "description": "实现异步HTTP客户端，支持流式POST、超时控制、重试机制",
+      "phase": "0.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/api/client.ts",
+        "python_original": "mozi/src/claude_code/services/api/client.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/api/client.py",
+        "mozi/tests/test_services_api_client.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/api/client.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/api/client.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_api_client.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/services/api/client.ts HTTP客户端"
+        ]
+      }
+    },
+    {
+      "id": "P0-11",
+      "subject": "实现 services/api/claude.py - ClaudeAIClient",
+      "description": "实现多Provider客户端(DIRECT, AWS_BEDROCK, AZURE_FOUNDRY, GOOGLE_VERTEX)，支持流式/非流式chat completion",
+      "phase": "0.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/api/claude.ts",
+        "python_original": "mozi/src/claude_code/services/api/claude.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/api/claude.py",
+        "mozi/tests/test_services_api_claude.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/api/claude.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/api/claude.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_api_claude.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/services/api/claude.ts API客户端"
+        ]
+      }
+    },
+    {
+      "id": "P0-12",
+      "subject": "实现 services/api/errors.py - API Error Types",
+      "description": "实现 APIError, RateLimitError, AuthError, PromptTooLongError",
+      "phase": "0.4",
+      "status": "completed",
+      "source": {
+        "typescript": "src/services/api/errors.ts",
+        "python_original": "mozi/src/claude_code/services/api/errors.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/services/api/errors.py",
+        "mozi/tests/test_services_api_errors.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/services/api/errors.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/services/api/errors.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_services_api_errors.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/services/api/errors.ts"
+        ]
+      }
+    },
+    {
+      "id": "P0-13",
+      "subject": "实现 security/rules.py",
+      "description": "实现 SecurityRule, SecurityEngine 规则引擎",
+      "phase": "0.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/types/permissions.ts (SecurityRule 相关)",
+        "python_original": "mozi/src/claude_code/security/rules.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/security/rules.py",
+        "mozi/tests/test_security_rules.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/security/rules.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/security/rules.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_security_rules.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 TypeScript 安全规则引擎"
+        ]
+      }
+    },
+    {
+      "id": "P0-14",
+      "subject": "实现 security/permissions.py",
+      "description": "实现权限检查 PermissionResult, check_tool_permission",
+      "phase": "0.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/types/permissions.ts",
+        "python_original": "mozi/src/claude_code/security/permissions.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/security/permissions.py",
+        "mozi/tests/test_security_permissions.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/security/permissions.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/security/permissions.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_security_permissions.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/types/permissions.ts 权限检查"
+        ]
+      }
+    },
+    {
+      "id": "P0-15",
+      "subject": "实现 security/budgets.py",
+      "description": "实现预算跟踪 Budget tracking",
+      "phase": "0.5",
+      "status": "completed",
+      "source": {
+        "typescript": "src/bootstrap/state.ts (预算相关)",
+        "python_original": "mozi/src/claude_code/security/budgets.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/security/budgets.py",
+        "mozi/tests/test_security_budgets.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/security/budgets.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/security/budgets.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_security_budgets.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 TypeScript 预算跟踪逻辑"
+        ]
+      }
+    }
+  ]
+}

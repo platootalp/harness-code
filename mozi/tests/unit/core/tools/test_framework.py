@@ -12,7 +12,7 @@ class TestToolContext:
         context = ToolContext(tool_name="test_tool")
         assert context.tool_name == "test_tool"
         assert context.parameters == {}
-        assert context.working_directory == "/Users/lijunyi/road/mozi"
+        assert context.working_directory == ""
         assert context.allowed_paths == []
         assert context.permission_level == 0
         assert context.timeout_seconds == 300

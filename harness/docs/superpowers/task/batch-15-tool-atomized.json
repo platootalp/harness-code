@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "name": "Phase 2.2: 工具系统拆分 - 任务管理工具",
+    "description": "将 P2-12 拆分为独立任务：TaskGetTool, TaskListTool, TaskUpdateTool, TaskStopTool, TaskOutputTool",
+    "source": "docs/migration/2026-04-05-phase-2-tools-system-design.md",
+    "order": 15,
+    "note": "从 batch-03 P2-12 拆分出来的独立任务"
+  },
+  "tasks": [
+    {
+      "id": "P2-12a",
+      "subject": "实现 TaskGetTool",
+      "description": "实现任务获取工具",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TaskGetTool/",
+        "python_original": "mozi/src/claude_code/tools/task_get.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/task_get.py",
+        "mozi/tests/test_tools_task_get.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/task_get.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/task_get.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_task_get.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TaskGetTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-12b",
+      "subject": "实现 TaskListTool",
+      "description": "实现任务列表工具",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TaskListTool/",
+        "python_original": "mozi/src/claude_code/tools/task_list.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/task_list.py",
+        "mozi/tests/test_tools_task_list.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/task_list.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/task_list.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_task_list.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TaskListTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-12c",
+      "subject": "实现 TaskUpdateTool",
+      "description": "实现任务更新工具",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TaskUpdateTool/",
+        "python_original": "mozi/src/claude_code/tools/task_update.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/task_update.py",
+        "mozi/tests/test_tools_task_update.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/task_update.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/task_update.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_task_update.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TaskUpdateTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-12d",
+      "subject": "实现 TaskStopTool",
+      "description": "实现任务停止工具",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TaskStopTool/",
+        "python_original": "mozi/src/claude_code/tools/task_stop.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/task_stop.py",
+        "mozi/tests/test_tools_task_stop.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/task_stop.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/task_stop.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_task_stop.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TaskStopTool/"
+        ]
+      }
+    },
+    {
+      "id": "P2-12e",
+      "subject": "实现 TaskOutputTool",
+      "description": "实现任务输出工具",
+      "phase": "2.2",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/tools/TaskOutputTool/",
+        "python_original": "mozi/src/claude_code/tools/task_output.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/tools/task_output.py",
+        "mozi/tests/test_tools_task_output.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/tools/task_output.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/tools/task_output.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_tools_task_output.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "对比 src/tools/TaskOutputTool/"
+        ]
+      }
+    }
+  ]
+}

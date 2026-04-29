@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "name": "Phase 3.5: InstallGithubApp \u547d\u4ee4",
+    "description": "\u5b9e\u73b0 GitHub App \u5b89\u88c5\u547d\u4ee4",
+    "source": "docs/migration/2026-04-05-phase-3-commands-system-design.md",
+    "order": 20,
+    "note": "\u590d\u6742\u7684 GitHub App \u5b89\u88c5\u6d41\u7a0b\uff0c\u4e4b\u524d\u672a\u8986\u76d6"
+  },
+  "tasks": [
+    {
+      "id": "P3-33",
+      "subject": "\u5b9e\u73b0 InstallGithubAppCommand - GitHub App \u5b89\u88c5\u4e3b\u547d\u4ee4",
+      "description": "\u5b9e\u73b0 GitHub App \u5b89\u88c5\u4e3b\u547d\u4ee4\u548c\u6240\u6709\u6b65\u9aa4\u7ec4\u4ef6 (ApiKeyStep, CheckGitHubStep, CheckExistingSecretStep, ChooseRepoStep, CreatingStep, ErrorStep, ExistingWorkflowStep, InstallAppStep, OAuthFlowStep, SuccessStep, WarningsStep)",
+      "phase": "3.5",
+      "status": "completed",
+      "blockedBy": [
+        "P1-5"
+      ],
+      "source": {
+        "typescript": "src/commands/install-github-app/*.tsx",
+        "python_original": "mozi/src/claude_code/commands/install_github_app.py, install_github_app_steps.py"
+      },
+      "deliverables": [
+        "mozi/src/claude_code/commands/install_github_app.py",
+        "mozi/src/claude_code/commands/install_github_app_steps.py",
+        "mozi/src/claude_code/commands/install_github_app_models.py",
+        "mozi/tests/test_commands_install_github_app.py"
+      ],
+      "verification": {
+        "lint": [
+          "ruff check mozi/src/claude_code/commands/install_github_app.py",
+          "ruff check mozi/src/claude_code/commands/install_github_app_steps.py",
+          "ruff check mozi/src/claude_code/commands/install_github_app_models.py"
+        ],
+        "type_check": [
+          "mypy mozi/src/claude_code/commands/install_github_app.py",
+          "mypy mozi/src/claude_code/commands/install_github_app_steps.py",
+          "mypy mozi/src/claude_code/commands/install_github_app_models.py"
+        ],
+        "test": [
+          "pytest mozi/tests/test_commands_install_github_app.py -v --tb=short"
+        ],
+        "functional_equivalence": [
+          "\u5bf9\u6bd4 src/commands/install-github-app/*.tsx"
+        ]
+      }
+    }
+  ]
+}

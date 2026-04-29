@@ -102,7 +102,7 @@ bandit.toml
 
 ```python
 class MoziError(Exception):
-    """Base exception for mozi."""
+    """Base exception for src."""
     pass
 
 class ConfigurationError(MoziError):

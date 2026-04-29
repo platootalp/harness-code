@@ -49,7 +49,7 @@ docs/foundation/architecture/
 
 ```python
 #!/usr/bin/env python3
-"""Bootstrap the mozi project skeleton."""
+"""Bootstrap the src project skeleton."""
 
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ from pathlib import Path
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Bootstrap mozi project skeleton")
+    parser = argparse.ArgumentParser(description="Bootstrap src project skeleton")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
     parser.add_argument(
         "--manifest",
@@ -166,7 +166,7 @@ __version_info__ = tuple(int(x) for x in __version__.split("."))
 
 
 class MoziError(Exception):
-    """Base exception for mozi."""
+    """Base exception for src."""
 
     pass
 
@@ -184,7 +184,7 @@ class ExecutionError(MoziError):
 ''',
     "pyproject.toml": '''\
 [project]
-name = "mozi"
+name = "src"
 version = "0.1.0"
 description = "Mozi AI Coding Agent"
 requires-python = ">=3.11"
@@ -212,7 +212,7 @@ line-length = 100
 quote-style = "double"
 
 [tool.ruff.isort]
-known-first-party = ["mozi"]
+known-first-party = ["src"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -232,7 +232,7 @@ line-length = 100
 quote-style = "double"
 
 [isort]
-known-first-party = ["mozi"]
+known-first-party = ["src"]
 ''',
     "mypy.ini": '''\
 [mypy]
@@ -250,7 +250,7 @@ markers =
 ''',
     "bandit.toml": '''\
 [bandit]
-targets = ["mozi/"]
+targets = ["src/"]
 confidence_level = 1
 severity_level = 1
 ''',
@@ -360,7 +360,7 @@ Expected: Pre-commit hooks installed
 - [ ] **Step 6: Commit skeleton**
 
 ```bash
-git add -A mozi/ tests/ .claude/ docs/ pyproject.toml ruff.toml mypy.ini pytest.ini bandit.toml .gitignore .pre-commit-config.yaml
+git add -A src/ tests/ .claude/ docs/ pyproject.toml ruff.toml mypy.ini pytest.ini bandit.toml .gitignore .pre-commit-config.yaml
 git commit -m "feat: add phase 0 project skeleton
 
 - mozi/ package with exception classes
@@ -381,12 +381,12 @@ After full implementation, run these to confirm:
 
 ```bash
 # Verify project structure
-find mozi -type d | sort
+find src -type d | sort
 find tests -type d | sort
 
 # Verify CI tools work
-uv run ruff check mozi/     # should pass
-uv run mypy mozi/ --strict  # should pass
+uv run ruff check src/     # should pass
+uv run mypy src/ --strict  # should pass
 uv run pytest tests/         # should pass
 
 # Verify pre-commit
