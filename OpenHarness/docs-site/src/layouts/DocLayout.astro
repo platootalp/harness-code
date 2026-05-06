@@ -1,0 +1,168 @@
+---
+import { getCollection } from 'astro:content';
+import TopNav from '../components/TopNav.astro';
+import Sidebar from '../components/Sidebar.astro';
+import ThemeToggle from '../components/ThemeToggle.tsx';
+import SearchModal from '../components/SearchModal.tsx';
+import KeyboardShortcuts from '../components/KeyboardShortcuts.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  currentPath?: string;
+  ogImage?: string;
+}
+
+const {
+  title = 'OpenHarness Docs',
+  description = 'OpenHarness 文档中心 — AI Agent Harness 框架',
+  currentPath = '',
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://docs.openharness.ai');
+const fullTitle = title === '首页' ? 'OpenHarness 文档中心' : `${title} — OpenHarness`;
+---
+
+<!doctype html>
+<html lang="zh" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- OpenGraph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="OpenHarness Docs" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Fonts preload -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Prevent FOUC: theme class must be set BEFORE React hydration to avoid mismatch -->
+    <script is:inline>
+      (function() {
+        var stored = localStorage.getItem('theme');
+        var root = document.documentElement;
+        root.classList.remove('dark');
+        if (stored === 'dark') {
+          root.classList.add('dark');
+        } else if (!stored || stored === 'system') {
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (prefersDark) root.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-300">
+    <!-- Top Navigation -->
+    <TopNav title={title} />
+
+    <!-- Search Modal (global) -->
+    <SearchModal client:load />
+
+    <!-- Keyboard Shortcuts -->
+    <KeyboardShortcuts />
+
+    <!-- Main Layout -->
+    <div class="flex pt-16">
+      <!-- Sidebar -->
+      <Sidebar currentPath={currentPath} />
+
+      <!-- Content Area -->
+      <main id="main-content" class="flex-1 min-h-[calc(100vh-4rem)] transition-all duration-200 overflow-x-hidden" style="margin-left: 280px;">
+
+        <!-- Content slot (layout div provides its own max-w + padding) -->
+        <slot />
+
+        <!-- Footer -->
+        <footer class="border-t border-[var(--color-border)] px-6 py-8 mt-16">
+          <div class="max-w-content mx-auto flex items-center justify-between text-sm text-[var(--color-text-muted)]">
+            <span>OpenHarness 文档</span>
+            <div class="flex items-center gap-4">
+              <a href="https://github.com" target="_blank" rel="noopener" class="hover:text-[var(--color-primary)] transition-colors">GitHub</a>
+              <span>·</span>
+              <span>CC BY 4.0</span>
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      import '../components/mermaid-block.ts';
+
+      // Convert mermaid code blocks to mermaid-block elements
+      (function() {
+        // Shiki puts data-language on pre element, not code
+        const mermaidBlocks = document.querySelectorAll('pre[data-language="mermaid"], code.language-mermaid');
+        mermaidBlocks.forEach((el) => {
+          const preEl = el.tagName === 'PRE' ? el : el.closest('pre');
+          const codeEl = el.tagName === 'CODE' ? el : preEl?.querySelector('code');
+          if (!preEl || !codeEl) return;
+
+          const definition = codeEl.textContent || '';
+          const mermaidBlock = document.createElement('mermaid-block');
+          mermaidBlock.dataset.definition = definition;
+          preEl.parentNode?.replaceChild(mermaidBlock, preEl);
+        });
+      })();
+
+      // Code block enhancements (copy button, language label)
+      (function() {
+        document.querySelectorAll('pre').forEach((pre) => {
+          const code = pre.querySelector('code');
+          if (!code) return;
+
+          // Get language
+          const lang = code.getAttribute('data-language') || '';
+          const wrapper = document.createElement('div');
+          wrapper.className = 'code-block-wrapper';
+
+          // Language label
+          if (lang) {
+            const langLabel = document.createElement('span');
+            langLabel.className = 'code-block-lang';
+            langLabel.textContent = lang;
+            wrapper.appendChild(langLabel);
+          }
+
+          // Copy button
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'code-copy-btn';
+          copyBtn.textContent = 'Copy';
+          copyBtn.addEventListener('click', async () => {
+            const text = code.textContent || '';
+            await navigator.clipboard.writeText(text);
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('bg-green-500', 'text-white', 'border-green-500');
+            setTimeout(() => {
+              copyBtn.textContent = 'Copy';
+              copyBtn.classList.remove('bg-green-500', 'text-white', 'border-green-500');
+            }, 2000);
+          });
+          wrapper.appendChild(copyBtn);
+
+          pre.parentNode?.insertBefore(wrapper, pre);
+          wrapper.appendChild(pre);
+        });
+      })();
+    </script>
+  </body>
+</html>

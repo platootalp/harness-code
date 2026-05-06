@@ -1,0 +1,6 @@
+{
+  "my-utility-server": {
+    "command": "python3",
+    "args": ["/Users/lijunyi/road/learn-claude-code/agents/my_mcp_server.py"]
+  }
+}

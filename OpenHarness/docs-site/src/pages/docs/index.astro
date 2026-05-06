@@ -1,0 +1,225 @@
+---
+import { getCollection } from 'astro:content';
+import DocLayout from '../../layouts/DocLayout.astro';
+import '../../styles/global.css';
+
+const allDocs = await getCollection('docs');
+
+// Count docs by section
+const counts: Record<string, number> = {};
+for (const doc of allDocs) {
+  const section = doc.id.split('/')[0] || 'overview';
+  counts[section] = (counts[section] || 0) + 1;
+}
+
+const sections = [
+  {
+    id: 'overview',
+    label: '总览',
+    icon: '📊',
+    desc: '架构概览、工作流地图、阅读指南',
+    href: '/docs/overview/architecture-at-a-glance/',
+    color: 'from-blue-500 to-cyan-500',
+    count: counts['overview'] || 0,
+  },
+  {
+    id: 'architecture',
+    label: '架构',
+    icon: '🏗️',
+    desc: '系统上下文、请求生命周期、失败模型、设计决策',
+    href: '/docs/architecture/system-context/',
+    color: 'from-violet-500 to-purple-500',
+    count: counts['architecture'] || 0,
+  },
+  {
+    id: 'workflows',
+    label: '工作流',
+    icon: '🔄',
+    desc: '核心查询流、多Agent协调、MCP集成、沙箱执行',
+    href: '/docs/workflows/core-query-flow/',
+    color: 'from-emerald-500 to-teal-500',
+    count: counts['workflows'] || 0,
+  },
+  {
+    id: 'modules',
+    label: '模块',
+    icon: '🧩',
+    desc: 'Engine、Tools、Plugins、Swarm、OHMO 等核心模块详解',
+    href: '/docs/modules/engine/',
+    color: 'from-orange-500 to-amber-500',
+    count: counts['modules'] || 0,
+  },
+  {
+    id: 'reference',
+    label: '参考',
+    icon: '📖',
+    desc: 'CLI 命令、配置参考、数据模型、术语表',
+    href: '/docs/reference/cli/',
+    color: 'from-rose-500 to-pink-500',
+    count: counts['reference'] || 0,
+  },
+  {
+    id: 'appendix',
+    label: '附录',
+    icon: '📎',
+    desc: '证据索引',
+    href: '/docs/appendix/evidence-index/',
+    color: 'from-slate-500 to-gray-500',
+    count: counts['appendix'] || 0,
+  },
+];
+
+const features = [
+  {
+    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`,
+    title: '详细解析',
+    desc: '每个核心模块包含正常流 + 异常流的逐跳解析，覆盖失败模式与恢复策略',
+  },
+  {
+    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
+    title: '源码证据',
+    desc: '所有结论均可回溯源码，证据索引覆盖 250+ 条符号引用',
+  },
+  {
+    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>`,
+    title: '可视化图表',
+    desc: 'Mermaid 架构图、时序图、流程图，每张图均有详细读图说明',
+  },
+  {
+    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`,
+    title: '风险登记',
+    desc: '完整的风险分析，涵盖触发条件、影响范围、可观测信号与缓解动作',
+  },
+  {
+    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>`,
+    title: '设计取舍',
+    desc: '关键架构决策均有替代方案分析，量化代价与取舍理由',
+  },
+  {
+    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,
+    title: '中英双语',
+    desc: '文档正文以中文为主，核心术语附英文原词与代码符号对照',
+  },
+];
+---
+
+<DocLayout title="首页" currentPath="/docs/">
+  <!-- Hero Section -->
+  <section class="mb-16">
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full mb-6">
+        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+        OpenHarness 开发文档中心
+      </div>
+
+      <h1 class="text-4xl md:text-5xl font-bold mb-4 text-[var(--color-text)]">
+        AI Agent Harness
+        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">框架文档</span>
+      </h1>
+
+      <p class="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto mb-8 leading-relaxed">
+        全面覆盖 OpenHarness 的架构设计、核心工作流、模块实现与工程实践。
+        所有结论均可回溯源码，配套 Mermaid 可视化图表。
+      </p>
+
+      <div class="flex items-center justify-center gap-3 flex-wrap">
+        <a
+          href="/docs/overview/architecture-at-a-glance/"
+          class="px-6 py-2.5 bg-[var(--color-primary)] text-white rounded-lg font-medium text-sm hover:bg-[var(--color-primary-hover)] transition-all shadow-md hover:shadow-lg active:scale-95 no-underline"
+        >
+          开始阅读 →
+        </a>
+        <a
+          href="/docs/reference/cli/"
+          class="px-6 py-2.5 border border-[var(--color-border)] text-[var(--color-text)] rounded-lg font-medium text-sm hover:bg-[var(--color-surface)] transition-all no-underline"
+        >
+          CLI 参考
+        </a>
+      </div>
+    </div>
+
+    <!-- Tech Stack Badges -->
+    <div class="flex items-center justify-center gap-3 flex-wrap text-xs text-[var(--color-text-muted)]">
+      <span class="px-2.5 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md font-mono">Astro 6</span>
+      <span class="px-2.5 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md font-mono">React 18</span>
+      <span class="px-2.5 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md font-mono">Tailwind 3</span>
+      <span class="px-2.5 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md font-mono">Mermaid</span>
+      <span class="px-2.5 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md font-mono">TypeScript</span>
+    </div>
+  </section>
+
+  <!-- Section Cards Grid -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-bold mb-6 text-[var(--color-text)]">文档分类</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {sections.map(section => (
+        <a
+          href={section.href}
+          class={`group block p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-transparent shadow-sm hover:shadow-md transition-all no-underline hover:-translate-y-0.5`}
+        >
+          <div class="flex items-start gap-3 mb-3">
+            <div class={`w-10 h-10 rounded-lg bg-gradient-to-br ${section.color} flex items-center justify-center text-white text-lg flex-shrink-0 shadow-sm`}>
+              {section.icon}
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
+                {section.label}
+              </h3>
+              <span class="text-xs text-[var(--color-text-muted)]">{section.count} 篇文档</span>
+            </div>
+          </div>
+          <p class="text-sm text-[var(--color-text-muted)] leading-relaxed">{section.desc}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-bold mb-6 text-[var(--color-text)]">文档特点</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {features.map(feature => (
+        <div class="p-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div class="w-10 h-10 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mb-3" set:html={feature.icon} />
+          <h3 class="text-sm font-semibold text-[var(--color-text)] mb-1">{feature.title}</h3>
+          <p class="text-sm text-[var(--color-text-muted)] leading-relaxed">{feature.desc}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Quick Links -->
+  <section>
+    <h2 class="text-2xl font-bold mb-6 text-[var(--color-text)]">快速入口</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <a href="/docs/overview/reading-guide/" class="flex items-center gap-3 p-4 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-all no-underline group">
+        <div class="text-2xl">📚</div>
+        <div>
+          <div class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)]">阅读指南</div>
+          <div class="text-xs text-[var(--color-text-muted)]">按角色和深度选择阅读路径</div>
+        </div>
+      </a>
+      <a href="/docs/overview/overview-summary/" class="flex items-center gap-3 p-4 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-all no-underline group">
+        <div class="text-2xl">🏁</div>
+        <div>
+          <div class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)]">总览总结</div>
+          <div class="text-xs text-[var(--color-text-muted)]">系统概述、架构亮点、技术栈</div>
+        </div>
+      </a>
+      <a href="/docs/reference/glossary/" class="flex items-center gap-3 p-4 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-all no-underline group">
+        <div class="text-2xl">📝</div>
+        <div>
+          <div class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)]">术语表</div>
+          <div class="text-xs text-[var(--color-text-muted)]">46 个核心术语定义与源码对照</div>
+        </div>
+      </a>
+      <a href="/docs/architecture/risks-and-tech-debt/" class="flex items-center gap-3 p-4 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-all no-underline group">
+        <div class="text-2xl">⚠️</div>
+        <div>
+          <div class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)]">风险与技术债</div>
+          <div class="text-xs text-[var(--color-text-muted)]">完整风险登记与技术债清单</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</DocLayout>

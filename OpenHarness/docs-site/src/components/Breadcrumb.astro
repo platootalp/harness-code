@@ -1,0 +1,40 @@
+---
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '' } = Astro.props;
+
+const segments = currentPath.replace(/^\/docs\/?/, '').replace(/\/$/, '').split('/').filter(Boolean);
+
+const crumbs = [
+  { label: '首页', href: '/docs/' },
+  ...segments.map((seg, i) => {
+    const href = '/docs/' + segments.slice(0, i + 1).join('/') + '/';
+    const label = seg.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return { label, href };
+  }),
+];
+---
+
+<nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-[var(--color-text-muted)] mb-6">
+  {crumbs.map((crumb, i) => (
+    <span class="flex items-center gap-2">
+      {i > 0 && (
+        <svg class="w-4 h-4 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      )}
+      {i === crumbs.length - 1 ? (
+        <span class="text-[var(--color-text)] font-medium">{crumb.label}</span>
+      ) : (
+        <a
+          href={crumb.href}
+          class="hover:text-[var(--color-primary)] transition-colors no-underline"
+        >
+          {crumb.label}
+        </a>
+      )}
+    </span>
+  ))}
+</nav>

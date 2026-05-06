@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  currentPath: string;
+  currentSlug: string;
+}
+
+const { currentPath, currentSlug } = Astro.props;
+
+const allDocs = await getCollection('docs');
+
+function getDocHref(id: string): string {
+  if (id === 'index.md') return '/docs/';
+  return `/docs/${id.replace(/\.md$/, '')}/`;
+}
+
+function getDocTitle(id: string): string {
+  const name = id.split('/').pop() || id;
+  return name.replace(/\.md$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Sort by href using simple string comparison
+const allHrefs = allDocs
+  .map(d => ({ id: d.id, href: getDocHref(d.id), title: getDocTitle(d.id) }))
+  .sort((a, b) => a.href < b.href ? -1 : a.href > b.href ? 1 : 0);
+
+const currentIndex = allHrefs.findIndex(d => d.href === currentPath);
+const prev = currentIndex > 0 ? allHrefs[currentIndex - 1] : null;
+const next = currentIndex < allHrefs.length - 1 ? allHrefs[currentIndex + 1] : null;
+---
+
+{(prev || next) && (
+  <nav data-pagination class="mt-16 pt-8 border-t border-[var(--color-border)] flex items-stretch justify-between gap-4">
+    {prev ? (
+      <a
+        data-page="prev"
+        href={prev.href}
+        class="group flex-1 max-w-[49%] p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)] transition-all no-underline"
+      >
+        <div class="flex items-center gap-2 text-sm text-[var(--color-text-muted)] mb-1">
+          <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span>上一篇</span>
+        </div>
+        <div class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] truncate">
+          {prev.title}
+        </div>
+      </a>
+    ) : <div class="flex-1" />}
+
+    {next ? (
+      <a
+        data-page="next"
+        href={next.href}
+        class="group flex-1 max-w-[49%] p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)] transition-all text-right no-underline"
+      >
+        <div class="flex items-center justify-end gap-2 text-sm text-[var(--color-text-muted)] mb-1">
+          <span>下一篇</span>
+          <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+        <div class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] truncate">
+          {next.title}
+        </div>
+      </a>
+    ) : <div class="flex-1" />}
+  </nav>
+)}

@@ -1,0 +1,643 @@
+{
+  "docs": [
+    {
+      "id": "index",
+      "title": "Index",
+      "description": "欢迎使用 OpenHarness 文档。本文档中心包含面向最终用户的使用手册和面向开发者的架构文档。",
+      "section": "index",
+      "href": "/docs/",
+      "content": "OpenHarness 文档中心 用户手册 (user/) 开发者文档 (dev/) 核心模块 (dev/core/) 基础设施 (dev/infrastructure/) UI 层 (dev/ui/) ohmo 应用 (dev/ohmo/) 文档规范 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "architecture/container-view",
+      "title": "Container View",
+      "description": "OpenHarness 在运行时涉及多个操作系统进程：主 CLI 进程、MCP 服务器子进程、Worker Agent 子进程、Bridge Session 子进程、Cron Scheduler 守护进程，以及可选的 Docker 沙箱容器",
+      "section": "架构",
+      "href": "/docs/architecture/container-view/",
+      "content": "容器视图 摘要 你将了解 范围 进程边界概览 主进程与子进程关系 OpenHarness 主进程 进程继承关系 Bridge Session 管理 架构 Spawn 流程 输出捕获 Session 生命周期 Swarm 子进程管理 Teammate Spawn 流程 命令行构建 推断 teammate 使用的可执行文件 构建继承的 CLI 参数（model、planmode 等） 构建继承的环境变量（APIKEY、OPENHARNESSBASEURL 等） 最终命令 TeammateExecutor 后端类型 进程间通信（IPC） Mailbox 和 Lockfile Worktree 隔离 MCP 服务器进程 stdio 子进程模型 HTTP Streamable 模式 工具和资源发现 Cron Scheduler 守护进程 进程模型 定时任务执行 进程间状态 进程间通信方式汇总 Docker 沙箱容器（可选） undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "architecture/design-decisions",
+      "title": "Design Decisions",
+      "description": "本文档记录 OpenHarness 中的 8 条核心架构决策。每条决策包含决策背景、当前方案、替代方案、为何未选替代方案及替代方案的代价。决策覆盖工具抽象、MCP 集成、沙箱后端、Swarm 执行模型、Coordinator 权限、配置加载",
+      "section": "架构",
+      "href": "/docs/architecture/design-decisions/",
+      "content": "架构设计决策 摘要 你将了解 范围 1. 工具抽象：BaseTool 类 vs 直接函数调用 决策背景 当前方案 替代方案 为何未选方案 A 为何未选方案 B 替代方案的代价 2. MCP 集成策略：内置客户端 vs 外部 MCP 网关 决策背景 当前方案 替代方案 为何未选方案 A 为何未选方案 B 替代方案的代价 3. 沙箱后端选择：Docker vs gVisor / seccomp / firecracker 决策背景 当前方案 替代方案 为何未选方案 A / B / C 为何未选方案 D（仅 srt） 替代方案的代价 4. Swarm 执行模型：InProcess vs Subprocess 决策背景 当前方案 asyncio.createtask() copies the current Context automatically, so each Task starts with an independent ContextVar state. 替代方案 为何未选方案 A 为何未选方案 B 替代方案的代价 5. Coordinator 权限模型：受限 Worker 工具集 vs 全权限 Worker 决策背景 当前方案 替代方案 为何未选方案 A 为何未选方案 B 替代方案的代价 6. 配置加载优先级：环境变量 vs 配置文件 vs 硬编码默认值 决策背景 当前方案 替代方案 为何未选方案 A 为何未选方案 B 为何未选方案 C 替代方案的代价 7. 会话状态持久化：文件存储 vs 数据库 vs 内存仅存 决策背景 当前方案 替代方案 为何未选方案 A 为何未选方案 B 为何未选方案 C 替代方案的代价 8. Channel 抽象层：统一 Stream 接口 vs 平台特定实现 决策背景 当前方案 替代方案 为何未选方案 A 为何未选方案 B 替代方案的代价 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "architecture/failure-model",
+      "title": "Failure Model",
+      "description": "OpenHarness 在运行时面临多种类型的故障——从上游 API 的临时不可用到工具执行错误、从沙箱容器崩溃到认证过期。本页系统性地分析各类失败的发生条件、传播路径、降级策略与恢复动作，帮助开发者理解系统在故障下的行为边界。",
+      "section": "架构",
+      "href": "/docs/architecture/failure-model/",
+      "content": "失败模型 摘要 你将了解 范围 故障分类总览 1. API 故障 触发条件 传播路径 降级策略 恢复动作 证据引用 2. 工具故障 触发条件 传播路径 降级策略 恢复动作 证据引用 3. Swarm 故障（协调者/Worker 模式） 触发条件 传播路径 降级策略 恢复动作 证据引用 4. 配置故障 触发条件 传播路径 降级策略 证据引用 5. 认证故障 触发条件 传播路径 降级策略 证据引用 6. 网络故障 触发条件 传播路径 降级策略 证据引用 失败传播链 降级策略总表 异常流逐跳解析 异常流 1：Docker 沙箱容器中途崩溃 异常流 2：长对话中 prompttoolong + 压缩也失败 状态图 风险 风险 1：沙箱容器资源泄漏 风险 2：并发工具执行中一个失败影响全部结果 风险 3：自动压缩不可中断导致长时间无响应 风险 4：MCP 服务器状态与服务端不同步 风险 5：权限拒绝后模型陷入循环 证据索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "architecture/request-lifecycle",
+      "title": "Request Lifecycle",
+      "description": "本文档深入剖析 OpenHarness 处理一条用户消息的完整技术链路，从 CLI 入口经过 9 跳以上的调用最终返回结果。通过逐跳解析正常流与异常流的执行路径，帮助开发者理解系统内部的数据流向、状态变更及潜在风险点。",
+      "section": "架构",
+      "href": "/docs/architecture/request-lifecycle/",
+      "content": "请求生命周期 摘要 你将了解 范围 完整调用链概览 逐跳详解 第 1 跳：CLI 入口 → cli.py 第 2 跳：cli.py → QueryEngine.submitmessage() 第 3 跳：QueryEngine → runquery() — 查询循环 第 4 跳：API 调用 — streammessage() 第 5 跳：工具名称查找 — ToolRegistry.get() 第 6 跳：权限校验 — PermissionChecker.evaluate() 第 7 跳：工具执行 — BaseTool.execute() / DockerSandboxSession.execcommand() 第 8 跳：结果序列化 — ToolResultBlock 构建 第 9 跳：Stream Event 发射与循环继续 第 10 跳：输出格式化 — TUI / CLI 输出 消息序列化路径 正常流逐跳解析 异常流逐跳解析 异常流 1：MCP 服务器连接中断 异常流 2：Prompt 过长触发响应式压缩 时序图 设计取舍 取舍 1：同步 API 调用 vs. 流式 API 调用 取舍 2：单工具串行 vs. 多工具并发 取舍 3：工具元数据持久化 vs. 仅保留结果 风险 风险 1：对话历史无限膨胀导致内存耗尽 风险 2：权限检查绕过的潜在安全风险 风险 3：MCP 服务器状态不一致 证据索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "architecture/risks-and-tech-debt",
+      "title": "Risks And Tech Debt",
+      "description": "本文档系统性地梳理 OpenHarness 架构中的已知风险（按类别分组，每条包含触发条件、影响范围、可观测信号和缓解动作）和技术债（阻碍系统演进或增加维护成本的设计缺陷和未完成工作）。",
+      "section": "架构",
+      "href": "/docs/architecture/risks-and-tech-debt/",
+      "content": "风险与技术债 摘要 你将了解 范围 风险 风险 1：Anthropic API 单点故障（类别：API 依赖） 风险 2：MCP stdio 冷启动导致的首工具调用超时（类别：性能） 风险 3：Worker Agent 孤儿化（类别：运维） 风险 4：Coordinator XML 解析脆弱性（类别：兼容性） 风险 5：Plugin 动态代码执行（类别：安全） 风险 6：Sandbox 逃逸（类别：安全） 风险 7：Cron Scheduler 多实例竞争（类别：运维） 风险 8：Git Worktree 路径冲突（类别：兼容性） 技术债 技术债 1：Provider Profile 与 API Client 的双轨解析 技术债 2：BackgroundTaskManager 的重启锁逻辑复杂度 技术债 3：Plugin 加载器的路径解析多版本共存 技术债 4：Channels 层的长连接管理重复 技术债 5：Coordinator 系统提示词的字符串拼接构造 2. Your Tools 4. Task Workflow 风险分类总览 技术债分类总览 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "architecture/system-context",
+      "title": "System Context",
+      "description": "OpenHarness 在运行时与多个外部系统存在依赖关系和交互关系。本文档定义系统的边界，明确什么属于 OpenHarness 本身、什么属于外部依赖，并说明上游调用者和下游被调用者的角色与交互方式。",
+      "section": "架构",
+      "href": "/docs/architecture/system-context/",
+      "content": "系统上下文 摘要 你将了解 范围 系统边界 外部依赖 AI API 提供商 Docker 守护进程 文件系统 即时通讯平台 MCP 服务器 上游调用者 CLI 用户 OHMO Gateway cron 调度器（定时触发） 外部 MCP 客户端 下游被调用者 工具执行 MCP 工具 Swarm Worker 关键模块在上下文中的位置 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/architecture-overview",
+      "title": "Architecture Overview",
+      "description": "\nOpenHarness 是一个开源的 Python Agent Harness —— 围绕 LLM 构建功能性编码 Agent 的基础设施。它兼容 Claude Code 规范，提供工具使用、技能、记忆和多 Agent 协调能力。",
+      "section": "dev",
+      "href": "/docs/dev/architecture-overview/",
+      "content": "架构总览 项目简介 系统架构 核心模块 1. Engine（引擎） 2. Tools（工具） 3. Skills（技能） 4. Plugins（插件） 5. Permissions（权限） 6. Hooks（钩子） 7. Commands（命令） 8. MCP（Model Context Protocol） 9. Memory（记忆） 10. Tasks（任务） 11. Coordinator（协调） 12. Prompts（提示词） 13. Config（配置） 数据流 Agent 执行流程 工具执行流程 关键设计 1. 流式优先 2. 异步架构 3. 扩展性 4. 安全性 5. 可配置性 与 Claude Code 的兼容性 扩展点 添加新工具 添加新技能 添加新插件 部署架构 进一步阅读 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/agent-loop",
+      "title": "Agent Loop",
+      "description": "Agent 循环是 OpenHarness 的核心引擎，负责驱动整个 Agent 的运行流程。它实现了一个基于 API 流式响应的异步循环机制，在用户提示和模型响应之间迭代执行工具调用。",
+      "section": "dev",
+      "href": "/docs/dev/core/agent-loop/",
+      "content": "Agent 循环引擎 (Agent Loop Engine) 概述 核心架构 核心组件 1. QueryEngine (engine/queryengine.py) 2. QueryContext (engine/query.py) 3. 核心循环 runquery() 流事件系统 (streamevents.py) 文本增量 工具执行开始 工具执行完成 错误事件 工具执行流程 (executetoolcall) 并发工具执行 自动压缩 (Auto-Compact) 位于 services/compact/ 重试机制 扩展点 1. 自定义权限提示 2. 自定义用户提示 3. Pre/Post Tool Hook 集成 与其他模块的交互 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/commands",
+      "title": "Commands",
+      "description": "OpenHarness 提供 54+ 内置斜杠命令（slash commands），用于控制会话、管理任务、查询状态等。",
+      "section": "dev",
+      "href": "/docs/dev/core/commands/",
+      "content": "命令系统 架构总览 核心类型 SlashCommand CommandHandler CommandResult CommandContext 命令注册表 内置命令 会话管理 状态和信息 工具和插件 记忆和文件 Git 操作 配置管理 任务管理 工具快捷 命令处理流程 自定义命令 1. 定义命令处理器 2. 注册命令 3. 插件贡献命令 插件 commands/my-cmd.md 特殊命令处理 继续工具循环 /continue 命令 提交提示给模型 插件命令 刷新运行时 修改设置后刷新 命令执行上下文 插件命令 扩展点 1. 命令别名 在注册表中添加别名 2. 动态命令 3. 命令拦截 与其他模块的关系 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/config",
+      "title": "Config",
+      "description": "本文档介绍 OpenHarness 的配置系统，包括多层配置、Schema 和迁移。",
+      "section": "dev",
+      "href": "/docs/dev/core/config/",
+      "content": "配置系统 概述 架构概览 配置加载优先级 核心设置 (Settings) 主配置模型 权限设置 (PermissionSettings) 记忆设置 (MemorySettings) MCP 服务器配置 (McpServerConfig) 提供者配置 (ProviderProfile) 内置提供者 配置加载 loadsettings 环境变量覆盖 CLI 参数覆盖 配置保存 savesettings 路径管理 配置文件路径 配置文件格式 settings.json 示例 配置迁移 迁移检查 模型解析 resolvemodelsetting 与其他模块的关系 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/coordinator",
+      "title": "Coordinator",
+      "description": "本文档介绍 OpenHarness 的多 Agent 协调系统，包括 Subagent 委派和团队协作。",
+      "section": "dev",
+      "href": "/docs/dev/core/coordinator/",
+      "content": "多 Agent 协调系统 概述 架构概览 协调者模式 (CoordinatorMode) 模式检测 协调者工具 Worker 工具集 TeamRegistry Agent 定义 AgentDefinition Agent 协作工具 agent 工具 sendmessage 工具 taskstop 工具 协调者系统提示 1. Your Role 2. Your Tools 3. Workers 任务通知 (TaskNotification) 协作流程 1. 启动 Worker 2. Worker 执行 3. 继续 Worker 4. 停止 Worker Worker 类型 worker simple worker 并行执行 并行研究多个问题 团队创建 与其他模块的关系 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/hooks",
+      "title": "Hooks",
+      "description": "OpenHarness Hook 系统提供生命周期事件拦截能力，允许在工具执行前后、执行命令前后等关键节点运行自定义逻辑。Hook 可用于安全审计、自动化验证、日志记录等场景。",
+      "section": "dev",
+      "href": "/docs/dev/core/hooks/",
+      "content": "生命周期钩子 (Hooks System) 概述 核心架构 HookEvent 事件类型 Hook 类型定义 CommandHookDefinition HttpHookDefinition PromptHookDefinition AgentHookDefinition HookRegistry HookExecutor Hook 执行流程 PreToolUse Hook 示例 payload = { \"toolname\": \"filewrite\", \"toolinput\": {\"path\": \"test.py\", \"content\": \"...\"}, \"event\": \"pretooluse\" } Hook 结果 HookResult AggregatedHookResult 参数注入 Command Hook $ARGUMENTS 被替换为 {\"toolname\": \"filewrite\", ...} Prompt Hook Matcher 过滤 Prompt Hook 验证协议 JSON 解析 配置格式 hooks.json 格式 工具执行中的集成 Pre-Hook 工具执行... Post-Hook 扩展点 1. 自定义 Hook 类型 2. Hook 排序 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/mcp",
+      "title": "Mcp",
+      "description": "OpenHarness 内置 MCP（Model Context Protocol）客户端，支持连接 stdio 和 HTTP 两种传输方式的 MCP 服务器，并将服务器提供的工具和资源暴露给 Agent。",
+      "section": "dev",
+      "href": "/docs/dev/core/mcp/",
+      "content": "MCP 客户端 架构总览 核心类型 McpClientManager src/openharness/mcp/client.py 服务器配置类型 src/openharness/mcp/types.py 连接状态 连接流程 Stdio 连接 HTTP 连接 会话注册 MCP 工具适配 tools/mcptool.py MCP 资源读取 tools/mcpresourcetool.py 配置格式 settings.json .mcp.json（插件格式） 环境变量认证 /mcp 命令设置认证 工具和资源列表 列出所有 MCP 工具 通过 /mcp 命令查看 列出所有资源 工具: /tools | 资源: ReadMcpResource MCP 工具使用示例 重连管理 错误处理 calltool 时 扩展点 1. 自定义 MCP 工具前缀 2. MCP 工具过滤 3. 工具结果后处理 与其他模块的关系 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/memory",
+      "title": "Memory",
+      "description": "本文档介绍 OpenHarness 的持久化记忆系统，包括上下文压缩和跨会话知识存储。",
+      "section": "dev",
+      "href": "/docs/dev/core/memory/",
+      "content": "记忆系统 概述 架构概览 核心概念 记忆文件结构 记忆入口 (MEMORY.md) Memory 项目概述 重要上下文 已知问题 待办 记忆加载 加载记忆提示 记忆目录解析 上下文压缩 自动压缩流程 Microcompact Full Compact CLAUDE.md 集成 自动发现 注入 CLAUDE.md 内容 持久化记忆 记忆写入 记忆结构建议 记忆设置 MemorySettings 与其他模块的关系 使用建议 1. 保持 MEMORY.md 简洁 2. 使用主题文件 3. 定期清理 4. 关键决策记录 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/permissions",
+      "title": "Permissions",
+      "description": "OpenHarness 权限系统提供多层次的安全控制，确保 Agent 操作符合用户意图。系统支持权限模式、路径规则、命令模式匹配等多维度控制，并与工具执行流程深度集成。",
+      "section": "dev",
+      "href": "/docs/dev/core/permissions/",
+      "content": "权限系统 (Permissions System) 概述 权限模式 (permissions/modes.py) 权限模式对比 PermissionChecker (permissions/checker.py) PermissionDecision 敏感路径保护 权限检查流程 路径规则 (PathRule) 配置示例 PermissionSettings 与工具执行的集成 1. 路径解析 2. 权限评估 3. 处理决策 命令模式匹配 deniedcommands 示例 权限模式切换 设计决策 1. 敏感路径不可覆盖 2. 显式优于隐式 3. 路径规范化 扩展点 1. 添加新的权限模式 2. 自定义敏感路径 在 PermissionChecker.init 中添加 3. 自定义命令匹配器 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/plugins",
+      "title": "Plugins",
+      "description": "OpenHarness 插件系统提供扩展机制，允许通过插件添加自定义命令、Hook、Agent 和 MCP 服务器。插件格式与 claude-code/plugins 兼容。",
+      "section": "dev",
+      "href": "/docs/dev/core/plugins/",
+      "content": "插件系统 架构总览 核心类型 PluginManifest src/openharness/plugins/schemas.py LoadedPlugin src/openharness/plugins/types.py PluginCommandDefinition 插件发现与加载 发现路径 用户插件目录 项目插件目录 额外指定的根目录 加载流程 插件目录结构 plugin.json 格式 commands 字段 生命周期 1. 发现阶段 2. 加载阶段 3. 注册阶段 4. 启用/禁用 启用插件 禁用插件 插件贡献 贡献命令 Commit Command Steps 贡献 Agent Code Review Agent 贡献 Hook 贡献 MCP 服务器 管理命令 列出插件 启用插件 禁用插件 安装插件 卸载插件 重新加载插件 扩展点 1. 自定义插件加载 2. 插件发现 与其他模块的关系 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/prompts",
+      "title": "Prompts",
+      "description": "本文档介绍 OpenHarness 的 Prompt 构建系统，包括系统提示词组装和上下文注入。",
+      "section": "dev",
+      "href": "/docs/dev/core/prompts/",
+      "content": "Prompt 构建系统 概述 架构概览 核心组件 系统提示词 (SystemPrompt) System Doing tasks Tone and style 环境信息 (EnvironmentInfo) 获取环境信息 Prompt 构建流程 基础构建 环境信息格式化 CLAUDE.md 集成 自动发现 加载 CLAUDE.md 注入 CLAUDE.md 上下文组装 完整上下文 动态 Prompt 追加系统提示 条件注入 提示词优化 Token 计数 自动截断 与其他模块的关系 配置选项 Settings 中的 Prompt 配置 CLI 参数 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/skills",
+      "title": "Skills",
+      "description": "技能（Skills）是 OpenHarness 的知识加载机制，支持按需从 Markdown 文件加载领域知识。与工具不同，技能在模型需要时动态加载，为 Agent 提供专业领域的指导。",
+      "section": "dev",
+      "href": "/docs/dev/core/skills/",
+      "content": "技能系统 架构总览 核心类型 SkillDefinition src/openharness/skills/types.py SkillRegistry src/openharness/skills/registry.py 技能加载流程 技能文件格式 Commit Skill When to use Workflow frontmatter 字段 布局规范 布局 1: 直接技能 布局 2: 目录技能 技能解析 技能使用方式 /skills 命令 Skill 工具 加载指定的技能内容 内置技能 插件技能 兼容性 扩展点 1. 自定义技能加载源 添加新的技能目录 2. 技能注册时机 与其他模块的关系 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/swarm",
+      "title": "Swarm",
+      "description": "Swarm 是 OpenHarness 的多智能体协调子系统，负责 teammate 的生成、生命周期管理、进程间通信和权限同步。它将一个复杂任务分解为多个专业 Agent（teammate），通过 Mailbox 机制进行异步消息传递。",
+      "section": "dev",
+      "href": "/docs/dev/core/swarm/",
+      "content": "Swarm 多智能体协调系统 概述 架构总览 核心类型 BackendType TeammateIdentity TeammateSpawnConfig SpawnResult 执行后端 SubprocessBackend（默认） TmuxBackend 检测是否在 tmux 中运行 创建 teammate pane ITerm2Backend InProcessBackend 后端注册与检测 BackendRegistry 自动检测顺序 Mailbox 消息系统 TeammateMailbox MailboxMessage 消息类型工厂函数 权限同步 生命周期管理 teamlifecycle.py lockfile.py 文件结构 与其他模块的关系 扩展点 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/tasks",
+      "title": "Tasks",
+      "description": "\n任务系统管理 Agent 的后台执行任务，包括 Shell 命令任务和本地 Agent 任务。",
+      "section": "dev",
+      "href": "/docs/dev/core/tasks/",
+      "content": "任务系统 概述 架构概览 核心概念 TaskRecord TaskType TaskStatus 任务管理器 (BackgroundTaskManager) 创建 Shell 任务 创建 Agent 任务 任务操作 任务生命周期 任务监控 输出管理 输出文件 异步输出复制 读取输出 任务输入 向任务写入数据 任务停止 单例模式 任务 ID 格式 任务工具 与其他模块的关系 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/core/tools",
+      "title": "Tools",
+      "description": "OpenHarness 内置 43+ 工具，覆盖文件 I/O、Shell 命令、代码搜索、Web 访问、MCP 集成等核心能力。每个工具都通过 Pydantic 模型进行输入验证，并与权限系统和 Hook 系统深度集成。",
+      "section": "dev",
+      "href": "/docs/dev/core/tools/",
+      "content": "工具系统 (Tools System) 概述 核心抽象 (tools/base.py) BaseTool ToolExecutionContext ToolResult ToolRegistry 内置工具一览 文件操作类 搜索类 Agent/团队类 任务类 模式切换类 定时任务类 知识类 MCP 类 其他 工具注册流程 权限检查集成 Hook 集成 Pre-Hook 工具执行... Post-Hook 自定义工具开发 基本结构 注册自定义工具 创建默认注册表 注册自定义工具 生成 API Schema 返回: { \"name\": \"mytool\", \"description\": \"执行自定义搜索\", \"inputschema\": {...}  # Pydantic model JSON schema } 工具输入规范化 扩展点 1. 添加新类别工具 2. MCP 工具适配 3. 动态工具注册 根据条件注册 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/debug-mode",
+      "title": "Debug Mode",
+      "description": "本文档介绍如何调试 OpenHarness 的 Python 后端。",
+      "section": "dev",
+      "href": "/docs/dev/debug-mode/",
+      "content": "调试模式 核心问题 详细步骤 步骤 1：安装 debugpy 步骤 2：配置 PyCharm Remote Debug 步骤 3：启动 TUI + 后端（带调试端口） 步骤 4：等待后端日志 步骤 5：PyCharm Attach 步骤 6：设置断点调试 快速验证 启动后端 看到 \"debugpy server started\" 日志后，在另一个终端验证端口： 参数说明 常见问题 Q: 端口被占用 Q: \"Raw mode is not supported\" Q: PyCharm Attach 后断点没生效 Q: TUI 无法连接后端 Q: lsof -i :5678 显示端口不监听 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/design-principles",
+      "title": "Design Principles",
+      "description": "OpenHarness 相信：LLM 本身已经具备智能，Harness 的职责是给它提供：\n- 手（工具执行）\n- 眼（文件系统、Web 访问）\n- 记忆（跨会话上下文）\n- 边界（权限和安全）",
+      "section": "dev",
+      "href": "/docs/dev/design-principles/",
+      "content": "设计原则 核心理念 设计原则 1. 简洁优先 (Simplicity First) 过度抽象 简洁直接 2. 模型中心 (Model-Centric) 3. 工具即接口 (Tools as Interface) 4. 扩展优于修改 (Extension Over Modification) 通过注册扩展，而非修改 通过配置扩展 5. 安全内置 (Security by Design) 6. 异步优先 (Async-First) 并行执行多个工具 7. 协议兼容 (Protocol Compatibility) 8. 配置分层 (Layered Configuration) 9. 可观测性 (Observability) 10. 渐进复杂性 (Progressive Complexity) 架构决策记录 AD-001: 使用 Pydantic 进行验证 AD-002: 异步流式架构 AD-003: Markdown 技能格式 AD-004: 插件命名空间 AD-005: 单例任务管理器 反模式 避免: 工具做决策 反模式 正确: 权限系统处理 避免: 过早抽象 反模式 正确: 按需添加 避免: 硬编码工具列表 反模式 正确: 基于属性 最佳实践 1. 工具开发 1. 明确输入模型 2. 描述清晰 3. 正确标识只读 4. 错误处理 2. 插件开发 3. 技能编写 My Skill When to use Workflow 总结 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/infrastructure/api-clients",
+      "title": "Api Clients",
+      "description": "本文档介绍 OpenHarness 的 API 客户端架构，涵盖对 Anthropic、OpenAI-Compatible、GitHub Copilot 和 OpenAI Codex 等 Provider 的支持。",
+      "section": "dev",
+      "href": "/docs/dev/infrastructure/api-clients/",
+      "content": "API 客户端 架构概览 核心类型 ApiMessageRequest 流式事件 AnthropicApiClient 重试逻辑 OAuth 支持 OpenAICompatibleClient 消息格式转换 Reasoning Content CopilotClient CodexApiClient Provider 检测 错误类型 扩展指南 添加新的 API Provider Provider 注册表 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/infrastructure/auth",
+      "title": "Auth",
+      "description": "本文档介绍 OpenHarness 的认证架构，包括 Auth Manager、认证 Flow 和凭证存储。",
+      "section": "dev",
+      "href": "/docs/dev/infrastructure/auth/",
+      "content": "认证系统 架构概览 AuthManager 核心职责 已知 Providers Auth Sources Profile 与 Provider 映射 认证 Flow ApiKeyFlow DeviceCodeFlow BrowserFlow 凭证存储 文件存储（默认） Keyring 存储（可选） 外部认证绑定 轻量级混淆 Auth 状态检测 Provider 能力检测 扩展指南 添加新的 Provider 添加新的 Auth Source 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/infrastructure/bridge",
+      "title": "Bridge",
+      "description": "本文档介绍 OpenHarness 的 Bridge 系统，用于管理子进程会话和桥接消息。",
+      "section": "dev",
+      "href": "/docs/dev/infrastructure/bridge/",
+      "content": "Bridge 系统 架构概览 BridgeSessionManager 核心方法 会话记录 输出捕获 SessionHandle 会话启动 终止策略 Bridge 类型 与 TUI 的集成 单例模式 扩展指南 添加新的会话类型 添加输出后端 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/infrastructure/channels",
+      "title": "Channels",
+      "description": "本文档介绍 OpenHarness 的消息渠道架构，支持 Telegram、Slack、Discord、Feishu 等 IM 平台。",
+      "section": "dev",
+      "href": "/docs/dev/infrastructure/channels/",
+      "content": "消息渠道 架构概览 MessageBus 消息类型 InboundMessage OutboundMessage BaseChannel 媒体目录解析 ChannelManager 支持的渠道 生命周期 出站分发 allowfrom 验证 ChannelBridge 会话路由 配置结构 扩展指南 添加新的渠道 渠道特定注意事项 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/ohmo/ohmo-architecture",
+      "title": "Ohmo Architecture",
+      "description": "ohmo 是 OpenHarness 的个人 Agent 应用，基于 OpenHarness 构建，提供 workspace、gateway、channels 三个子系统的整合。",
+      "section": "dev",
+      "href": "/docs/dev/ohmo/ohmo-architecture/",
+      "content": "ohmo 整体架构 架构概览 核心设计 Workspace 目录结构 Workspace 模板文件 三子系统关系 Workspace 初始化 Prompt 构建 Session 持久化 CLI 命令 与 OpenHarness 的关系 扩展指南 自定义人设 添加个人技能 添加个人插件 修改 Gateway 配置 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/ohmo/ohmo-channels",
+      "title": "Ohmo Channels",
+      "description": "ohmo 通过 OpenHarness 的 Channels 系统接入多个 IM 平台，所有渠道共享相同的 MessageBus 架构。",
+      "section": "dev",
+      "href": "/docs/dev/ohmo/ohmo-channels/",
+      "content": "ohmo Channels 架构关系 Gateway 渠道配置 Bootstrap 流程 BOOTSTRAP.md - First Contact Identity 配置 IDENTITY.md - Your Shape 渠道与 Memory 会话与 Identity 绑定 渠道安全 进度消息发送 gateway.json 扩展指南 自定义渠道配置 添加新渠道到 ohmo 渠道消息预处理 渠道支持矩阵 故障排查 渠道无法启动 消息无响应 Token 过期 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/ohmo/ohmo-gateway",
+      "title": "Ohmo Gateway",
+      "description": "Gateway 是 ohmo 的消息网关服务，负责接收来自各渠道的消息、调度 Runtime 处理、返回响应。",
+      "section": "dev",
+      "href": "/docs/dev/ohmo/ohmo-gateway/",
+      "content": "Gateway Server 架构概览 OhmoGatewayService 前台运行 进程管理 状态文件 OhmoSessionRuntimePool 流式消息处理 渠道进度格式化 中文渠道 英文渠道 检测内容语言（CJK vs Latin） OhmoGatewayBridge Session 路由 GatewayConfig 配置加载 启动流程 扩展指南 添加新路由策略 添加进度事件类型 修改渠道配置格式 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/team-allocation",
+      "title": "Team Allocation",
+      "description": "| 指标 | 数据 |\n|------|------|\n| 总代码量 | 38,800 LOC (Python + TypeScript) |\n| Python 文件 | 205 个 .py 文件 |\n| 工具实现 | 45 个 |\n| 聊",
+      "section": "dev",
+      "href": "/docs/dev/team-allocation/",
+      "content": "OpenHarness 3人 + CC 开发分工 系统规模 人员分配 详细模块归属 P0 - 核心引擎 (开发者 A) P1 - 功能集成 (开发者 B) P2 - 前端 & 编排 (开发者 C) 模块依赖关系 开发阶段 Phase 1: 基础设施 (Week 1-4) Phase 2: 功能开发 (Week 5-12) Phase 3: 功能开发续 & 集成 (Week 13-20) Phase 4: 扩展功能 & 收尾 (Week 21-26) 关键依赖提醒 P0 最关键 每日对齐 提前准备 P1 模块优先级 P1 任务简介（简历级别） 1. 任务层 2. 上下文 3. 编排 4. 集成 最小可行核心 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "dev/ui/tui",
+      "title": "Tui",
+      "description": "OpenHarness 的终端用户界面（Terminal UI）由 React + Ink 构建，运行在 Node.js 环境中，通过 JSON 行协议与 Python 后端通信。",
+      "section": "dev",
+      "href": "/docs/dev/ui/tui/",
+      "content": "React TUI 架构概览 技术栈 App 组件 状态管理 布局结构 后端通信协议 协议格式 BackendEvent 类型 FrontendRequest 类型 流式文本处理 组件详解 ConversationView PromptInput CommandPicker SelectModal ModalHost 主题系统 入口点 扩展指南 添加新组件 添加新命令 添加新事件类型 关键文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/auth",
+      "title": "Auth",
+      "description": "认证系统是 OpenHarness 与外部 AI 供应商建立信任通道的核心子系统。它通过统一的 AuthFlow 抽象支持多种认证方式（API Key、设备码、浏览器跳转），由 AuthManager 管理多 Provider 的凭证状态，",
+      "section": "模块",
+      "href": "/docs/modules/auth/",
+      "content": "认证系统（Authentication） 摘要 你将了解 范围 1. 认证系统的目的与架构 2. AuthFlow 体系 2.1 ApiKeyFlow（API Key 认证） src/openharness/auth/flows.py -> ApiKeyFlow 2.2 DeviceCodeFlow（GitHub OAuth 设备码） src/openharness/auth/flows.py -> DeviceCodeFlow 2.3 BrowserFlow（浏览器跳转认证） src/openharness/auth/flows.py -> BrowserFlow 3. 凭证存储 3.1 双层存储策略 src/openharness/auth/storage.py -> storecredential 3.2 Keyring 可用性探测 src/openharness/auth/storage.py -> keyringavailable 3.3 混淆 helpers（注意：非加密） src/openharness/auth/storage.py -> obfuscate / deobfuscate 3.4 ExternalAuthBinding（外部凭证绑定） src/openharness/auth/storage.py -> ExternalAuthBinding 4. 支持的认证源 src/openharness/auth/manager.py -> AUTHSOURCES 5. AuthManager 的 Profile 管理 5.1 ProviderProfile 数据结构 5.2 Profile 管理操作 src/openharness/auth/manager.py -> AuthManager 5.3 凭证切换 src/openharness/auth/manager.py -> AuthManager.storecredential 6. 设计取舍 取舍 1：文件存储作为 Keyring 降级方案 取舍 2：Profile 与 AuthSource 的双层切换 7. 凭证安全存储考量 8. 风险 9. 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/bridge",
+      "title": "Bridge",
+      "description": "BridgeSessionManager 管理 OpenHarness 的 bridge-run 子会话模式。当用户执行 /bridge 或 bridge-run 命令时，主会话在子进程中启动一个独立的 OpenHarness 实例，子会话",
+      "section": "模块",
+      "href": "/docs/modules/bridge/",
+      "content": "Bridge 系统模块（Bridge） 摘要 你将了解 范围 BridgeSessionManager 角色 完整生命周期 spawn() readoutput() stop() 主会话与子会话的消息传递 Bridge vs Swarm 设计取舍 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/engine",
+      "title": "Engine",
+      "description": "QueryEngine 是 OpenHarness 的对话推理引擎，负责管理对话历史、驱动工具感知循环、处理流式事件和追踪使用成本。它通过 runquery() 协程实现 turn-by-turn 的 Agent 推理，并在每次模型调用前检",
+      "section": "模块",
+      "href": "/docs/modules/engine/",
+      "content": "Engine 模块（Engine） 摘要 你将了解 范围 QueryEngine 核心职责 submitmessage() vs continuepending() Query Loop 内部机制 消息模型 ConversationMessage ContentBlock 类型 StreamEvent 类型 CostTracker 异常处理 Prompt 过长的反应式压缩 MaxTurnsExceeded 设计取舍 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/hooks",
+      "title": "Hooks",
+      "description": "钩子系统是 OpenHarness 的生命周期事件注入框架，允许外部脚本、HTTP 服务或 AI 模型在预定义的系统事件点（会话开始/结束、工具使用前后、内存压缩前后）执行自定义逻辑。通过 HookRegistry 集中注册、HookExe",
+      "section": "模块",
+      "href": "/docs/modules/hooks/",
+      "content": "钩子系统（Hooks） 摘要 你将了解 范围 1. 钩子系统的目的 2. 钩子类型 2.1 CommandHookDefinition（命令钩子） src/openharness/hooks/schemas.py -> CommandHookDefinition 2.2 HttpHookDefinition（HTTP 钩子） src/openharness/hooks/schemas.py -> HttpHookDefinition 2.3 PromptHookDefinition（提示词钩子） src/openharness/hooks/schemas.py -> PromptHookDefinition 2.4 AgentHookDefinition（Agent 钩子） src/openharness/hooks/schemas.py -> AgentHookDefinition 3. 生命周期事件 4. HookExecutor 的执行模型 src/openharness/hooks/executor.py -> HookExecutor.execute 5. 钩子与 Settings 的集成 src/openharness/hooks/loader.py -> loadhookregistry 6. 钩子配置格式 6.1 平面格式（Settings / 插件 hooks.json） 6.2 结构化格式（hooks/hooks.json with hooks 数组） 7. 设计取舍 取舍 1：JSON Schema 驱动的钩子验证 取舍 2：阻塞式与容错式的混合设计 8. 风险 9. 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/ohmo",
+      "title": "Ohmo",
+      "description": "OHMO（Oh My Harness）是一个消息渠道 Gateway 服务，将 OpenHarness Agent 的对话能力通过 Telegram、Slack、Discord、飞书等即时通讯平台暴露给用户。它以独立守护进程运行，通过 Me",
+      "section": "模块",
+      "href": "/docs/modules/ohmo/",
+      "content": "OHMO 子系统模块（OHMO） 摘要 你将了解 范围 OHMO 与 OpenHarness 的关系 Gateway 架构 OhmoGatewayService OhmoSessionRuntimePool Channel 桥接 MessageBus 模型 Inbound: Channel → MessageBus Outbound: Bridge → MessageBus → Channel Channel 适配器 会话管理与会话快照 中文/英文进度格式化 设计取舍 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/plugins",
+      "title": "Plugins",
+      "description": "插件系统是 OpenHarness 的核心扩展机制，允许用户通过自包含的插件包向系统注入自定义技能（Skills）、命令（Commands）、Agent 定义（Agents）、钩子（Hooks）以及 MCP 服务器配置。插件遵循固定的目录结",
+      "section": "模块",
+      "href": "/docs/modules/plugins/",
+      "content": "插件系统（Plugins） 摘要 你将了解 范围 1. 插件系统的目的 2. 插件结构 2.1 plugin.json 清单文件 3. 插件发现路径 src/openharness/plugins/loader.py -> discoverpluginpaths 4. 插件加载流程 5. 插件组件加载 5.1 loadpluginskills() src/openharness/plugins/loader.py -> loadpluginskills 5.2 loadplugincommands() src/openharness/plugins/loader.py -> loadplugincommands 5.3 loadpluginagents() src/openharness/plugins/loader.py -> loadpluginagents 5.4 loadpluginhooks() src/openharness/plugins/loader.py -> loadpluginhooks 5.5 loadpluginmcp() src/openharness/plugins/loader.py -> loadpluginmcp 6. LoadedPlugin 数据结构 src/openharness/plugins/types.py -> LoadedPlugin 7. 插件安装与卸载 7.1 安装 src/openharness/plugins/installer.py -> installpluginfrompath 7.2 卸载 src/openharness/plugins/installer.py -> uninstallplugin 8. 内置插件 vs 用户插件 9. 设计取舍 取舍 1：文件系统驱动的插件发现 取舍 2：Markdown 作为配置语言 10. 风险 11. 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/state",
+      "title": "State",
+      "description": "AppStateStore 是 OpenHarness 应用层的核心状态容器，采用可观察（Observable）单例模式管理 UI 状态、工作区配置和会话上下文。它通过发布-订阅机制驱动 TUI 刷新、权限模式切换、主题变更等跨组件协调，并",
+      "section": "模块",
+      "href": "/docs/modules/state/",
+      "content": "状态管理模块（State） 摘要 你将了解 范围 核心数据结构：AppState AppStateStore 设计 Swarm 状态同步机制 ContextVar 隔离 状态与会话持久化 设计取舍 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/swarm",
+      "title": "Swarm",
+      "description": "Swarm 是 OpenHarness 的多 Agent 协作框架，通过 TeammateExecutor 协议抽象出四种执行后端（In-Process、Subprocess、tmux、iTerm2），实现 Leader-Worker 架构",
+      "section": "模块",
+      "href": "/docs/modules/swarm/",
+      "content": "Swarm 模块（Swarm） 摘要 你将了解 范围 架构总览 Backend 类型详解 InProcessSwarm（进程内执行） SubprocessSwarmBackend（子进程执行） TeammateExecutor 协议 Mailbox 机制 Teammate 生命周期 Pane 管理（tmux / iTerm2） SwarmRegistry 权限同步（permissionsync） 设计取舍 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/tasks",
+      "title": "Tasks",
+      "description": "BackgroundTaskManager 是 OpenHarness 的后台任务执行引擎，负责创建、监控和停止 shell 命令与 Agent 子进程。它管理 localbash、localagent、remoteagent 和 inpr",
+      "section": "模块",
+      "href": "/docs/modules/tasks/",
+      "content": "任务管理模块（Tasks） 摘要 你将了解 范围 BackgroundTaskManager 角色 任务类型 任务生命周期 createshelltask vs createagenttask 任务 I/O 任务停止：优雅 vs 强制 与 Swarm / Coordinator 的集成 设计取舍 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "modules/tools",
+      "title": "Tools",
+      "description": "工具系统是 OpenHarness 与外部世界交互的核心通道。它通过统一的 BaseTool 抽象层将所有可调用能力（文件操作、Shell 执行、Web 访问、Agent 调度等）标准化，使 Agent 能够以结构化方式完成任务。工具通过 ",
+      "section": "模块",
+      "href": "/docs/modules/tools/",
+      "content": "工具系统（Tools） 摘要 你将了解 范围 1. 架构总览 2. 核心接口 2.1 BaseTool 抽象类 src/openharness/tools/base.py -> BaseTool.execute 2.2 ToolResult 模型 2.3 ToolExecutionContext 3. 工具分类 4. 核心工具详解 4.1 BashTool（Shell 执行） src/openharness/tools/bashtool.py -> BashTool.execute 4.2 FileReadTool（文件读取） 4.3 FileWriteTool（文件写入） 4.4 WebFetchTool（网页获取） 4.5 AgentTool（Agent 调度） src/openharness/tools/agenttool.py -> AgentTool.execute 4.6 TaskCreateTool（任务创建） 4.7 SkillTool（Skill 读取） 4.8 McpToolAdapter（MCP 工具适配器） 5. ToolRegistry 的工具发现与注册 src/openharness/tools/base.py -> ToolRegistry.toapischema src/openharness/tools/base.py -> BaseTool.toapischema 6. 工具权限系统 7. 工具 Schema 生成 8. 设计取舍 取舍 1：Pydantic 模型作为 Schema 源 取舍 2：异步 execute() 方法 9. 风险 10. 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "overview/architecture-at-a-glance",
+      "title": "Architecture At A Glance",
+      "description": "OpenHarness 是一个以 AI 模型为核心驱动力的自动化编码助手运行时，其架构遵循经典的\"输入 → 推理 → 执行 → 反馈\"循环，但通过多智能体编排层（Coordinator/Swarm）和多通道抽象层（Channels/OHMO",
+      "section": "总览",
+      "href": "/docs/overview/architecture-at-a-glance/",
+      "content": "架构总览 摘要 你将了解 范围 五层架构 第1层：CLI / REPL 第2层：Engine / Query 第3层：Tools / MCP 第4层：Coordinator / Swarm 第5层：Channels / OHMO 核心模块职责 模块依赖关系 设计取舍 取舍 1：子进程 vs. 进程内执行——选择进程隔离以换取健壮性 子进程使用 python -m openharness --task-worker 启动 取舍 2：MCP 协议作为工具扩展的统一抽象 stdio 传输通过 AsyncExitStack 管理子进程生命周期 取舍 3：Coordinator 模式中的 XML 通知信封 vs. 结构化 RPC 取舍 4：多 Provider 抽象 vs. 单一 Provider 硬编码 取舍 5：Channels 多协议适配 vs. 单一 WebSocket 协议 风险 风险 1：Anthropic API 依赖——单点供应商风险 风险 2：MCP stdio 传输的冷启动延迟 风险 3：子进程孤儿化——Worker 在主进程异常退出时无法被回收 风险 4：Coordinator 模式的 XML 解析脆弱性 风险 5：Plugin 动态代码执行——任意代码注入 风险 6：Sandbox 逃逸——文件系统权限边界失效 风险 7：Git Worktree 冲突——多个 Worker 并发修改同一分支 风险 8：Cron Scheduler 进程持久化——后台任务占用资源 证据索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "overview/overview-summary",
+      "title": "Overview Summary",
+      "description": "> 本页提供 OpenHarness 项目的整体概述，适合首次了解或快速查阅核心信息。",
+      "section": "总览",
+      "href": "/docs/overview/overview-summary/",
+      "content": "OpenHarness 总览 系统一句话描述 核心价值主张 架构亮点 五层架构 核心特性 关键设计决策摘要 决策 1：工具优先而非对话优先 决策 2：Provider 作为工作流而非硬编码 决策 3：内存持久化通过文件系统而非数据库 决策 4：Swarm Teammate 优先子进程后端 决策 5：权限采用黑名单优先模式 风险摘要 技术栈 语言与运行时 核心依赖 前端与界面 外部集成 版本与演进信息 当前版本 v0.1.x 关键里程碑 架构演进方向（待规划） 兼容性 相关链接 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "overview/reading-guide",
+      "title": "Reading Guide",
+      "description": "OpenHarness 文档分为 L1（概览）、L2（参考）、L3（架构详细）三层。本页为不同角色提供个性化的阅读路径指引，帮助你根据需求找到最相关的文档。",
+      "section": "总览",
+      "href": "/docs/overview/reading-guide/",
+      "content": "阅读指南 摘要 你将了解 范围 文档层级概览 按角色的阅读路径 终端用户 开发者 贡献者 文档依赖关系图 核心依赖链 L1/L2/L3 阅读建议 L1（概览层） L2（参考层） L3（架构详细层） 关键文档推荐阅读顺序 顺序一：完整新人路径（按顺序阅读） 顺序二：开发者快速上手（按顺序阅读） 顺序三：核心贡献者路径（按顺序阅读） 顺序四：渠道集成路径（按顺序阅读） 各角色关注重点速查 终端用户速查表 开发者速查表 贡献者速查表 文档版本同步 反馈与改进 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "overview/workflow-map",
+      "title": "Workflow Map",
+      "description": "本文档通过 Mermaid 图表与详细读图说明，呈现 OpenHarness 的关键工作流体系。工作流地图从业务语义出发，展示核心查询流、工具执行流、Agent 协调流、MCP 集成流、沙箱执行流、认证流与插件加载流之间的关系与触发链条。",
+      "section": "总览",
+      "href": "/docs/overview/workflow-map/",
+      "content": "工作流地图 摘要 你将了解 范围 关键工作流总览 工作流详细定义 1. 核心查询流（Query Workflow） 2. 工具执行流（Tool Execution Workflow） 3. Agent 协调流（Coordinator Workflow） 4. MCP 集成流（MCP Integration Workflow） 5. 沙箱执行流（Sandbox Execution Workflow） 6. 认证流（Authentication Workflow） 7. 插件加载流（Plugin Loading Workflow） 子工作流图 子图 1：工具执行流的内部分支 子图 2：自动压缩流 子图 3：MCP 连接建立流 工作流关系矩阵 工作流之间关系说明 父子关系 横向依赖 并行关系 证据索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "reference/cli",
+      "title": "Cli",
+      "description": "OpenHarness 通过 oh（或 openharness）命令提供完整的命令行接口。本页详细列出所有全局参数、子命令及其选项。",
+      "section": "参考",
+      "href": "/docs/reference/cli/",
+      "content": "CLI 参考 摘要 你将了解 范围 全局参数 会话控制（Session） 模型与努力级别（Model & Effort） 输出控制（Output） 权限控制（Permissions） 系统与上下文（System & Context） 高级选项（Advanced） 子命令：oh（默认 REPL） 子命令：oh mcp oh mcp list oh mcp add <name> <configjson> oh mcp remove <name> 子命令：oh plugin oh plugin list oh plugin install <source> oh plugin uninstall <name> 子命令：oh auth oh auth login [provider] oh auth status oh auth logout [provider] oh auth switch <providerorprofile> oh auth copilot-login oh auth codex-login oh auth claude-login oh auth copilot-logout 子命令：oh provider oh provider list oh provider use <name> oh provider add <name> oh provider edit <name> oh provider remove <name> 子命令：oh cron oh cron start oh cron stop oh cron status oh cron list oh cron toggle <name> <enabled> oh cron history [--limit N] [name] oh cron logs [--lines N] 子命令：oh setup oh setup [profile] 配置覆盖方式 常用覆盖示例 覆盖模型 打印模式（单次查询） 继续会话 恢复指定会话 权限模式 系统提示词 Base URL 和 API 格式 调试模式 主题 环境变量 配置文件 证据索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "reference/config",
+      "title": "Config",
+      "description": "OpenHarness 的所有运行时行为由 Settings Pydantic 模型驱动。本页详细说明各配置字段的含义、配置优先级、内置 Provider Profile 以及子配置块的结构。",
+      "section": "参考",
+      "href": "/docs/reference/config/",
+      "content": "配置参考 摘要 你将了解 范围 配置优先级 主模型：Settings API 配置字段 行为配置字段 UI 配置字段 ProviderProfile 配置 字段说明 resolvedmodel 属性 PermissionSettings 配置 字段说明 PathRuleConfig 权限模式值 SandboxSettings 配置 主字段 SandboxNetworkSettings SandboxFilesystemSettings DockerSandboxSettings MemorySettings 配置 HookDefinition 配置 CommandHookDefinition PromptHookDefinition HttpHookDefinition AgentHookDefinition McpServerConfig 配置 McpStdioServerConfig McpHttpServerConfig McpWebSocketServerConfig enabledplugins 配置 内置 Provider Profile claude-api claude-subscription openai-compatible codex copilot moonshot gemini 各 Profile 差异汇总 模型别名解析 完整配置文件示例 环境变量覆盖参考 证据索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "reference/data-models",
+      "title": "Data Models",
+      "description": "OpenHarness 的核心数据类型按功能分层为 Engine 层、Config 层、MCP 层、Swarm 层、Coordinator 层、Plugin 层和 Channel 层。本页按层级整理所有 Pydantic / datacla",
+      "section": "参考",
+      "href": "/docs/reference/data-models/",
+      "content": "数据模型参考 摘要 你将了解 范围 Engine 层 ConversationMessage ContentBlock TextBlock ImageBlock ToolUseBlock ToolResultBlock ToolExecutionContext ToolResult StreamEvent CostTracker Config 层 ResolvedAuth MCP 层 McpServerConfig McpStdioServerConfig McpHttpServerConfig McpWebSocketServerConfig McpToolInfo McpResourceInfo McpConnectionStatus McpJsonConfig Swarm 层 BackendType PaneBackendType PaneId CreatePaneResult BackendDetectionResult TeammateIdentity TeammateSpawnConfig SpawnResult TeammateMessage TeammateExecutor PaneBackend Coordinator 层 AgentDefinition WorkerConfig TaskNotification Plugin 层 PluginCommandDefinition LoadedPlugin Channel 层 InboundMessage OutboundMessage ChannelBridge Sandbox 层补充 SandboxAvailability Hook 定义补充 证据索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "reference/glossary",
+      "title": "Glossary",
+      "description": "> 本术语表收录 OpenHarness 项目的核心术语定义，包含中文术语、英文原词、代码符号及源码证据。\n> 最后更新：与源码同步（v0.1.x）",
+      "section": "参考",
+      "href": "/docs/reference/glossary/",
+      "content": "OpenHarness 术语表 术语分类索引 A: Agent 系统 1. Agent Harness（Agent 挽具） 2. Coordinator（协调器） 3. Teammate（队友） 4. TeammateExecutor（队友执行器） 5. Tool Agent（工具 Agent） B: Bridge 与渠道 6. Bridge（桥接） 7. Channel（渠道） 8. ohmo（个人 Agent 应用） C: Config 与设置 9. Provider Profile（Provider 配置） 10. Settings（设置） 11. Auto-Compact（自动压缩） D: Docker 与沙箱 12. Docker Sandbox（Docker 沙箱） 13. Sandbox Backend（沙箱后端） E: Engine 与查询 14. QueryEngine（查询引擎） 15. QueryContext（查询上下文） 16. runquery（运行查询） 17. ToolExecutionContext（工具执行上下文） 18. ToolMetadata（工具元数据） 19. ConversationMessage（会话消息） 20. StreamEvent（流事件） H: Hooks 与生命周期 21. Hook（钩子） 22. PRETOOLUSE / POSTTOOLUSE 23. HookExecutor（钩子执行器） M: MCP 与协议 24. MCP（Model Context Protocol） 25. MCP Client Manager（MCP 客户端管理器） 26. MCP Transport（MCP 传输方式） P: Permissions 与安全 27. Permission Mode（权限模式） 28. Permission Checker（权限检查器） 29. SENSITIVEPATHPATTERNS（敏感路径模式） S: Swarm 与团队 30. Swarm（蜂群） 31. BackendRegistry（后端注册表） 32. TeamFile（团队文件） 33. TaskNotification（任务通知） T: Tasks 与后台任务 34. BackgroundTaskManager（后台任务管理器） 35. TaskRecord（任务记录） 36. ToolRegistry（工具注册表） U: UI 与交互 37. AppStateStore（应用状态存储） 38. CostTracker（成本追踪器） 39. React TUI（React 终端用户界面） 其他 40. CLAUDE.md（Claude 项目说明） 41. Skill（技能） 42. Plugin（插件） 43. AuthFlow（认证流程） 44. UsageSnapshot（使用量快照） 45. Memory（内存/持久化知识） 46. RESOLVEDAUTH（已解析认证） 术语对照表 按字母顺序索引 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "SHOWCASE",
+      "title": "SHOWCASE",
+      "description": "This page collects concrete ways to use OpenHarness without overselling the project. Each example is intended to be smal",
+      "section": "SHOWCASE",
+      "href": "/docs/SHOWCASE/",
+      "content": "OpenHarness Showcase 1. Repository-aware coding assistant 2. Headless automation for scripts and CI 3. Skill and plugin playground 4. Multi-agent and background task experiments 5. Provider compatibility testbed 6. Documentation-first onboarding How to contribute a showcase entry undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "superpowers/specs/2026-04-09-docs-site-design",
+      "title": "2026 04 09 Docs Site Design",
+      "description": "项目：将 docs/ 下的 Markdown 文档转换为静态前端网页，支持 Mermaid 图表渲染和 AI 图片生成。",
+      "section": "superpowers",
+      "href": "/docs/superpowers/specs/2026-04-09-docs-site-design/",
+      "content": "OpenHarness 文档站设计规格 1. 概述与目标 2. 技术选型 方案：C (推荐) — Astro + React 岛屿 3. 站点结构 4. 功能规格 4.1 Markdown 渲染 4.2 Mermaid 图表渲染 4.3 AI 图片生成 4.4 导航与侧边栏 4.5 主题支持 4.6 搜索（可选，后续实现） 5. 文档路由设计 6. 组件详细设计 MermaidBlock（React 岛屿） ImageGenIsland（React 岛屿） DocLayout（ Astro 布局） 7. 部署方案 8. 实现步骤（初步） 9. 验收标准 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "superpowers/specs/2026-04-09-docs-site-impl-plan",
+      "title": "2026 04 09 Docs Site Impl Plan",
+      "description": "| ID | 任务 | 状态 | 说明 |\n|----|------|------|------|\n| T2 | Init Astro + Tailwind + React | pending | 初始化项目，安装依赖 |\n| T3 | C",
+      "section": "superpowers",
+      "href": "/docs/superpowers/specs/2026-04-09-docs-site-impl-plan/",
+      "content": "文档站实现计划 任务依赖图 任务详情 验收标准 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "superpowers/specs/2026-04-17-task-module-design",
+      "title": "2026 04 17 Task Module Design",
+      "description": "任务模块是 Agent 的内部能力，用于将复杂目标拆解为可执行的子任务，并管理子任务之间的依赖关系、并行执行、状态跟踪和结果处理。",
+      "section": "superpowers",
+      "href": "/docs/superpowers/specs/2026-04-17-task-module-design/",
+      "content": "任务模块详细设计 1. 概述 设计目标 2. 核心架构 3. 数据模型 TaskType TaskDef（任务定义） TaskRecord（持久化格式） 持久化文件格式 4. API 设计 5. DAG 调度算法 拓扑排序 并行执行 失败处理 任务完成流程 6. Watcher 线程 7. Agent 介入机制 回调流程 Agent 典型使用模式 创建任务 启动调度 wait() 会返回（pause 时） 8. 持久化 目录结构 重建 DAG 9. 状态机 10. 与现有 BackgroundTaskManager 的关系 11. 实现顺序 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/channels-user",
+      "title": "Channels User",
+      "description": "OpenHarness 的 Channels 系统支持将多种即时通讯平台接入 Agent，实现通过 IM 工具与 Agent 对话。",
+      "section": "用户手册",
+      "href": "/docs/user/channels-user/",
+      "content": "消息渠道配置 概述 支持的渠道 架构说明 配置渠道 通过 ohmo config 渠道配置存储 Telegram 配置 步骤 1: 创建 Bot 步骤 2: 配置 选择 telegram 输入 Bot Token 配置选项 Slack 配置 步骤 1: 创建 Slack App 步骤 2: 启用 Socket Mode 步骤 3: 配置 选择 slack 输入 Bot Token (xoxb-...) 输入 App Token (xapp-...) 配置选项 grouppolicy 选项 Discord 配置 步骤 1: 创建 Discord Application 步骤 2: 配置 Intents 步骤 3: 配置 选择 discord 输入 Bot Token 配置 Gateway URL 配置 Intents Bitmask 配置选项 Feishu（飞书）配置 步骤 1: 创建飞书应用 步骤 2: 配置 选择 feishu 输入 App ID 输入 App Secret 配置 Encrypt Key（可选） 配置 Verification Token（可选） 配置选项 运行 Gateway 前台运行 后台运行 查看状态 重启 停止 渠道使用 安全考虑 allowfrom 限制 群组策略 调试 查看 Gateway 日志 测试渠道连接 常见问题 Q: Bot 没有响应？ Q: 收到 \"Unauthorized\" 错误？ Q: 消息延迟？ undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/cli-reference",
+      "title": "Cli Reference",
+      "description": "OpenHarness CLI 使用 oh 和 ohmo 两个主命令。",
+      "section": "用户手册",
+      "href": "/docs/user/cli-reference/",
+      "content": "CLI 命令参考 oh 主命令 基础用法 全局选项 子命令 ohmo 命令 基础命令 gateway 子命令 权限模式 输出格式 环境变量 配置文件 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/getting-started",
+      "title": "Getting Started",
+      "description": "\n- Python 3.10 或更高版本\n- uv 包管理器（推荐）或 pip",
+      "section": "用户手册",
+      "href": "/docs/user/getting-started/",
+      "content": "快速入门指南 前置要求 一、安装 OpenHarness 一键安装脚本 从源码安装 二、配置 Provider 内置 Workflow 三、运行 Agent 交互模式（TUI） 非交互模式 直接执行单个任务 JSON 输出 流式 JSON 输出（实时查看工具调用） 四、常用命令一览 统一配置入口 查看已有 workflow/profile 切换当前 workflow 查看认证状态 启动交互式会话 五、使用 ohmo 个人代理 初始化 配置 ohmo 运行 ohmo 运行 personal agent 前台运行 gateway 查看 gateway 状态 六、下一步 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/installation",
+      "title": "Installation",
+      "description": "常用参数：\n- --from-source：从源码安装\n- --with-channels：安装 IM channel 依赖",
+      "section": "用户手册",
+      "href": "/docs/user/installation/",
+      "content": "安装配置 安装方式 方式一：一键脚本（推荐） 方式二：源码安装 方式三：pip 安装 安装目录结构 Channels 依赖 安装 channels 依赖 或使用安装脚本 验证安装 开发依赖 安装所有开发依赖 运行测试 代码检查 类型检查 卸载 常见问题 Q: 提示 \"command not found: oh\" Q: uv 命令不存在 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/memory-user",
+      "title": "Memory User",
+      "description": "OpenHarness 的记忆系统让 Agent 能够跨会话保持上下文和知识。记忆系统支持多种机制，包括 MEMORY.md 文件、CLAUDE.md 自动发现和会话恢复。",
+      "section": "用户手册",
+      "href": "/docs/user/memory-user/",
+      "content": "记忆系统使用 概述 记忆存储位置 项目级记忆 用户级记忆 ohmo 个人记忆 MEMORY.md 索引文件 Memory Index 记忆文件格式 项目上下文 技术栈 关键约定 添加记忆 交互式添加 命令行添加 使用 ohmo memory 命令 手动添加 记忆搜索 触发条件 CLAUDE.md 自动发现 CLAUDE.md 位置 CLAUDE.md 内容 项目指导 项目概述 开发规范 命令 CLAUDE.md 与记忆的区别 会话恢复 保存会话 恢复会话 继续最近一次会话 按 ID 恢复指定会话 交互式选择会话 会话存储 记忆自动压缩 压缩建议 最佳实践 1. 保持记忆简洁 2. 定期整理 3. 命名规范 好 差 4.CLAUDE.md 精炼 配置 常见问题 Q: 记忆没有加载？ Q: 如何迁移记忆？ Q: 记忆占用空间大？ undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/ohmo-user",
+      "title": "Ohmo User",
+      "description": "ohmo 是基于 OpenHarness 的 personal-agent app，提供更深度的个性化体验。与标准的 oh 命令不同，ohmo 专注于个人助理场景，包括身份定义、记忆系统和多渠道接入。",
+      "section": "用户手册",
+      "href": "/docs/user/ohmo-user/",
+      "content": "ohmo 个人代理 概述 核心概念 工作空间 Gateway 初始化 首次初始化 配置 Provider 检查状态 soul.md - 灵魂定义 内容结构 Soul 性格特点 行为准则 专长领域 identity.md - 身份定义 内容结构 Identity 名字 来历 能力 user.md - 用户画像 内容结构 User Profile 基本信息 偏好 关系 运行模式 交互式模式 单次任务模式 后端模式 Gateway 管理 前台运行 后台启动 查看状态 重启 停止 记忆管理 ohmo memory 命令 列出所有记忆 添加记忆 删除记忆 记忆类型 渠道集成 与 oh 的区别 最佳实践 1. soul.md 定制 2. user.md 维护 3. 记忆整理 4. 渠道安全 配置参考 gateway.json 结构 故障排除 Gateway 启动失败 渠道无响应 记忆丢失 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/permissions-user",
+      "title": "Permissions User",
+      "description": "OpenHarness 提供多级权限系统，确保操作安全可控。权限模式控制哪些操作需要用户确认。",
+      "section": "用户手册",
+      "href": "/docs/user/permissions-user/",
+      "content": "权限模式说明 概述 权限模式 default 模式 plan 模式 fullauto 模式 切换权限模式 在 TUI 中切换 命令行指定 路径规则 配置路径规则 规则说明 示例 工具黑名单/白名单 禁用特定工具 仅允许特定工具 命令拒绝模式 敏感路径保护 交互式确认 MCP 工具权限 权限模式适用场景 配置文件示例 最佳实践 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/plugins-user",
+      "title": "Plugins User",
+      "description": "插件是 OpenHarness 的扩展系统，可以提供：\n- 工具（Tools）\n- 命令（Commands）\n- 代理（Agents）\n- Hooks\n- MCP 服务器配置\n- 技能（Skills）",
+      "section": "用户手册",
+      "href": "/docs/user/plugins-user/",
+      "content": "插件使用指南 什么是插件 插件存放位置 管理插件 列出插件 安装插件 卸载插件 插件结构 plugin.json 清单 字段说明 插件命令 我的命令 使用示例 命令名称 插件代理 我的代理 代理 frontmatter 字段 Hooks 支持的 Hook 事件 MCP 服务器配置 插件开发 常见问题 插件不加载 插件命令不显示 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/providers-user",
+      "title": "Providers User",
+      "description": "OpenHarness 支持多种 AI Provider，通过统一的工作流（workflow）概念进行管理。Provider 配置采用 Profile 机制，支持同时配置多个 Provider 并快速切换。",
+      "section": "用户手册",
+      "href": "/docs/user/providers-user/",
+      "content": "Provider 配置 概述 工作流类型 配置流程 引导式配置 手动配置 Anthropic-Compatible API 支持的后端 配置示例 Claude 官方 选择 Anthropic-Compatible API → Claude official Moonshot/Kimi 认证方式 Claude Subscription 前提条件 配置 OpenAI-Compatible API 支持的后端 配置示例 OpenAI 官方 选择 OpenAI-Compatible API → OpenAI official OpenRouter 本地 Ollama 认证方式 Codex Subscription 前提条件 配置 GitHub Copilot 配置 选择 2. GitHub Enterprise 输入 Enterprise URL 支持的功能 Provider Profile 管理 列出 Profile 切换 Profile 编辑 Profile 删除 Profile 认证管理 查看认证状态 清除认证 清除当前 profile 的认证 清除指定 provider 环境变量覆盖 配置文件 常见问题 Q: API 调用失败？ Q: 如何使用本地模型？ Q: 切换 Provider 后模型不变？ Q: 一个项目只能用一个 Provider？ undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/skills-user",
+      "title": "Skills User",
+      "description": "技能是 Markdown 格式的文档，用于扩展 OpenHarness 的能力。技能可以被按需加载，兼容 Claude Code 的技能格式。",
+      "section": "用户手册",
+      "href": "/docs/user/skills-user/",
+      "content": "技能使用指南 什么是技能（Skills） 技能存放位置 技能目录结构 使用技能 创建自定义技能 我的自定义技能 使用方法 frontmatter 字段 技能与插件的区别 常用内置技能 查看可用技能 在 TUI 中输入 / 即可看到技能列表 技能最佳实践 故障排除 技能不显示 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "user/tasks-user",
+      "title": "Tasks User",
+      "description": "OpenHarness 提供任务管理系统，支持在后台运行 Shell 命令和 Agent 子进程，方便管理长时间运行的任务。",
+      "section": "用户手册",
+      "href": "/docs/user/tasks-user/",
+      "content": "任务管理 概述 任务类型 1. Shell 任务 (localbash) 2. Agent 任务 (localagent) 3. 远程任务 (remoteagent) 4. 进程内任务 (inprocessteammate) 任务目录 使用任务 在 TUI 中管理任务 命令行创建任务 在 Python 代码中 创建 Shell 任务 创建 Agent 任务 任务生命周期 查看任务状态 列出所有任务 查看单个任务 读取任务输出 任务控制 停止任务 向任务发送输入 重启 Agent 任务 任务记录结构 Cron 调度集成 配置定时任务 最佳实践 1. 任务描述清晰 2. 监控任务输出 3. 正确处理长时间任务 定期检查状态 4. 资源清理 停止任务 多 Agent 协作 主 Agent 创建子 Agent 任务 向子 Agent 发送指令 读取子 Agent 输出 常见问题 Q: 任务启动失败？ Q: Agent 任务自动退出？ Q: 如何查看历史任务？ 列出所有任务（包括已完成） 只看运行中的 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "workflows/core-query-flow",
+      "title": "Core Query Flow",
+      "description": "核心查询流是 OpenHarness 引擎的主轴——每一条用户消息从进入系统到最终输出结果，都经过 QueryEngine 初始化、消息提交、Query Loop 执行、工具调用、结果收集与 StreamEvent 输出的完整链路。本页深入",
+      "section": "工作流",
+      "href": "/docs/workflows/core-query-flow/",
+      "content": "核心查询流 摘要 你将了解 范围 架构总览 QueryEngine 初始化 → submitmessage() 逐跳解析：初始化与消息提交 runquery() 主循环 逐跳解析：主循环结构（12 跳正常流） 循环外： StreamEvent 事件序列 CostTracker 使用量追踪 src/openharness/engine/queryengine.py -> submitmessage() src/openharness/engine/costtracker.py 权限检查时机与方式 检查时机 检查方式：决策树 设计取舍 取舍 1：串行 vs 并发工具执行 取舍 2：权限检查在输入验证之后 ... 取舍 3：auto-compact 内嵌在主循环中 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "workflows/exception-and-recovery",
+      "title": "Exception And Recovery",
+      "description": "OpenHarness 在四个层次产生异常：API 层（网络与模型交互）、工具层（工具执行与输入验证）、协调层（多 Agent 任务管理与协调器消息传递）、沙箱层（隔离执行环境）。每类异常有各自的出现时机、传播路径与捕获层级，辅以不同的重试",
+      "section": "工作流",
+      "href": "/docs/workflows/exception-and-recovery/",
+      "content": "异常与恢复 摘要 你将了解 范围 异常分类总图 API 层异常 A1：网络错误 A2：API 错误（429/500/502/503/529） src/openharness/api/client.py A3：上下文超长 A4：认证失败 工具层异常 T1：未知工具 T2：输入验证失败 T3：权限拒绝 T4：工具执行异常 T5：PRETOOLUSE 钩子阻断 T6：敏感路径拒绝 协调层异常 C1：Worker 崩溃 src/openharness/swarm/inprocess.py src/openharness/swarm/subprocessbackend.py C2：消息传递失败 src/openharness/swarm/mailbox.py -> writetomailbox C3：TaskNotification 解析错误 src/openharness/coordinator/coordinatormode.py -> parsetasknotification C4：maxturns 超出 C5：权限同步失败 src/openharness/swarm/permissionsync.py -> pollpermissionresponse 沙箱层异常 S1：进程启动失败 SubprocessBackend S2：进程超时 重试策略总结 设计取舍 取舍 1：工具层异常不自动重试 vs 自动重试 取舍 2：权限拒绝不抛出异常 vs 抛出异常 取舍 3：沙箱进程超时强制 kill vs 永不 kill 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "workflows/mcp-integration-flow",
+      "title": "Mcp Integration Flow",
+      "description": "本文档详细解析 OpenHarness 中 Model Context Protocol（MCP）的集成架构与执行路径。MCP 是 Anthropic 提出的标准协议，用于将外部工具服务器接入 AI 代理。OpenHarness 通过 Mc",
+      "section": "工作流",
+      "href": "/docs/workflows/mcp-integration-flow/",
+      "content": "MCP 集成流 摘要 你将了解 范围 1. MCP 协议与 OpenHarness 的角色 2. McpClientManager 生命周期 2.1 初始化 2.2 connectall() 2.3 使用阶段 2.4 reconnectall() 2.5 close() 3. 三种传输类型的实现差异 3.1 stdio（标准输入输出） 3.2 HTTP Streamable 3.3 WebSocket 4. MCP 工具调用路径 4.1 完整序列图 4.2 路径解析 5. MCP 资源读取路径 5.1 listresources() 5.2 readresource() 6. MCP 服务器配置 6.1 配置来源 6.2 stdio 配置 6.3 HTTP 配置 6.4 WebSocket 配置 7. MCP 与工具系统的桥接 7.1 McpToolAdapter 7.2 ReadMcpResourceTool 7.3 ListMcpResourcesTool 7.4 McpAuthTool 8. 正常流逐跳解析 9. 异常流逐跳解析 9.1 服务器连接失败 9.2 调用时服务器已断开 9.3 工具调用超时或返回错误 9.4 服务器不支持资源功能 10. 设计取舍 取舍 1：工具元数据缓存 vs 实时发现 取舍 2：Session 生命周期绑定 vs 按需创建 取舍 3：WebSocket 传输延迟实现 11. 风险 风险 1：MCP 服务器子进程（stdio）泄漏 风险 2：认证信息明文传输 风险 3：MCP 服务器未响应导致 Agent 阻塞 12. 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "workflows/multi-agent-coordination",
+      "title": "Multi Agent Coordination",
+      "description": "OpenHarness 支持两种多 Agent 协调模式：Coordinator（协调器）模式和 Swarm（蜂群）模式。前者通过一个主 Agent 协调多个 Worker 子进程，消息通过 TaskNotification XML 传递；",
+      "section": "工作流",
+      "href": "/docs/workflows/multi-agent-coordination/",
+      "content": "多 Agent 协调流 摘要 你将了解 范围 架构总览 Coordinator 模式 vs Swarm 模式 Coordinator 模式：TeamRegistry、WorkerConfig、TaskNotification TeamRegistry（内存团队注册表） WorkerConfig（Worker 配置） TaskNotification（任务完成通知） Swarm 模式：Teammate 生命周期 TeammateIdentity（身份标识） TeammateSpawnConfig（Spawn 配置） 正常流逐跳解析：Swarm Leader spawn 一个 Teammate 优先级：inprocessfallback > tmux > subprocess 直接写入 mailbox + 注入 messagequeue 若 ctx 可访问，推入 ctx.messagequeue drainmailbox() 在每个事件循环中被调用 finally 块中 Swarm 模式：消息传递机制 Swarm Mailbox 文件系统布局 MailboxMessage 结构 Agent 定义系统 AgentDefinition 数据模型 Builtin Agents 加载流程 权限在多 Agent 间的同步 两种同步协议 src/openharness/swarm/permissionsync.py 角色检测 设计取舍 取舍 1：In-Process vs Subprocess 执行后端 取舍 2：文件邮箱 vs 内存消息队列 风险 证据引用 undefined",
+      "lastUpdated": ""
+    },
+    {
+      "id": "workflows/sandbox-execution",
+      "title": "Sandbox Execution",
+      "description": "本文档详细解析 OpenHarness 中沙箱（Sandbox）系统的执行流程与架构设计。沙箱通过隔离代码执行环境来保护宿主机器，防止恶意或意外的有害操作。OpenHarness 支持两种沙箱后端：srt（基于 bubblewrap / s",
+      "section": "工作流",
+      "href": "/docs/workflows/sandbox-execution/",
+      "content": "沙箱执行流 摘要 你将了解 范围 1. 沙箱系统的目的 2. DockerBackend 启动流程 2.1 可用性检查 2.2 镜像可用性检查 2.3 DockerSandboxSession.start() 3. 命令执行路径 3.1 execcommand() 3.2 命令构建 4. 网络隔离 4.1 隔离策略 4.2 配置模型 5. 资源限制 5.1 CPU 限制 5.2 内存限制 5.3 额外配置 6. 项目目录挂载 7. 沙箱清理 7.1 异步停止 7.2 同步停止（atexit） 7.3 容器自动删除 8. 平台兼容性 8.1 平台能力抽象 8.2 Docker 后端不支持的平台 8.3 srt 后端的平台差异 9. SandboxSettings 配置项详解 10. 正常流逐跳解析 11. 异常流逐跳解析 11.1 Docker daemon 未运行 11.2 镜像不存在且禁止构建 11.3 容器启动失败 11.4 execcommand 在未启动的会话上调用 11.5 容器内命令超时 12. 设计取舍 取舍 1：Docker 容器常驻 vs 按需创建销毁 取舍 2：网络 bridge + 无域名过滤 vs srt 的域名级控制 13. 风险 风险 1：Docker Desktop 资源竞争 风险 2：持久化容器状态导致不可预测行为 风险 3：macOS 上 Docker 后端不可用导致降级风险 14. 证据引用 undefined",
+      "lastUpdated": ""
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+digraph STYLE_GUIDE {
+    // Node types and shapes
+    "Is this a question?" [shape=diamond];
+    "Take an action" [shape=box];
+    "git commit -m 'msg'" [shape=plaintext];
+    "Current state" [shape=ellipse];
+    "STOP: Critical warning" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    "Process starts" [shape=doublecircle];
+}

@@ -2,11 +2,53 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="403051d7-2c8f-4c3a-826e-35d0b0bfdcfe" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/OpenHarness" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/claude-harness" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hermes-agent" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/learn-claude-code" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/nanobot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/harness/docs/deep/AGENT-SYSTEM.review.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/harness/docs/deep/REVIEW-REPORT.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/harness/docs/deep/TASK-SYSTEM.review.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/brainstorming/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/brainstorming/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/dispatching-parallel-agents/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/dispatching-parallel-agents/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/executing-plans/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/executing-plans/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/finishing-a-development-branch/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/finishing-a-development-branch/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/receiving-code-review/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/receiving-code-review/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/requesting-code-review/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/requesting-code-review/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/requesting-code-review/code-reviewer.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/requesting-code-review/code-reviewer.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/code-quality-reviewer-prompt.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/code-quality-reviewer-prompt.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/implementer-prompt.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/implementer-prompt.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/spec-reviewer-prompt.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/subagent-driven-development/spec-reviewer-prompt.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/CREATION-LOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/CREATION-LOG.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/condition-based-waiting-example.ts" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/condition-based-waiting-example.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/condition-based-waiting.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/condition-based-waiting.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/defense-in-depth.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/defense-in-depth.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/find-polluter.sh" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/find-polluter.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/root-cause-tracing.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/root-cause-tracing.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-academic.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-academic.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-pressure-1.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-pressure-1.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-pressure-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-pressure-2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-pressure-3.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/systematic-debugging/test-pressure-3.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/test-driven-development/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/test-driven-development/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/test-driven-development/testing-anti-patterns.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/test-driven-development/testing-anti-patterns.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/using-git-worktrees/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/using-git-worktrees/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/using-superpowers/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/using-superpowers/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/verification-before-completion/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/verification-before-completion/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-plans/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-plans/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/anthropic-best-practices.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/anthropic-best-practices.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/examples/CLAUDE_MD_TESTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/examples/CLAUDE_MD_TESTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/graphviz-conventions.dot" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/graphviz-conventions.dot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/persuasion-principles.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/persuasion-principles.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/render-graphs.js" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/render-graphs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/testing-skills-with-subagents.md" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.claude/skills/harness/superpowers/writing-skills/testing-skills-with-subagents.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/claude-harness/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/claude-harness/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learn-claude-code/agents/s01_agent_loop.py" beforeDir="false" afterPath="$PROJECT_DIR$/learn-claude-code/agents/s01_agent_loop.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learn-claude-code/skills/agent-builder/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/learn-claude-code/skills/agent-builder/SKILL.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,9 +58,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "platootalp"
+  }
 }]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "git@github.com:platootalp/harness-code.git",
+    "accountId": "35e25c7b-ff6b-4344-a870-7c96c253c3ae"
+  }
+}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="3CT4zQW0ApJqg9D8iqgY5PPLQPP" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -30,17 +84,17 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "simple",
-    "last_opened_file_path": "/Users/lijunyi/road/reference/harness-code"
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/Users/lijunyi/road/harness-code"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/claude-code" />
+      <recent name="$PROJECT_DIR$/claude-code/src" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/docs" />
       <recent name="$PROJECT_DIR$/harness-mvp" />
-      <recent name="$PROJECT_DIR$/harness/docs/claude-code" />
-      <recent name="$PROJECT_DIR$/harness/docs" />
-      <recent name="$PROJECT_DIR$/harness/docs/deep" />
-      <recent name="$PROJECT_DIR$/mozi/docs" />
     </key>
   </component>
   <component name="SharedIndexes">

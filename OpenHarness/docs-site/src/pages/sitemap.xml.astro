@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+
+const allDocs = await getCollection('docs');
+const baseUrl = 'https://docs.openharness.ai';
+
+const urls = allDocs.map(doc => {
+  const slug = doc.id.replace(/\.md$/, '');
+  const href = slug === 'index' ? '/docs/' : `/docs/${slug}/`;
+  return {
+    url: `${baseUrl}${href}`,
+    lastmod: doc.data.lastUpdated || new Date().toISOString().split('T')[0],
+    priority: slug === 'index' ? '1.0' : '0.8',
+    changefreq: 'weekly',
+  };
+});
+---
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {urls.map(u => (
+    <url>
+      <loc>{u.url}</loc>
+      <lastmod>{u.lastmod}</lastmod>
+      <changefreq>{u.changefreq}</changefreq>
+      <priority>{u.priority}</priority>
+    </url>
+  ))}
+</urlset>

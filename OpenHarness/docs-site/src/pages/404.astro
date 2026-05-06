@@ -1,0 +1,23 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+import SearchTrigger from '../components/SearchTrigger.tsx';
+---
+
+<DocLayout title="页面未找到" currentPath="">
+  <div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div class="text-8xl font-bold text-[var(--color-border)] mb-4">404</div>
+    <h1 class="text-2xl font-bold mb-3 text-[var(--color-text)]">页面未找到</h1>
+    <p class="text-[var(--color-text-muted)] mb-8 max-w-md">
+      抱歉，你访问的页面不存在。可能是链接错误或页面已被移动。
+    </p>
+    <div class="flex items-center gap-3">
+      <a
+        href="/docs/"
+        class="px-5 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-all no-underline"
+      >
+        ← 返回首页
+      </a>
+      <SearchTrigger client:load />
+    </div>
+  </div>
+</DocLayout>

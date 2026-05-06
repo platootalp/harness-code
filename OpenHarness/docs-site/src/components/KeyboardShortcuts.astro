@@ -1,0 +1,81 @@
+---
+// Global keyboard shortcuts
+---
+
+<script is:inline>
+  (function() {
+    // ---- Open search ----
+    function openSearch() {
+      window.dispatchEvent(new CustomEvent('open-search'));
+    }
+
+    // ---- Prev/Next doc ----
+    function prevDoc() {
+      const link = document.querySelector('nav[data-pagination] a[data-page="prev"]');
+      if (link) link.click();
+    }
+
+    function nextDoc() {
+      const link = document.querySelector('nav[data-pagination] a[data-page="next"]');
+      if (link) link.click();
+    }
+
+    // ---- Help panel ----
+    function showHelp() {
+      if (document.getElementById('kbd-help')) return;
+      const overlay = document.createElement('div');
+      overlay.id = 'kbd-help';
+      overlay.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm';
+      overlay.innerHTML = `
+        <div class="bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)] shadow-2xl p-6 w-full max-w-md animate-fade-in">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-semibold text-[var(--color-text)]">键盘快捷键</h3>
+            <button id="close-kbd" class="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="space-y-1 text-sm">
+            ${[
+              ['打开搜索', 'S', '/'],
+              ['关闭弹窗', 'Esc', ''],
+              ['上一个文档', '←', ''],
+              ['下一个文档', '→', ''],
+            ].map(([label, key]) => `
+              <div class="flex items-center justify-between py-2 border-b border-[var(--color-border)] last:border-0">
+                <span class="text-[var(--color-text-muted)]">${label}</span>
+                <kbd class="px-2 py-0.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded font-mono text-xs">${key}</kbd>
+              </div>
+            `).join('')}
+          </div>
+          <p class="text-[10px] text-[var(--color-text-muted)] text-center mt-4">按 <kbd class="px-1.5 py-0.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded font-mono">?</kbd> 再次打开</p>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      document.getElementById('close-kbd').onclick = hideHelp;
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) hideHelp(); });
+    }
+
+    function hideHelp() {
+      document.getElementById('kbd-help')?.remove();
+    }
+
+    // ---- Key handler ----
+    document.addEventListener('keydown', function(e) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      switch (e.key) {
+        case '?':
+          e.preventDefault();
+          document.getElementById('kbd-help') ? hideHelp() : showHelp();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          prevDoc();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          nextDoc();
+          break;
+      }
+    });
+  })();
+</script>

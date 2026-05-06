@@ -1,0 +1,378 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '' } = Astro.props;
+
+const allDocs = await getCollection('docs');
+
+type DocEntry = { id: string; slug: string; data: { title?: string; description?: string }; filePath?: string };
+type Group = { id: string; label: string; icon: string; docs: DocEntry[] };
+
+const SECTION_CONFIG: Record<string, { label: string; icon: string; order: number }> = {
+  overview:     { label: '总览',     icon: '📊', order: 1 },
+  architecture: { label: '架构',      icon: '🏗️', order: 2 },
+  workflows:    { label: '工作流',    icon: '🔄', order: 3 },
+  modules:      { label: '模块',      icon: '🧩', order: 4 },
+  reference:    { label: '参考',      icon: '📖', order: 5 },
+  appendix:     { label: '附录',      icon: '📎', order: 6 },
+  user:         { label: '用户手册',  icon: '👤', order: 7 },
+};
+
+function getSection(fileId: string): string {
+  const parts = fileId.split('/');
+  if (parts.length === 1) return 'overview';
+  return parts[0];
+}
+
+function buildTree(docs: DocEntry[]): Group[] {
+  const sections: Record<string, DocEntry[]> = {};
+  for (const doc of docs) {
+    const section = getSection(doc.id);
+    if (!sections[section]) sections[section] = [];
+    sections[section].push(doc);
+  }
+  for (const key of Object.keys(sections)) {
+    sections[key].sort((a, b) => a.id.localeCompare(b.id));
+  }
+  return Object.entries(sections)
+    .map(([key, docs]) => ({
+      id: key,
+      label: SECTION_CONFIG[key]?.label || key,
+      icon: SECTION_CONFIG[key]?.icon || '📄',
+      docs,
+    }))
+    .sort((a, b) => (SECTION_CONFIG[a.id]?.order || 99) - (SECTION_CONFIG[b.id]?.order || 99));
+}
+
+const navGroups = buildTree(allDocs);
+
+function getDocTitle(doc: DocEntry): string {
+  if (doc.data?.title) return doc.data.title;
+  const name = doc.id.split('/').pop() || doc.id;
+  return name.replace(/\.md$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function getDocHref(doc: DocEntry): string {
+  if (doc.id === 'index.md') return '/docs/';
+  return `/docs/${doc.id.replace(/\.md$/, '')}/`;
+}
+
+function isActive(doc: DocEntry): boolean {
+  const href = getDocHref(doc);
+  return currentPath === href || currentPath === href.replace(/\/$/, '');
+}
+---
+
+<aside
+  id="sidebar"
+  class="fixed left-0 top-16 bottom-0 w-sidebar bg-[var(--color-sidebar-bg)] border-r border-[var(--color-sidebar-border)] overflow-y-auto scrollbar-thin transition-[width] duration-300 z-40 -translate-x-full lg:translate-x-0"
+  data-desktop-collapsed="false"
+>
+  <!-- Mobile overlay -->
+  <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/50 z-[-1] lg:hidden" onclick="toggleSidebar()"></div>
+
+  <nav class="py-4 flex flex-col h-full">
+    <!-- Logo (removed — TopNav already has OH logo) -->
+
+    <!-- Navigation Groups -->
+    <div class="flex-1 space-y-1 px-2">
+      {navGroups.map((group, i) => (
+        <div class="nav-group" data-group={group.id} data-expanded={i === 0 ? 'true' : 'false'}>
+          <!-- Expanded: group header with label + chevron -->
+          <button
+            class="group-header-expanded hidden lg:flex items-center justify-between w-full px-2 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors cursor-pointer bg-transparent border-none rounded-md hover:bg-[var(--color-surface)]"
+            onclick="toggleGroup(this)"
+          >
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="text-base flex-shrink-0">{group.icon}</span>
+              <span class="truncate group-label">{group.label}</span>
+            </span>
+            <svg class="chevron w-3 h-3 flex-shrink-0 transition-transform duration-200 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <!-- Collapsed: icon-only button with tooltip — shown only when sidebar is icon-rail -->
+          <button
+            class="group-header-collapsed items-center justify-center w-10 h-10 mx-auto rounded-md text-xl transition-colors cursor-pointer bg-transparent border-none hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] relative"
+            onclick="toggleGroup(this)"
+            title={group.label}
+          >
+            {group.icon}
+          </button>
+
+          <ul class="nav-docs nav-docs-collapsed mt-0.5 space-y-0.5 overflow-hidden rtl:pl-0 rtl:pr-2">
+            {group.docs.map(doc => (
+              <li class="doc-item">
+                <a
+                  href={getDocHref(doc)}
+                  class={`doc-link flex items-center gap-1.5 px-2 py-1.5 rounded-md text-sm transition-all duration-150 no-underline ${
+                    isActive(doc)
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium shadow-sm'
+                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] dark:hover:bg-white/5'
+                  }`}
+                >
+                  {isActive(doc) && (
+                    <svg class="w-3 h-3 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                  )}
+                  <span class="truncate doc-label">{getDocTitle(doc)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <!-- Footer with collapse toggle -->
+    <div class="mt-auto pt-3 border-t border-[var(--color-border)] px-2">
+      <!-- Desktop collapse/expand toggle — integrated, clean -->
+      <button
+        id="sidebar-desktop-toggle"
+        class="hidden lg:flex items-center justify-center w-full h-9 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-all cursor-pointer bg-transparent border-none"
+        onclick="toggleSidebarDesktop()"
+        aria-label="折叠侧边栏"
+        title="折叠侧边栏"
+      >
+        <svg id="collapse-icon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+        </svg>
+        <svg id="expand-icon" class="w-4 h-4 hidden transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <!-- Mobile-only version text (hidden on desktop) -->
+      <div class="lg:hidden text-xs text-center text-[var(--color-text-muted)] py-1">v0.1.x</div>
+    </div>
+  </nav>
+</aside>
+
+<!-- Mobile Toggle Button -->
+<button
+  id="sidebar-toggle"
+  class="fixed bottom-4 left-4 z-50 lg:hidden w-12 h-12 bg-[var(--color-primary)] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[var(--color-primary-hover)] transition-all active:scale-95"
+  onclick="toggleSidebar()"
+  aria-label="Toggle navigation"
+>
+  <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+  <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+</button>
+
+<script is:inline>
+  // Sidebar toggle for mobile
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+
+    if (!sidebar) return;
+
+    const isOpen = !sidebar.classList.contains('-translate-x-full');
+
+    if (isOpen) {
+      sidebar.classList.add('-translate-x-full');
+      if (overlay) overlay.classList.add('hidden');
+      if (menuIcon) menuIcon.classList.remove('hidden');
+      if (closeIcon) closeIcon.classList.add('hidden');
+      document.body.style.overflow = '';
+    } else {
+      sidebar.classList.remove('-translate-x-full');
+      if (overlay) overlay.classList.remove('hidden');
+      if (menuIcon) menuIcon.classList.add('hidden');
+      if (closeIcon) closeIcon.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  // Group expand/collapse using CSS class
+  function toggleGroup(btn) {
+    const group = btn.closest('.nav-group');
+    if (!group) return;
+
+    const sidebar = document.getElementById('sidebar');
+    const isDesktopCollapsed = sidebar && sidebar.dataset.desktopCollapsed === 'true';
+    const main = document.getElementById('main-content');
+    const collapseIcon = document.getElementById('collapse-icon');
+    const expandIcon = document.getElementById('expand-icon');
+
+    // If in icon-rail collapsed mode, clicking a group icon expands the sidebar first
+    if (isDesktopCollapsed) {
+      sidebar.dataset.desktopCollapsed = 'false';
+      sidebar.classList.remove('sidebar-collapsed');
+      sidebar.classList.remove('w-sidebar-collapsed');
+      sidebar.classList.add('w-sidebar');
+      if (main) main.style.setProperty('margin-left', '280px', 'important');
+      sidebar.querySelectorAll('.doc-item').forEach(el => el.classList.remove('hidden'));
+      if (collapseIcon) collapseIcon.classList.remove('hidden');
+      if (expandIcon) expandIcon.classList.add('hidden');
+    }
+
+    const docs = group.querySelector('.nav-docs');
+    const chevron = group.querySelector('.chevron');
+    const isExpanded = group.dataset.expanded === 'true';
+
+    if (isExpanded) {
+      // Collapse
+      docs.classList.add('nav-docs-collapsed');
+      docs.classList.remove('nav-docs-expanded');
+      if (chevron) chevron.style.transform = 'rotate(-90deg)';
+      group.dataset.expanded = 'false';
+    } else {
+      // Expand
+      docs.classList.remove('nav-docs-collapsed');
+      docs.classList.add('nav-docs-expanded');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+      group.dataset.expanded = 'true';
+    }
+  }
+
+  // Initialize: expand first group, collapse others (only when desktop sidebar is expanded)
+  function initSidebarGroups() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const isDesktopCollapsed = window.matchMedia('(max-width: 1023px)').matches ? false : sidebar.dataset.desktopCollapsed === 'true';
+    if (isDesktopCollapsed) return; // groups handled by initSidebarDesktopState
+
+    document.querySelectorAll('.nav-group').forEach((group, i) => {
+      const docs = group.querySelector('.nav-docs');
+      const chevron = group.querySelector('.chevron');
+      if (i === 0) {
+        group.dataset.expanded = 'true';
+        docs.classList.remove('nav-docs-collapsed');
+        docs.classList.add('nav-docs-expanded');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      } else {
+        group.dataset.expanded = 'false';
+        docs.classList.add('nav-docs-collapsed');
+        docs.classList.remove('nav-docs-expanded');
+        if (chevron) chevron.style.transform = 'rotate(-90deg)';
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidebarGroups);
+  } else {
+    initSidebarGroups();
+  }
+
+  // Desktop sidebar collapse/expand — icon rail style
+  function toggleSidebarDesktop() {
+    const sidebar = document.getElementById('sidebar');
+    const main = document.getElementById('main-content');
+    const collapseIcon = document.getElementById('collapse-icon');
+    const expandIcon = document.getElementById('expand-icon');
+    if (!sidebar) return;
+
+    const isCollapsed = sidebar.dataset.desktopCollapsed === 'true';
+
+    if (isCollapsed) {
+      // Expand to full sidebar
+      sidebar.dataset.desktopCollapsed = 'false';
+      sidebar.classList.remove('sidebar-collapsed');
+      sidebar.classList.remove('w-sidebar-collapsed');
+      sidebar.classList.add('w-sidebar');
+      if (main) main.style.setProperty('margin-left', '280px', 'important');
+
+      // Show all doc items
+      sidebar.querySelectorAll('.doc-item').forEach(el => el.classList.remove('hidden'));
+
+      if (collapseIcon) collapseIcon.classList.remove('hidden');
+      if (expandIcon) expandIcon.classList.add('hidden');
+      initSidebarGroups();
+      localStorage.setItem('sidebar-desktop-collapsed', 'false');
+    } else {
+      // Collapse to icon rail
+      sidebar.dataset.desktopCollapsed = 'true';
+      sidebar.classList.add('sidebar-collapsed');
+      sidebar.classList.remove('w-sidebar');
+      sidebar.classList.add('w-sidebar-collapsed');
+      if (main) main.style.setProperty('margin-left', '56px', 'important');
+
+      // Hide all doc items
+      sidebar.querySelectorAll('.doc-item').forEach(el => el.classList.add('hidden'));
+
+      if (collapseIcon) collapseIcon.classList.add('hidden');
+      if (expandIcon) expandIcon.classList.remove('hidden');
+      localStorage.setItem('sidebar-desktop-collapsed', 'true');
+    }
+  }
+
+  // Restore desktop sidebar collapsed state from localStorage
+  function initSidebarDesktopState() {
+    const sidebar = document.getElementById('sidebar');
+    const main = document.getElementById('main-content');
+    const collapseIcon = document.getElementById('collapse-icon');
+    const expandIcon = document.getElementById('expand-icon');
+    if (!sidebar) return;
+
+    const stored = localStorage.getItem('sidebar-desktop-collapsed');
+    if (stored === 'true') {
+      sidebar.dataset.desktopCollapsed = 'true';
+      sidebar.classList.add('sidebar-collapsed');
+      sidebar.classList.remove('w-sidebar');
+      sidebar.classList.add('w-sidebar-collapsed');
+      if (main) main.style.setProperty('margin-left', '56px', 'important');
+      sidebar.querySelectorAll('.doc-item').forEach(el => el.classList.add('hidden'));
+      if (collapseIcon) collapseIcon.classList.add('hidden');
+      if (expandIcon) expandIcon.classList.remove('hidden');
+    } else {
+      sidebar.dataset.desktopCollapsed = 'false';
+      sidebar.classList.remove('sidebar-collapsed');
+      sidebar.classList.add('w-sidebar');
+      sidebar.classList.remove('w-sidebar-collapsed');
+      if (main) main.style.setProperty('margin-left', '280px', 'important');
+      sidebar.querySelectorAll('.doc-item').forEach(el => el.classList.remove('hidden'));
+      if (collapseIcon) collapseIcon.classList.remove('hidden');
+      if (expandIcon) expandIcon.classList.add('hidden');
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { initSidebarDesktopState(); });
+  } else {
+    initSidebarDesktopState();
+  }
+</script>
+
+<style>
+  /* Icon rail visibility: expanded shows text headers, collapsed shows icon buttons */
+
+  /* Desktop: hide icon buttons by default (lg and up) */
+  #sidebar .group-header-collapsed {
+    display: none;
+  }
+
+  /* Desktop: show text headers by default (lg and up) */
+  #sidebar .group-header-expanded {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    /* Expanded state: show text header, hide icon */
+    #sidebar:not(.sidebar-collapsed) .group-header-expanded {
+      display: flex;
+    }
+    #sidebar:not(.sidebar-collapsed) .group-header-collapsed {
+      display: none;
+    }
+
+    /* Collapsed (icon-rail) state: show icon, hide text header */
+    #sidebar.sidebar-collapsed .group-header-expanded {
+      display: none;
+    }
+    #sidebar.sidebar-collapsed .group-header-collapsed {
+      display: flex;
+    }
+  }
+</style>

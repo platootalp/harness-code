@@ -1,0 +1,10 @@
+{
+  "matcher": "tool == \"Write\" && file_path matches \"docs/specs/.*\\.md\"",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\necho \"Spec document created. Run /review to initiate review.\""
+    }
+  ],
+  "description": "Remind to run review after spec document creation"
+}

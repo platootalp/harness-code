@@ -1,0 +1,52 @@
+---
+import ThemeToggle from './ThemeToggle.tsx';
+import SearchTrigger from './SearchTrigger.tsx';
+
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 h-nav bg-[var(--color-nav-bg)] backdrop-blur-md border-b border-[var(--color-border)] transition-colors duration-300">
+  <div class="flex items-center justify-between h-full px-6 max-w-screen-2xl mx-auto">
+    <!-- Logo + Title -->
+    <a href="/docs/" class="flex items-center gap-3 no-underline group">
+      <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md group-hover:shadow-lg transition-shadow">
+        OH
+      </div>
+      <div class="hidden sm:block">
+        <span class="font-semibold text-[var(--color-text)] text-sm">OpenHarness</span>
+        <span class="text-[var(--color-text-muted)] text-sm mx-1">/</span>
+        <span class="text-[var(--color-text-muted)] text-sm">{title || '文档'}</span>
+      </div>
+    </a>
+
+    <!-- Nav -->
+    <nav class="flex items-center gap-1">
+      <!-- Search -->
+      <SearchTrigger client:load />
+
+      <!-- Links -->
+      <a href="/docs/" class="hidden sm:flex px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] rounded-md transition-all">
+        首页
+      </a>
+      <a href="/docs/overview/architecture-at-a-glance/" class="hidden md:flex px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] rounded-md transition-all">
+        架构
+      </a>
+      <a href="/docs/workflows/core-query-flow/" class="hidden lg:flex px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] rounded-md transition-all">
+        工作流
+      </a>
+      <a href="/docs/reference/cli/" class="hidden lg:flex px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] rounded-md transition-all">
+        参考
+      </a>
+
+      <!-- Divider -->
+      <div class="w-px h-5 bg-[var(--color-border)] mx-2"></div>
+
+      <!-- Theme Toggle -->
+      <ThemeToggle client:load />
+    </nav>
+  </div>
+</header>

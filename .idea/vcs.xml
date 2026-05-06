@@ -2,5 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/OpenHarness" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/claude-harness" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/hermes-agent" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/learn-claude-code" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/nanobot" vcs="Git" />
   </component>
 </project>

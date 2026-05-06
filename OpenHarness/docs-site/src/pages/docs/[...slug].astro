@@ -1,0 +1,71 @@
+---
+import { getCollection, render } from 'astro:content';
+import DocLayout from '../../layouts/DocLayout.astro';
+import TableOfContents from '../../components/TableOfContents.tsx';
+import Pagination from '../../components/Pagination.astro';
+import ReadingProgress from '../../components/ReadingProgress.tsx';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+  return docs.map((doc) => {
+    let slug: string;
+    if (doc.id === 'index.md') {
+      slug = '';
+    } else {
+      slug = doc.id.replace(/\.md$/, '');
+    }
+    return {
+      params: { slug: slug || undefined },
+      props: { doc, slug },
+    };
+  });
+}
+
+const { doc, slug } = Astro.props;
+const { Content, headings } = await render(doc);
+const currentPath = slug ? `/docs/${slug}/` : '/docs/';
+const currentH2s = headings.filter(h => h.depth === 2 || h.depth === 3);
+---
+
+<DocLayout
+  title={doc.data.title || (slug ? slug.split('/').pop() : '首页')}
+  description={doc.data.description}
+  currentPath={currentPath}
+>
+  <!-- Reading Progress Bar -->
+  <ReadingProgress client:load />
+
+  <!-- Content + TOC Layout -->
+  <div id="doc-content-wrapper" class="flex flex-col xl:flex-row xl:items-start xl:gap-8 xl:max-w-screen-xl xl:w-full xl:mx-auto px-6 xl:px-10 py-10">
+    <!-- Main Content (article with prose) -->
+    <div class="docs-article-wrap">
+      <article
+        class="prose prose-slate dark:prose-invert
+          prose-headings:font-semibold prose-headings:text-[var(--color-text)]
+          prose-h1:text-3xl prose-h1:font-bold prose-h1:mb-4
+          prose-h2:text-2xl prose-h2:font-semibold prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-[var(--color-border)]
+          prose-h3:text-xl prose-h3:font-semibold prose-h3:mt-8 prose-h3:mb-3
+          prose-p:text-[var(--color-text)] prose-p:leading-relaxed
+          prose-a:text-[var(--color-primary)] prose-a:no-underline hover:prose-a:underline
+          prose-code:text-[var(--color-primary)] prose-code:bg-[var(--color-code-bg)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:text-sm
+          prose-pre:bg-[#1e293b] prose-pre:rounded-lg prose-pre:p-0 prose-pre:overflow-visible
+          prose-img:rounded-lg prose-img:shadow-md
+          prose-table:text-sm prose-th:bg-[var(--color-surface)] prose-th:font-semibold
+          prose-blockquote:border-l-4 prose-blockquote:border-[var(--color-primary)] prose-blockquote:bg-[var(--color-surface)] prose-blockquote:rounded-r-lg
+          prose-hr:border-[var(--color-border)]
+        "
+      >
+        <Content />
+      </article>
+      <!-- Pagination -->
+      <Pagination currentPath={currentPath} currentSlug={slug} />
+    </div>
+
+    <!-- Table of Contents (right side, sticky) -->
+    {currentH2s.length > 2 && (
+      <aside class="hidden xl:block xl:sticky xl:top-24 xl:self-start xl:flex-shrink-0 xl:w-36 xl:ml-4">
+        <TableOfContents headings={currentH2s} currentPath={currentPath} client:load />
+      </aside>
+    )}
+  </div>
+</DocLayout>
