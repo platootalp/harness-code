@@ -171,7 +171,7 @@ Claude Code 实现了**四层上下文压缩**，按执行顺序：
 ### 3.2 Snip 压缩
 
 ```typescript
-// services/compact/snipCompact.ts
+// services/compact/snipCompact.ts (feature-gated, 仅在 HISTORY_SNIP 启用时编译)
 if (feature('HISTORY_SNIP')) {
   const snipResult = snipModule!.snipCompactIfNeeded(messagesForQuery)
   messagesForQuery = snipResult.messages
@@ -854,8 +854,8 @@ Main Agent 的 `query()` 在**下次循环**通过 `getCommandsByMaxPriority()` 
 | `services/tools/toolOrchestration.ts` | 批量工具执行 |
 | `services/compact/autoCompact.ts` | 自动压缩 |
 | `services/compact/microCompact.ts` | 微压缩 |
-| `services/compact/snipCompact.ts` | 消息裁剪 |
-| `services/compact/reactiveCompact.ts` | 响应式压缩 |
+| `services/compact/snipCompact.ts` | 消息裁剪（feature-gated: HISTORY_SNIP） |
+| `services/compact/reactiveCompact.ts` | 响应式压缩（feature-gated: CONTEXT_COLLAPSE） |
 
 ---
 

@@ -522,12 +522,17 @@ fetchOlderEvents(ctx, beforeId, limit)  // 翻页
 ### 5.2 恢复的数据类型
 
 ```typescript
+// sessionRestore.ts — 核心恢复数据
 type ResumeResult = {
   messages?: Message[]
   fileHistorySnapshots?: FileHistorySnapshot[]
   attributionSnapshots?: AttributionSnapshotMessage[]
   contextCollapseCommits?: ContextCollapseCommitEntry[]
   contextCollapseSnapshot?: ContextCollapseSnapshotEntry
+}
+
+// conversationRecovery.ts — 恢复后的会话元信息
+type ResumedSessionInfo = {
   sessionId: UUID | undefined
   agentName?: string
   agentColor?: string
@@ -717,11 +722,13 @@ export function createSessionSpawner(deps: SessionSpawnerDeps): SessionSpawner
 // Ring buffer 保留最近 10 个活动
 const MAX_ACTIVITIES = 10
 
-type SessionActivity =
-  | { type: 'tool_start', summary: string, timestamp: number }
-  | { type: 'text', summary: string, timestamp: number }
-  | { type: 'result', summary: string, timestamp: number }
-  | { type: 'error', summary: string, timestamp: number }
+type SessionActivityType = 'tool_start' | 'text' | 'result' | 'error'
+
+type SessionActivity = {
+  type: SessionActivityType
+  summary: string
+  timestamp: number
+}
 ```
 
 ### 7.4 传输协议切换

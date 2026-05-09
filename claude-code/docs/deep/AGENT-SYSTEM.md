@@ -97,7 +97,7 @@ flowchart LR
         L2["AppState.tasks[id] = running"]
         L3["runAgent() 执行\npollTasks() 监控"]
         L4["Agent 完成任务\ncompleteAgentTask()"]
-        L5["enqueueAgentNotification()\n发送 XML 通知"]
+        L5["enqueuePendingNotification()\n发送 XML 通知"]
         L6["evictTaskOutput()\n30 秒后驱逐"]
     end
 
@@ -151,7 +151,7 @@ type LocalAgentTaskState = TaskStateBase & {
   type: 'local_agent'
   agentId: string              // SubAgent 的唯一标识
   prompt: string                // SubAgent 的初始 prompt
-  selectedAgent: AgentDefinition // Agent 配置
+  selectedAgent?: AgentDefinition // Agent 配置（可选）
   agentType: string             // Agent 类型
   abortController?: AbortController
   retrieved: boolean            // 是否已获取结果
@@ -248,7 +248,7 @@ type AgentDefinition = {
   maxTurns?: number
   model?: ModelAlias | 'inherit'
   permissionMode?: PermissionMode
-  source: 'built-in' | 'user'
+  source: 'built-in' | SettingSource | 'plugin'
   baseDir: string
   getSystemPrompt?: () => string | Promise<string>
   // ...
@@ -335,7 +335,7 @@ sequenceDiagram
 
     alt 异步模式
         Run->>Task: completeAgentTask(result)
-        Task->>Queue: enqueueAgentNotification()
+        Task->>Queue: enqueuePendingNotification()
         Queue->>Main: 下次 query 收到 XML 消息
     else 同步模式
         Run-->>Tool: yield Message (实时返回)
@@ -347,7 +347,7 @@ sequenceDiagram
 
 1. AgentTool 收到启动请求后，先通过 `registerAsyncAgent()` 在 AppState 注册任务
 2. `runAgent()` 执行核心的 query 循环，期间通过 `yield` 实时返回消息
-3. 对于异步（后台）agent，完成后通过 `enqueueAgentNotification()` 发送 XML 通知
+3. 对于异步（后台）agent，完成后通过 `enqueuePendingNotification()` 发送 XML 通知
 4. Main Agent 在下次 query 轮询时从消息队列获取通知
 
 ---
@@ -547,7 +547,7 @@ flowchart LR
 
     subgraph Complete
         N1["completeAgentTask()"]
-        N2["enqueueAgentNotification()"]
+        N2["enqueuePendingNotification()"]
         N3["XML 消息入队"]
     end
 
@@ -648,7 +648,7 @@ sequenceDiagram
         Sub->>Sub: 工具调用
     end
 
-    Sub->>Queue: enqueueAgentNotification()
+    Sub->>Queue: enqueuePendingNotification()
     Note over Queue: SubAgent 完成后通知
 
     loop 下次 query
@@ -729,7 +729,7 @@ SubAgent 之所以能"不让出也不阻塞"，是因为它本质上就是异步
 | 文件读写 | ✅ | `await fs.readFile()` 时让出 |
 | CPU 计算（无 await） | ❌ | 不让出 |
 
-** практически：** SubAgent 的大部分操作都是 I/O 操作（API 调用、文件读写、命令执行），自然会有 await，自然会让出事件循环。
+** In practice:** SubAgent 的大部分操作都是 I/O 操作（API 调用、文件读写、命令执行），自然会有 await，自然会让出事件循环。
 
 #### 3.5.7 线程 vs 协程 vs async generator 对比
 
@@ -886,7 +886,7 @@ type TeamFile = {
 
 ```typescript
 // utils/swarm/backends/types.ts
-type BackendType = 'in-process' | 'tmux' | 'it2'
+type BackendType = 'in-process' | 'tmux' | 'iterm2'
 
 // In-Process: 同一 Node.js 进程，AsyncLocalStorage 隔离
 // tmux: 独立的 CLI 进程，通过 tmux 命令通信
@@ -965,7 +965,7 @@ sequenceDiagram
     Sub->>Task: completeAgentTask(result)
     Task->>Task: AppState.tasks[id].status = completed
     Task->>Task: AppState.tasks[id].result = result
-    Task->>Queue: enqueueAgentNotification(finalMessage)
+    Task->>Queue: enqueuePendingNotification(finalMessage)
     Note over Queue: XML 消息进入队列
 
     loop 下次 query 轮询
@@ -983,8 +983,8 @@ sequenceDiagram
 | 2. 注册 Task | `LocalAgentTask.tsx` | `registerAsyncAgent()` |
 | 3. 执行 Agent | `runAgent.ts` | `runAgent()` |
 | 4. 完成 Task | `LocalAgentTask.tsx` | `completeAgentTask()` |
-| 5. 发送通知 | `LocalAgentTask.tsx` | `enqueueAgentNotification()` |
-| 6. 接收消息 | `QueryEngine.ts` | `query()` 主循环 |
+| 5. 发送通知 | `LocalAgentTask.tsx` | `enqueuePendingNotification()` |
+| 6. 接收消息 | `query.ts` | `query()` 主循环 |
 
 ### 5.4 设计取舍
 

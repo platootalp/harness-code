@@ -285,9 +285,9 @@ flowchart TD
 
 ---
 
-## 四、具体例子与 Bad Case
+## 五、具体例子与 Bad Case
 
-### 4.1 重试例子：网络抖动
+### 5.1 重试例子：网络抖动
 
 ```
 用户输入: "帮我写一个 Hello World"
@@ -315,7 +315,7 @@ LLM 调用 API
 
 ---
 
-### 4.2 重试例子：Rate Limit
+### 5.2 重试例子：Rate Limit
 
 ```
 用户输入: "解释这段代码"
@@ -340,7 +340,7 @@ LLM 调用 API
 
 ---
 
-### 4.3 降级例子：模型回退
+### 5.3 降级例子：模型回退
 
 ```
 用户输入: "重构这个模块"
@@ -368,7 +368,7 @@ LLM 调用 API ( Opus )
 
 ---
 
-### 4.4 降级例子：Context 过长
+### 5.4 降级例子：Context 过长
 
 ```
 用户粘贴了一篇很长的文章
@@ -396,7 +396,7 @@ LLM 调用 API
 
 ---
 
-### 4.5 LLM Reflect 例子：权限拒绝
+### 5.5 LLM Reflect 例子：权限拒绝
 
 ```
 用户输入: "删除 ~/.ssh/id_rsa"
@@ -421,7 +421,7 @@ LLM 生成: "无法删除该文件，需要提升权限。您可以手动执行 
 
 ---
 
-### 4.6 LLM Reflect 例子：文件不存在
+### 5.6 LLM Reflect 例子：文件不存在
 
 ```
 用户输入: "读取 /tmp/nonexistent.txt"
@@ -452,7 +452,7 @@ LLM 调用 BashTool("ls /tmp/")
 
 ---
 
-### 4.7 Bad Case：Zod 校验失败 + LLM 修正
+### 5.7 Bad Case：Zod 校验失败 + LLM 修正
 
 ```
 用户输入: "用 grep 搜索包含 'error' 的文件"
@@ -480,7 +480,7 @@ LLM 修正: GrepTool({ pattern: "error", path: "." })
 
 ---
 
-### 4.8 Bad Case：连续重试耗尽
+### 5.8 Bad Case：连续重试耗尽
 
 ```
 用户输入: "分析这个 100MB 的日志文件"
@@ -512,7 +512,7 @@ LLM 生成: "这个日志文件太大了(100MB)，我可以帮您：
 
 ---
 
-### 4.9 Bad Case：未知错误类型
+### 5.9 Bad Case：未知错误类型
 
 ```
 用户输入: "执行某个自定义操作"
@@ -537,7 +537,7 @@ LLM 决定: "这是个未知错误，我应该告诉用户，并建议他们检�
 
 ---
 
-### 4.10 Bad Case：MCP Server 连接失败
+### 5.10 Bad Case：MCP Server 连接失败
 
 ```
 用户输入: "使用 GitHub MCP 搜索仓库"
@@ -563,7 +563,7 @@ LLM 生成: "GitHub MCP 服务似乎不可用，您可以：
 
 ---
 
-### 4.11 例子总结表
+### 5.11 例子总结表
 
 | 场景 | 层级 | 错误类型 | LLM 恢复策略 |
 |------|------|---------|------------|
@@ -579,11 +579,11 @@ LLM 生成: "GitHub MCP 服务似乎不可用，您可以：
 
 ---
 
-## 五、没有熔断器 (Circuit Breaker)
+## 六、没有熔断器 (Circuit Breaker)
 
 Claude Code 没有实现熔断器，原因是：
 
-### 5.1 不需要熔断的场景
+### 6.1 不需要熔断的场景
 
 **分布式系统需要熔断**：防止级联故障。A 服务挂了，不应该继续调用 B，B 应该快速失败。
 
@@ -592,7 +592,7 @@ Claude Code 没有实现熔断器，原因是：
 - 重试已经处理了瞬态错误
 - API 真正挂了，重试会全部超时，最终返回 `is_error: true` 给 LLM Reflect
 
-### 5.2 可以加熔断的地方（如果需要）
+### 6.2 可以加熔断的地方（如果需要）
 
 | 位置 | 熔断条件 | 动作 |
 |------|---------|------|
@@ -602,15 +602,15 @@ Claude Code 没有实现熔断器，原因是：
 
 ---
 
-## 六、错误日志与追踪
+## 七、错误日志与追踪
 
-### 6.1 错误日志
+### 7.1 错误日志
 
 所有错误写入 `~/.claude/logs/errors/{date}.jsonl`：
 - Axios 错误 enrichment（URL、status、server message）
 - MCP server 错误写入 `mcpLogs/{serverName}/errors.jsonl`
 
-### 6.2 错误 ID
+### 7.2 错误 ID
 
 ```typescript
 // constants/errorIds.ts
@@ -618,7 +618,7 @@ E_TOOL_USE_SUMMARY_GENERATION_FAILED = 344
 // Next ID: 346
 ```
 
-### 6.3 Telemetry Safe Error
+### 7.3 Telemetry Safe Error
 
 ```typescript
 // utils/errors.ts
@@ -628,7 +628,7 @@ class TelemetrySafeError_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
 
 ---
 
-## 七、错误处理文件索引
+## 八、错误处理文件索引
 
 | 文件 | 职责 |
 |------|------|
@@ -643,7 +643,7 @@ class TelemetrySafeError_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
 
 ---
 
-## 八、总结
+## 九、总结
 
 | 维度 | 重试 | 降级 | LLM Reflect |
 |------|------|------|------------|

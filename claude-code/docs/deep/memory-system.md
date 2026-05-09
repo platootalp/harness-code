@@ -1182,27 +1182,27 @@ CLAUDE.md 加载的核心是"有序遍历 + 去重 + 缓存"。文件按优先�
 
 | 文件路径 | 职责 |
 |----------|------|
-| `harness/claude-code/memdir/memdir.ts` | 记忆核心：提示词构建、入口截断、目录创建 |
-| `harness/claude-code/memdir/memoryTypes.ts` | 四类型分类法、行为指南模板、frontmatter 格式 |
-| `harness/claude-code/memdir/paths.ts` | 自动记忆路径解析、启停判断、路径验证 |
-| `harness/claude-code/memdir/memoryScan.ts` | 记忆文件扫描、frontmatter 提取、manifest 格式化 |
-| `harness/claude-code/memdir/findRelevantMemories.ts` | AI 相关性选择（Sonnet sideQuery） |
-| `harness/claude-code/memdir/memoryAge.ts` | 记忆新鲜度计算和警告 |
-| `harness/claude-code/memdir/teamMemPaths.ts` | 团队记忆路径、安全验证（两阶段+symlink检测） |
-| `harness/claude-code/memdir/teamMemPrompts.ts` | 团队记忆提示词构建（双目录模式） |
-| `harness/claude-code/tools/AgentTool/agentMemory.ts` | 代理记忆路径与加载（三级作用域） |
-| `harness/claude-code/services/extractMemories/extractMemories.ts` | 后台记忆提取代理（闭包+互斥+尾随） |
-| `harness/claude-code/services/extractMemories/prompts.ts` | 提取代理提示词（auto-only / combined） |
-| `harness/claude-code/services/autoDream/autoDream.ts` | 跨会话蒸馏代理（多层门控+锁+回滚） |
-| `harness/claude-code/services/autoDream/consolidationPrompt.ts` | 蒸馏代理提示词（四阶段：Orient→Gather→Consolidate→Prune） |
-| `harness/claude-code/services/SessionMemory/sessionMemory.ts` | 会话内笔记（postSampling Hook + 双阈值） |
-| `harness/claude-code/services/SessionMemory/prompts.ts` | 会话记忆提示词模板 |
-| `harness/claude-code/services/SessionMemory/sessionMemoryUtils.ts` | 会话记忆配置与状态管理 |
-| `harness/claude-code/utils/claudemd.ts` | CLAUDE.md 加载与上下文注入（六类文件 + @include + 条件规则） |
-| `harness/claude-code/utils/memory/types.ts` | MemoryType 类型定义（Managed/User/Project/Local/AutoMem/TeamMem） |
-| `harness/claude-code/utils/memoryFileDetection.ts` | 记忆文件路径检测工具 |
-| `harness/claude-code/commands/memory/memory.tsx` | /memory CLI 命令（交互式记忆文件编辑） |
-| `harness/claude-code/components/memory/MemoryFileSelector.tsx` | 记忆文件选择器 UI 组件 |
-| `harness/claude-code/components/memory/MemoryUpdateNotification.tsx` | 记忆更新通知 UI 组件 |
-| `harness/claude-code/services/compact/compact.ts` | 压缩系统（与记忆的交互：缓存重置、会话元数据重追加） |
-| `harness/claude-code/services/compact/sessionMemoryCompact.ts` | 压缩时的会话记忆整合 |
+| `src/memdir/memdir.ts` | 记忆核心：提示词构建、入口截断、目录创建 |
+| `src/memdir/memoryTypes.ts` | 四类型分类法、行为指南模板、frontmatter 格式 |
+| `src/memdir/paths.ts` | 自动记忆路径解析、启停判断、路径验证 |
+| `src/memdir/memoryScan.ts` | 记忆文件扫描、frontmatter 提取、manifest 格式化 |
+| `src/memdir/findRelevantMemories.ts` | AI 相关性选择（Sonnet sideQuery） |
+| `src/memdir/memoryAge.ts` | 记忆新鲜度计算和警告 |
+| `src/memdir/teamMemPaths.ts` | 团队记忆路径、安全验证（两阶段+symlink检测） |
+| `src/memdir/teamMemPrompts.ts` | 团队记忆提示词构建（双目录模式） |
+| `src/tools/AgentTool/agentMemory.ts` | 代理记忆路径与加载（三级作用域） |
+| `src/services/extractMemories/extractMemories.ts` | 后台记忆提取代理（闭包+互斥+尾随） |
+| `src/services/extractMemories/prompts.ts` | 提取代理提示词（auto-only / combined） |
+| `src/services/autoDream/autoDream.ts` | 跨会话蒸馏代理（多层门控+锁+回滚） |
+| `src/services/autoDream/consolidationPrompt.ts` | 蒸馏代理提示词（四阶段：Orient→Gather→Consolidate→Prune） |
+| `src/services/SessionMemory/sessionMemory.ts` | 会话内笔记（postSampling Hook + 双阈值） |
+| `src/services/SessionMemory/prompts.ts` | 会话记忆提示词模板 |
+| `src/services/SessionMemory/sessionMemoryUtils.ts` | 会话记忆配置与状态管理 |
+| `src/utils/claudemd.ts` | CLAUDE.md 加载与上下文注入（六类文件 + @include + 条件规则） |
+| `src/utils/memory/types.ts` | MemoryType 类型定义（Managed/User/Project/Local/AutoMem/TeamMem） |
+| `src/utils/memoryFileDetection.ts` | 记忆文件路径检测工具 |
+| `src/commands/memory/memory.tsx` | /memory CLI 命令（交互式记忆文件编辑） |
+| `src/components/memory/MemoryFileSelector.tsx` | 记忆文件选择器 UI 组件 |
+| `src/components/memory/MemoryUpdateNotification.tsx` | 记忆更新通知 UI 组件 |
+| `src/services/compact/compact.ts` | 压缩系统（与记忆的交互：缓存重置、会话元数据重追加） |
+| `src/services/compact/sessionMemoryCompact.ts` | 压缩时的会话记忆整合 |

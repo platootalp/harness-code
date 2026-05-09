@@ -27,7 +27,7 @@ flowchart LR
         remote["Remote Skills<br/>AKI/GCS (实验性)"]
     end
 
-    query --> skillTool
+    Agent --> skillTool
     skillTool --> commands
     commands --> loadSkills
     commands --> dynamic
@@ -177,8 +177,9 @@ function registerBundledSkill(definition: BundledSkillDefinition): void {
     skillRoot,
     context: definition.context,
     agent: definition.agent,
-    files: definition.files,
     progressMessage: 'running',
+    // files 字段不直接存储在 command 中，通过 getPromptForCommand 闭包处理
+    // 首次调用时提取到 skillRoot 目录下的磁盘
     getPromptForCommand,
   }
   bundledSkills.push(command)
@@ -306,10 +307,12 @@ export function parseSkillFrontmatterFields(
 ): {
   displayName: string | undefined
   description: string
+  hasUserSpecifiedDescription: boolean
   allowedTools: string[]
   argumentHint: string | undefined
   argumentNames: string[]
   whenToUse: string | undefined
+  version: string | undefined
   model: ReturnType<typeof parseUserSpecifiedModel> | undefined
   disableModelInvocation: boolean
   userInvocable: boolean
@@ -355,7 +358,13 @@ async call({ skill, args }, context, canUseTool, parentMessage) {
           ...ctx.getAppState(),
           toolPermissionContext: {
             ...ctx.getAppState().toolPermissionContext,
-            alwaysAllowRules: { command: allowedTools }
+            alwaysAllowRules: {
+              ...ctx.getAppState().toolPermissionContext.alwaysAllowRules,
+              command: [...new Set([
+                ...(ctx.getAppState().toolPermissionContext.alwaysAllowRules.command || []),
+                ...allowedTools
+              ])]
+            }
           }
         }
       }
@@ -536,7 +545,7 @@ return { behavior: 'ask', suggestions: [...] }
 if (loadedFrom !== 'mcp') {
   finalContent = await executeShellCommandsInPrompt(
     finalContent,
-    { ...toolUseContext, alwaysAllowRules: { command: allowedTools } },
+    { ...toolUseContext, alwaysAllowRules: { ...toolUseContext.alwaysAllowRules, command: [...new Set([...(toolUseContext.alwaysAllowRules?.command || []), ...allowedTools])] } },
     `/${skillName}`,
     shell,
   )
@@ -570,11 +579,11 @@ async function executeRemoteSkill(slug, commandName, context) {
   // 1. 从会话状态获取远程技能元数据
   const meta = getDiscoveredRemoteSkill(slug)
 
-  // 2. 从 AKI/GCS 加载 SKILL.md 内容
-  const { content, cacheHit, latencyMs } = await loadRemoteSkill(slug, meta.url)
+  // 2. 从 AKI/GCS 加载 SKILL.md 内容（同时提取到本地缓存）
+  const { content, skillPath, cacheHit, latencyMs, fileCount, totalBytes } = await loadRemoteSkill(slug, meta.url)
 
-  // 3. 提取到本地缓存目录
-  const skillDir = extractToLocalCache(slug, content)
+  // 3. skillPath 即为提取后的本地缓存目录
+  const skillDir = skillPath
 
   // 4. 注入 base directory 前缀
   let finalContent = `Base directory for this skill: ${skillDir}\n\n${bodyContent}`
@@ -600,15 +609,14 @@ sequenceDiagram
     participant Loader as loadSkillsDir/discoverSkillDirs
     participant Process as processPromptSlashCommand
     participant Skill as Skill Prompt
+    participant SubAgent as SubAgent
 
     User->>Agent: /simplify
     Agent->>SkillTool: SkillTool.call(skill="simplify")
 
-    par 并行加载
-        SkillTool->>Commands: findCommand("simplify")
-        Commands->>Loader: loadSkillsFromSkillsDir()
-        Loader-->>Commands: Skill[] (Bundled/Disk/MCP)
-    end
+    SkillTool->>Commands: findCommand("simplify")
+    Commands->>Loader: loadSkillsFromSkillsDir()
+    Loader-->>Commands: Skill[] (Bundled/Disk/MCP)
 
     Commands-->>SkillTool: Command found
     SkillTool->>SkillTool: checkPermissions()
@@ -625,8 +633,8 @@ sequenceDiagram
     else Fork Execution
         Process->>Process: prepareForkedCommandContext()
         Process->>Agent: runAgent() in sub-agent
-        subagent->>subagent: 执行技能任务
-        subagent-->>Agent: 完成通知
+        SubAgent->>SubAgent: 执行技能任务
+        SubAgent-->>Agent: 完成通知
         Agent-->>User: 展示结果
     end
 ```

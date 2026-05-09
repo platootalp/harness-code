@@ -222,7 +222,7 @@ flowchart LR
 
     subgraph 状态层
         AppState.tasks["AppState.tasks (内存)"]
-        磁盘输出["{project}/.claude/tmp/{sessionId}/tasks/"]
+        磁盘输出["project/.claude/tmp/sessionId/tasks/"]
     end
 
     LocalShellTask --> registerTask
@@ -307,10 +307,10 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph 存储层
-        TodoListDisk["磁盘: ~/.claude/config/tasks/{taskListId}/<br/>TodoList（Task工具v2）"]
+        TodoListDisk["磁盘: ~/.claude/config/tasks/taskListId/<br/>TodoList（Task工具v2）"]
         TaskMemory["内存: AppState.tasks"]
-        TaskOutput["磁盘: {project}/.claude/tmp/{sessionId}/tasks/"]
-        AppStateTodos["内存: AppState.todos<br/>{agentId ?? sessionId} -> TodoList"]
+        TaskOutput["磁盘: project/.claude/tmp/sessionId/tasks/"]
+        AppStateTodos["内存: AppState.todos<br/>agentId ?? sessionId -> TodoList"]
     end
 
     subgraph 路由依据
@@ -424,8 +424,8 @@ flowchart TD
     end
 
     subgraph Storage["存储层"]
-        disk1["~/.claude/config/tasks/{agentId}/<br/>TodoList 磁盘文件"]
-        output1["{project}/.claude/tmp/{sessionId}/tasks/<br/>TaskOutput 输出文件"]
+        disk1["~/.claude/config/tasks/agentId/<br/>TodoList 磁盘文件"]
+        output1["project/.claude/tmp/sessionId/tasks/<br/>TaskOutput 输出文件"]
     end
 
     main --> sa1
@@ -438,8 +438,8 @@ flowchart TD
     todo2 -.-> disk2
     ts1 -.-> output1
     ts2 -.-> output2
-    disk2["~/.claude/config/tasks/{agentId}/"]
-    output2["{project}/.claude/tmp/{sessionId}/tasks/"]
+    disk2["~/.claude/config/tasks/agentId/"]
+    output2["project/.claude/tmp/sessionId/tasks/"]
 ```
 
 ### 8.3 联动时序
@@ -469,16 +469,16 @@ sequenceDiagram
     Note over State: AppState.todos[agentId] = TodoList
 
     Task->>Disk: initTaskOutputAsSymlink()
-    Note over Disk: {project}/.claude/tmp/{sessionId}/tasks/{agentId}
+    Note over Disk: project/.claude/tmp/sessionId/tasks/agentId
 
     loop 每秒轮询
         Poll->>Task: 检查状态
         Task->>State: updateTaskState()
     end
 
-    Task完成->>State: status = 'completed'
-    Task完成->>Poll: 下次轮询检测到完成
-    Task完成->>User: XML 通知
+    Task->>State: status = 'completed'
+    Task->>Poll: 下次轮询检测到完成
+    Task->>User: XML 通知
 ```
 
 ### 8.4 SubAgent 与 LocalAgentTask 的一对一关系
@@ -526,7 +526,7 @@ const oldTodos = appState.todos[todoKey] ?? []
     │   → query() 循环
     │   → TodoWriteTool / TaskCreateTool 调用
     │       → AppState.todos[agentId] 更新（内存）
-    │       → 磁盘 ~/.claude/config/tasks/{agentId}/ 写入
+    │       → 磁盘 ~/.claude/config/tasks/agentId/ 写入
     → pollTasks() 每秒监控
     → 完成 → 通知用户
 ```
@@ -953,14 +953,14 @@ SubAgent 执行
 flowchart TD
     subgraph 计划层
         TodoList["TodoList
-        路径: ~/.claude/config/tasks/{taskListId}/
+        路径: ~/.claude/config/tasks/taskListId/
         用途: 人类可读任务清单 + 依赖关系
         状态: pending/in_progress/completed"]
     end
 
     subgraph 执行层
         Task["后台任务（Task）
-        路径: AppState.tasks + {project}/.claude/tmp/{sessionId}/tasks/
+        路径: AppState.tasks + project/.claude/tmp/sessionId/tasks/
         用途: 长时操作执行 + 输出追踪
         状态: pending/running/completed/failed/killed"]
     end
@@ -971,7 +971,7 @@ flowchart TD
         用途: SubAgent → Main Agent 结果传递"]
 
         Mailbox["File Mailbox
-        路径: ~/.claude/teams/{team}/inboxes/
+        路径: ~/.claude/teams/team/inboxes/
         用途: Team 成员间通信"]
     end
 
@@ -1017,7 +1017,7 @@ flowchart TD
         A4["创建 TodoItem\nid=数字字符串\nstatus=pending"]
         A5["设置 blockedBy\n依赖关系"]
         A6["写入 AppState.todos\nkey=agentId??sessionId"]
-        A7["异步写入磁盘\n~/.claude/config/tasks/{taskListId}/tasks.json"]
+        A7["异步写入磁盘\n~/.claude/config/tasks/taskListId/tasks.json"]
     end
 
     subgraph 依赖检查
@@ -1084,7 +1084,7 @@ flowchart TD
 
     subgraph 注册阶段
         R1["registerTask() 创建 TaskState"]
-        R2["生成 taskId: {prefix}{8位随机}"]
+        R2["生成 taskId: prefix+8位随机"]
         R3["AppState.tasks[taskId] = running"]
         R4["创建输出文件"]
     end
@@ -1180,7 +1180,7 @@ flowchart LR
         TodoClaim["claimTask()\n检查 blockedBy"]
         TodoUpdate["updateTask()\n修改状态"]
         TodoBlock["blockTask()\n设置依赖"]
-        TodoDisk["~/.claude/config/tasks/{taskListId}/"]
+        TodoDisk["~/.claude/config/tasks/taskListId/"]
         TodoMemory["AppState.todos[key]"]
     end
 
@@ -1194,7 +1194,7 @@ flowchart LR
         TaskExecute["runAgent() / exec()"]
         TaskPoll["pollTasks()\n每秒轮询"]
         TaskNotify["enqueueAgentNotification()\nXML 通知"]
-        TaskOutput["{project}/.claude/tmp/{sessionId}/tasks/"]
+        TaskOutput["project/.claude/tmp/sessionId/tasks/"]
         TaskMemory["AppState.tasks[id]"]
     end
 
@@ -1270,7 +1270,7 @@ flowchart LR
     end
 
     subgraph Task字段
-        TK["id: {prefix}{8位随机}
+        TK["id: prefix+8位随机
         type: local_agent|local_bash|...
         status: pending|running|completed|failed|killed
         outputFile: 磁盘路径
@@ -1294,12 +1294,12 @@ flowchart LR
 sequenceDiagram
     participant User as 用户
     participant Leader as Leader Agent
-    participant TodoList as TodoList\n~/.claude/config/tasks/{teamName}/
+    participant TodoList as TodoList\n~/.claude/config/tasks/teamName/
     participant TaskLeader as Task(Leader)\nAppState.tasks
     participant Spawn as spawnTeammate()
     participant Teammate as Teammate Agent
     participant TaskMember as Task(Teammate)\nAppState.tasks
-    participant Mailbox as Mailbox\n~/.claude/teams/{team}/inboxes/
+    participant Mailbox as Mailbox\n~/.claude/teams/team/inboxes/
     participant Poll as pollTasks()
 
     User->>Leader: "实现功能 X"
